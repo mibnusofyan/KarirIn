@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../data/mock_data.dart';
-import '../logic/interview.dart';
-import '../logic/match_score.dart';
 import '../router.dart';
 import '../theme/career_theme.dart';
 import '../widgets/career_widgets.dart';
 import '../widgets/common.dart';
 
 /// Three stories: find opportunities, grow readiness, practise. One benefit per slide,
-/// each with the same panel shape and the K mark's rising-steps motif.
+/// each with an illustration on the same panel shape.
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -141,161 +138,40 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
-/// Same rounded panel for every slide; colour and illustration change with the story.
+/// Same rounded panel for every slide, holding the story's illustration.
 class _Panel extends StatelessWidget {
   const _Panel({required this.index});
   final int index;
 
+  /// Illustrations from assets/images/onboarding (transparent PNG, 1448 × 1086).
+  static const images = [
+    'assets/images/onboarding/lowongan yang cocok.png',
+    'assets/images/onboarding/meningkatkan skill.png',
+    'assets/images/onboarding/latihan wawancara.png',
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final bg = [CareerColors.navy, CareerColors.mint, CareerColors.amberLight][index];
+    // Light tints so the navy and teal in the illustrations stay visible.
+    final bg = [const Color(0xFFE8EEF7), CareerColors.mint, CareerColors.amberLight][index];
+    final dpr = MediaQuery.devicePixelRatioOf(context);
     return ExcludeSemantics(
       child: Container(
         width: double.infinity,
-        constraints: const BoxConstraints(minHeight: 260),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
         decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(28)),
-        clipBehavior: Clip.antiAlias,
-        child: Stack(
-          children: [
-            // Small K-steps motif above the card, so it is never covered.
-            Positioned(
-              right: 20,
-              top: 16,
-              child: Opacity(
-                opacity: index == 0 ? .7 : .45,
-                child: const SizedBox(width: 50, height: 48, child: FittedBox(child: CareerSteps())),
-              ),
+        child: LayoutBuilder(
+          builder: (context, c) => AspectRatio(
+            aspectRatio: 1448 / 1086,
+            child: Image.asset(
+              images[index],
+              fit: BoxFit.contain,
+              // Decode at display size instead of the full 1448 px.
+              cacheWidth: (c.maxWidth * dpr).round(),
+              filterQuality: FilterQuality.medium,
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 76, 20, 20),
-              child: [const _OpportunityArt(), const _ReadinessArt(), const _PracticeArt()][index],
-            ),
-          ],
+          ),
         ),
-      ),
-    );
-  }
-}
-
-class _WhiteCard extends StatelessWidget {
-  const _WhiteCard({required this.child});
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(20),
-      boxShadow: const [BoxShadow(color: Color(0x1F0B1F3A), blurRadius: 20, offset: Offset(0, 8))],
-    ),
-    child: child,
-  );
-}
-
-class _OpportunityArt extends StatelessWidget {
-  const _OpportunityArt();
-
-  @override
-  Widget build(BuildContext context) {
-    final job = jobById('j1');
-    final r = computeMatch(job, raniProfile);
-    return _WhiteCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CompanyAvatar(company: job.company, size: 36),
-              const SizedBox(width: 10),
-              Expanded(child: Text(job.company, style: CareerText.small)),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(job.title, style: CareerText.cardTitle),
-          const SizedBox(height: 4),
-          Text('${job.city} · ${job.mode.label} · ${job.salary}', style: CareerText.small),
-          const SizedBox(height: 12),
-          MatchBadge(result: r),
-        ],
-      ),
-    );
-  }
-}
-
-class _ReadinessArt extends StatelessWidget {
-  const _ReadinessArt();
-
-  @override
-  Widget build(BuildContext context) {
-    final job = jobById('j1');
-    final before = computeMatch(job, raniProfile);
-    final gap = skillGap(job, before).first;
-    final after = computeMatch(job, raniProfile.copyWith(skills: [...raniProfile.skills, gap.skill]));
-    return _WhiteCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Wrap(
-            crossAxisAlignment: WrapCrossAlignment.end,
-            children: [
-              Text(fmt(before.total), style: CareerText.heading.copyWith(fontSize: 34, color: CareerColors.muted)),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
-                child: Icon(Icons.arrow_forward_rounded, color: CareerColors.muted),
-              ),
-              Text(fmt(after.total), style: CareerText.heading.copyWith(fontSize: 34, color: CareerColors.teal)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(9),
-                decoration: BoxDecoration(color: CareerColors.mint, borderRadius: BorderRadius.circular(12)),
-                child: const Icon(Icons.school_outlined, color: CareerColors.teal, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(gap.skill, style: CareerText.label),
-                    Text('${resourceFor(gap.skill).type.label} gratis · ${resourceFor(gap.skill).duration}', style: CareerText.small),
-                  ],
-                ),
-              ),
-              Text('+${fmt(gap.gain)}', style: CareerText.label.copyWith(color: CareerColors.teal)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PracticeArt extends StatelessWidget {
-  const _PracticeArt();
-
-  @override
-  Widget build(BuildContext context) {
-    final q = interviewJ1[1];
-    final score = gradeAnswer(q.better);
-    return _WhiteCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CareerPill(q.type, icon: Icons.forum_outlined, color: CareerColors.navy, background: CareerColors.background),
-          const SizedBox(height: 10),
-          Text(q.text, maxLines: 2, overflow: TextOverflow.ellipsis, style: CareerText.label),
-          const SizedBox(height: 14),
-          for (final (name, v) in score.aspects.take(2))
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: RubricRow(name: name, value: v),
-            ),
-        ],
       ),
     );
   }

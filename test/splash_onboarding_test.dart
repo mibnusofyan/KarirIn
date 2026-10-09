@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:karirin/data/mock_data.dart';
-import 'package:karirin/logic/match_score.dart';
 import 'package:karirin/router.dart';
 import 'package:karirin/screens/onboarding_screen.dart';
 import 'package:karirin/screens/splash_screen.dart';
@@ -45,6 +43,13 @@ Future<GoRouter> mount(
   return router;
 }
 
+/// Finds the onboarding illustration, also when decoded through ResizeImage (cacheWidth).
+Finder illustration(String file) => find.byWidgetPredicate((w) {
+  if (w is! Image) return false;
+  final provider = w.image is ResizeImage ? (w.image as ResizeImage).imageProvider : w.image;
+  return provider is AssetImage && provider.assetName == 'assets/images/onboarding/$file';
+});
+
 void main() {
   setUpAll(() async {
     final loader = FontLoader('PlusJakartaSans');
@@ -84,22 +89,22 @@ void main() {
   });
 
   group('Onboarding', () {
-    testWidgets('three stories with real numbers, then sign-in', (tester) async {
+    testWidgets('three stories, each with its illustration, then sign-in', (tester) async {
       await mount(tester, location: Routes.onboarding);
       await tester.pumpAndSettle();
       expect(find.text('TEMUKAN PELUANG'), findsOneWidget);
       expect(find.text('1 dari 3'), findsOneWidget);
-      final r = computeMatch(jobById('j1'), raniProfile);
-      expect(find.textContaining('${fmt(r.total)} / 100'), findsOneWidget);
+      expect(illustration('lowongan yang cocok.png'), findsOneWidget);
 
       await tester.tap(find.text('Lanjut'));
       await tester.pumpAndSettle();
       expect(find.text('TINGKATKAN KESIAPAN'), findsOneWidget);
-      expect(find.text('92,5'), findsOneWidget);
+      expect(illustration('meningkatkan skill.png'), findsOneWidget);
 
       await tester.tap(find.text('Lanjut'));
       await tester.pumpAndSettle();
       expect(find.text('BERLATIH'), findsOneWidget);
+      expect(illustration('latihan wawancara.png'), findsOneWidget);
       expect(find.text('Lewati'), findsNothing);
       await tester.tap(find.text('Mulai sekarang'));
       await tester.pumpAndSettle();
@@ -135,4 +140,12 @@ void main() {
       });
     }
   }
+
+  test('onboarding illustrations are bundled', () async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    for (final name in ['lowongan yang cocok', 'meningkatkan skill', 'latihan wawancara']) {
+      final data = await rootBundle.load('assets/images/onboarding/$name.png');
+      expect(data.lengthInBytes, greaterThan(0), reason: name);
+    }
+  });
 }
