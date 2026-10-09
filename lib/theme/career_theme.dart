@@ -58,6 +58,15 @@ abstract final class CareerText {
     fontWeight: FontWeight.w500,
     color: CareerColors.muted,
   );
+  /// Small uppercase section marker ("KECOCOKAN PROFIL").
+  static const eyebrow = TextStyle(
+    fontFamily: 'PlusJakartaSans',
+    fontSize: 10,
+    height: 1.5,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 1.4,
+    color: CareerColors.muted,
+  );
   static const label = TextStyle(
     fontFamily: 'PlusJakartaSans',
     fontSize: 14,

@@ -230,3 +230,114 @@ class _StepsPainter extends CustomPainter {
   @override
   bool shouldRepaint(_StepsPainter oldDelegate) => false;
 }
+
+/// The job a screen works towards, with a "Ganti" action instead of a long list.
+class SelectedJobCard extends StatelessWidget {
+  const SelectedJobCard({
+    super.key,
+    required this.eyebrow,
+    required this.scored,
+    required this.onChange,
+  });
+  final String eyebrow;
+  final ScoredJob scored;
+  final VoidCallback onChange;
+
+  @override
+  Widget build(BuildContext context) {
+    final job = scored.job;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: CareerColors.line),
+      ),
+      child: Row(
+        children: [
+          CompanyAvatar(company: job.company, size: 44),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(eyebrow, style: CareerText.eyebrow),
+                const SizedBox(height: 3),
+                Text(job.title, style: CareerText.label),
+                Text(job.company, style: CareerText.small),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: onChange,
+            child: Text(
+              'Ganti',
+              semanticsLabel: 'Ganti lowongan, saat ini ${job.title}',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Bottom sheet to pick a target job; returns the chosen job id.
+Future<String?> showJobPicker(
+  BuildContext context, {
+  required String title,
+  required List<ScoredJob> ranked,
+  required String selectedId,
+}) => showCareerSheet<String>(
+  context,
+  (ctx) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      CareerSheetHeader(title),
+      const Text(
+        'Diurutkan dari yang paling cocok dengan profilmu.',
+        style: CareerText.muted,
+      ),
+      const SizedBox(height: 8),
+      for (final (i, s) in ranked.indexed) ...[
+        if (i > 0) const Divider(),
+        Semantics(
+          selected: s.job.id == selectedId,
+          child: InkWell(
+            onTap: () => Navigator.pop(ctx, s.job.id),
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Row(
+                children: [
+                  CompanyAvatar(company: s.job.company, size: 40),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(s.job.title, style: CareerText.label),
+                        const SizedBox(height: 2),
+                        Text(s.job.company, style: CareerText.small),
+                        const SizedBox(height: 8),
+                        MatchBadge(result: s.result),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    s.job.id == selectedId
+                        ? Icons.check_circle_rounded
+                        : Icons.radio_button_unchecked_rounded,
+                    color: s.job.id == selectedId
+                        ? CareerColors.teal
+                        : CareerColors.line,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    ],
+  ),
+);
