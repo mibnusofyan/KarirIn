@@ -331,3 +331,33 @@ class InsightTile extends StatelessWidget {
     );
   }
 }
+
+/// White, rounded input with the label inside the field and the error right below it.
+InputDecoration careerInput({required String label, String? hint, String? error, String? helper, Widget? suffix}) {
+  OutlineInputBorder border(Color color, [double width = 1]) => OutlineInputBorder(
+    borderRadius: BorderRadius.circular(12),
+    borderSide: BorderSide(color: color, width: width),
+  );
+  return InputDecoration(
+    labelText: label,
+    hintText: hint,
+    errorText: error,
+    helperText: helper,
+    suffixIcon: suffix,
+    filled: true,
+    fillColor: Colors.white,
+    floatingLabelBehavior: FloatingLabelBehavior.auto,
+    labelStyle: CareerText.muted,
+    floatingLabelStyle: CareerText.small.copyWith(color: CareerColors.teal, fontWeight: FontWeight.w600),
+    hintStyle: CareerText.muted,
+    helperStyle: CareerText.small,
+    helperMaxLines: 2,
+    errorStyle: CareerText.small.copyWith(color: CareerColors.error, fontWeight: FontWeight.w600),
+    errorMaxLines: 2,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    enabledBorder: border(CareerColors.line),
+    focusedBorder: border(CareerColors.teal, 2),
+    errorBorder: border(CareerColors.error),
+    focusedErrorBorder: border(CareerColors.error, 2),
+  );
+}

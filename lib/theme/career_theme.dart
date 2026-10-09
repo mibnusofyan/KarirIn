@@ -12,6 +12,9 @@ abstract final class CareerColors {
   static const line = Color(0xFFE2E7E4);
   static const amber = Color(0xFF805B13);
   static const amberLight = Color(0xFFFFF3D9);
+
+  /// Form errors only; status and scores use teal/amber instead of red.
+  static const error = Color(0xFFB42318);
 }
 
 abstract final class CareerText {
@@ -39,18 +42,8 @@ abstract final class CareerText {
     letterSpacing: -.3,
     color: CareerColors.ink,
   );
-  static const body = TextStyle(
-    fontFamily: 'PlusJakartaSans',
-    fontSize: 14,
-    height: 1.55,
-    color: CareerColors.ink,
-  );
-  static const muted = TextStyle(
-    fontFamily: 'PlusJakartaSans',
-    fontSize: 14,
-    height: 1.5,
-    color: CareerColors.muted,
-  );
+  static const body = TextStyle(fontFamily: 'PlusJakartaSans', fontSize: 14, height: 1.55, color: CareerColors.ink);
+  static const muted = TextStyle(fontFamily: 'PlusJakartaSans', fontSize: 14, height: 1.5, color: CareerColors.muted);
   static const small = TextStyle(
     fontFamily: 'PlusJakartaSans',
     fontSize: 12,
@@ -58,6 +51,7 @@ abstract final class CareerText {
     fontWeight: FontWeight.w500,
     color: CareerColors.muted,
   );
+
   /// Small uppercase section marker ("KECOCOKAN PROFIL").
   static const eyebrow = TextStyle(
     fontFamily: 'PlusJakartaSans',
@@ -96,11 +90,7 @@ class CareerTheme extends StatelessWidget {
         outlineVariant: CareerColors.line,
       ),
       scaffoldBackgroundColor: CareerColors.background,
-      textTheme: base.textTheme.apply(
-        fontFamily: 'PlusJakartaSans',
-        bodyColor: CareerColors.ink,
-        displayColor: CareerColors.ink,
-      ),
+      textTheme: base.textTheme.apply(fontFamily: 'PlusJakartaSans', bodyColor: CareerColors.ink, displayColor: CareerColors.ink),
       appBarTheme: base.appBarTheme.copyWith(
         backgroundColor: CareerColors.background,
         foregroundColor: CareerColors.ink,
@@ -114,27 +104,15 @@ class CareerTheme extends StatelessWidget {
           foregroundColor: Colors.white,
           minimumSize: const Size(48, 52),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           textStyle: CareerText.label,
         ),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: CareerColors.teal,
-          minimumSize: const Size(48, 48),
-          textStyle: CareerText.label,
-        ),
+        style: TextButton.styleFrom(foregroundColor: CareerColors.teal, minimumSize: const Size(48, 48), textStyle: CareerText.label),
       ),
-      bottomSheetTheme: base.bottomSheetTheme.copyWith(
-        backgroundColor: Colors.white,
-      ),
-      dividerTheme: const DividerThemeData(
-        color: CareerColors.line,
-        thickness: 1,
-        space: 1,
-      ),
+      bottomSheetTheme: base.bottomSheetTheme.copyWith(backgroundColor: Colors.white),
+      dividerTheme: const DividerThemeData(color: CareerColors.line, thickness: 1, space: 1),
       navigationBarTheme: NavigationBarThemeData(
         height: 76,
         backgroundColor: Colors.white,
@@ -143,21 +121,12 @@ class CareerTheme extends StatelessWidget {
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => CareerText.small.copyWith(
             fontSize: 11,
-            fontWeight: states.contains(WidgetState.selected)
-                ? FontWeight.w700
-                : FontWeight.w500,
-            color: states.contains(WidgetState.selected)
-                ? CareerColors.teal
-                : CareerColors.muted,
+            fontWeight: states.contains(WidgetState.selected) ? FontWeight.w700 : FontWeight.w500,
+            color: states.contains(WidgetState.selected) ? CareerColors.teal : CareerColors.muted,
           ),
         ),
         iconTheme: WidgetStateProperty.resolveWith(
-          (states) => IconThemeData(
-            size: 23,
-            color: states.contains(WidgetState.selected)
-                ? CareerColors.teal
-                : CareerColors.muted,
-          ),
+          (states) => IconThemeData(size: 23, color: states.contains(WidgetState.selected) ? CareerColors.teal : CareerColors.muted),
         ),
       ),
     );

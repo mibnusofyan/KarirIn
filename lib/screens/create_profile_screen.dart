@@ -5,148 +5,212 @@ import 'package:go_router/go_router.dart';
 import '../data/models.dart';
 import '../router.dart';
 import '../state/app_state.dart';
-import '../theme/app_theme.dart';
-import '../widgets/common.dart';
+import '../theme/career_theme.dart';
+import '../widgets/career_widgets.dart';
 
+/// Buat profil: one recommended path (CV PDF) with the alternatives in plain sight.
 class CreateProfileScreen extends ConsumerWidget {
   const CreateProfileScreen({super.key});
 
   Future<void> _askConsent(BuildContext context, WidgetRef ref, ProfileSource source) async {
-    final ok = await showKSheet<bool>(context, (_) => _ConsentSheet(photo: source == ProfileSource.cvPhoto));
+    final ok = await showCareerSheet<bool>(context, (_) => _ConsentSheet(photo: source == ProfileSource.cvPhoto));
     if (ok != true || !context.mounted) return;
     ref.read(appProvider.notifier).useCvProfile(source);
     context.go('${Routes.processing}?kind=${source == ProfileSource.cvPhoto ? 'photo' : 'pdf'}');
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-    appBar: topBar(title: 'Buat profil', caption: 'Langkah 1 dari 2', onBack: () => context.go(Routes.auth)),
-    body: LayoutBuilder(
-      builder: (context, c) => SingleChildScrollView(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: c.maxHeight),
-          child: IntrinsicHeight(
+  Widget build(BuildContext context, WidgetRef ref) => CareerTheme(
+    child: Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          tooltip: 'Kembali',
+          icon: const Icon(Icons.arrow_back_rounded, size: 22),
+          onPressed: () => context.go(Routes.auth),
+        ),
+        title: const Text('Buat profil'),
+        bottom: const PreferredSize(preferredSize: Size.fromHeight(28), child: _Steps(current: 1)),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+        children: [
+          const Text('Bagaimana kamu ingin memulai?', style: CareerText.heading),
+          const SizedBox(height: 8),
+          const Text(
+            'AI menyusun profil dari pilihanmu. Kamu tetap memeriksa dan mengubah hasilnya sebelum skor dihitung.',
+            style: CareerText.muted,
+          ),
+          const SizedBox(height: 22),
+          _Recommended(onTap: () => _askConsent(context, ref, ProfileSource.cvPdf)),
+          const SizedBox(height: 28),
+          const Text('Cara lain', style: CareerText.title),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: CareerColors.line),
+            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const StepProgress(.5),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(16, 24, 16, 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Bagaimana kamu ingin membuat profil?', style: KText.headlineSmall),
-                      SizedBox(height: 8),
-                      Text(
-                        'AI menyusun profil dari pilihanmu. Kamu tetap bisa memeriksa dan mengubah hasilnya.',
-                        style: KText.bodyMediumVariant,
-                      ),
-                    ],
-                  ),
+                _Alternative(
+                  icon: Icons.photo_camera_outlined,
+                  title: 'Foto CV',
+                  subtitle: 'Potret CV cetak dengan kamera',
+                  meta: '±1 menit',
+                  onTap: () => _askConsent(context, ref, ProfileSource.cvPhoto),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: [
-                      _Option(
-                        icon: Icons.upload_file_rounded,
-                        title: 'Unggah CV (PDF)',
-                        subtitle: 'Maksimal 5 MB · paling cepat',
-                        onTap: () => _askConsent(context, ref, ProfileSource.cvPdf),
-                      ),
-                      const SizedBox(height: 12),
-                      _Option(
-                        icon: Icons.photo_camera_rounded,
-                        title: 'Foto CV',
-                        subtitle: 'Potret CV cetak dengan kamera',
-                        onTap: () => _askConsent(context, ref, ProfileSource.cvPhoto),
-                      ),
-                      const SizedBox(height: 12),
-                      _Option(
-                        icon: Icons.forum_rounded,
-                        title: 'Belum punya CV?',
-                        subtitle: 'Jawab 8 pertanyaan singkat · ±3 menit',
-                        highlighted: true,
-                        onTap: () => context.go(Routes.qa),
-                      ),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(16, 24, 16, 16),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.lock_rounded, size: 18, color: KColors.onSurfaceVariant),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'CV hanya diproses setelah kamu memberi izin dan bisa dihapus kapan saja dari Pengaturan.',
-                          style: KText.bodySmall,
-                        ),
-                      ),
-                    ],
-                  ),
+                const Divider(),
+                _Alternative(
+                  icon: Icons.forum_outlined,
+                  title: 'Belum punya CV?',
+                  subtitle: 'Jawab 8 pertanyaan singkat, AI menyusun profilmu',
+                  meta: '±3 menit',
+                  onTap: () => context.go(Routes.qa),
                 ),
               ],
             ),
           ),
-        ),
+          const SizedBox(height: 24),
+          const CareerMeta(
+            Icons.lock_outline_rounded,
+            'CV hanya diproses setelah kamu memberi izin dan bisa dihapus kapan saja dari Pengaturan.',
+            style: CareerText.small,
+          ),
+        ],
       ),
     ),
   );
 }
 
-class _Option extends StatelessWidget {
-  const _Option({required this.icon, required this.title, required this.subtitle, required this.onTap, this.highlighted = false});
-  final IconData icon;
-  final String title, subtitle;
+/// "Langkah 1 dari 2" with two segments.
+class _Steps extends StatelessWidget {
+  const _Steps({required this.current});
+  final int current;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+    child: Row(
+      children: [
+        for (var i = 1; i <= 2; i++) ...[
+          if (i > 1) const SizedBox(width: 6),
+          Expanded(
+            child: Container(
+              height: 4,
+              decoration: BoxDecoration(
+                color: i <= current ? CareerColors.teal : CareerColors.line,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(width: 12),
+        Text('Langkah $current dari 2', style: CareerText.small),
+      ],
+    ),
+  );
+}
+
+class _Recommended extends StatelessWidget {
+  const _Recommended({required this.onTap});
   final VoidCallback onTap;
-  final bool highlighted;
 
   @override
   Widget build(BuildContext context) {
-    final fg = highlighted ? KColors.onSecondaryContainer : KColors.onSurface;
-    return Material(
-      color: highlighted ? KColors.secondaryContainer : KColors.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: highlighted ? BorderSide.none : const BorderSide(color: KColors.outlineVariant),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
+    const light = Color(0xFFC4D6E7);
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(color: CareerColors.navy, borderRadius: BorderRadius.circular(24)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: highlighted ? KColors.secondary : KColors.primaryContainer,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(icon, color: highlighted ? Colors.white : KColors.onPrimaryContainer),
+                padding: const EdgeInsets.all(11),
+                decoration: BoxDecoration(color: Colors.white.withValues(alpha: .12), borderRadius: BorderRadius.circular(14)),
+                child: const Icon(Icons.upload_file_outlined, color: Colors.white, size: 24),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: KText.titleMedium.copyWith(color: fg)),
-                    Text(subtitle, style: KText.bodyMedium.copyWith(color: highlighted ? fg : KColors.onSurfaceVariant)),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right_rounded, color: highlighted ? fg : KColors.onSurfaceVariant),
+              const Spacer(),
+              const CareerPill('Disarankan', icon: Icons.star_outline_rounded, color: CareerColors.navy, background: CareerColors.yellow),
             ],
           ),
-        ),
+          const SizedBox(height: 16),
+          Text('Unggah CV (PDF)', style: CareerText.title.copyWith(color: Colors.white)),
+          const SizedBox(height: 6),
+          Text(
+            'Paling cepat dan paling lengkap: skill, pendidikan, dan pengalaman langsung terbaca.',
+            style: CareerText.body.copyWith(color: const Color(0xFFE3F0F8)),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 16,
+            runSpacing: 6,
+            children: [
+              for (final t in ['±15 detik', 'Maks. 5 MB']) Text('• $t', style: CareerText.small.copyWith(color: light)),
+            ],
+          ),
+          const SizedBox(height: 18),
+          FilledButton(
+            onPressed: onTap,
+            style: FilledButton.styleFrom(backgroundColor: CareerColors.teal),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(child: Text('Pilih berkas PDF', textAlign: TextAlign.center)),
+                SizedBox(width: 10),
+                Icon(Icons.arrow_forward_rounded, size: 19),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
+}
+
+class _Alternative extends StatelessWidget {
+  const _Alternative({required this.icon, required this.title, required this.subtitle, required this.meta, required this.onTap});
+  final IconData icon;
+  final String title, subtitle, meta;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(12),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(color: CareerColors.mint, borderRadius: BorderRadius.circular(14)),
+            child: Icon(icon, color: CareerColors.teal, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: CareerText.label),
+                const SizedBox(height: 2),
+                Text(subtitle, style: CareerText.small),
+                const SizedBox(height: 2),
+                Text(
+                  meta,
+                  style: CareerText.small.copyWith(color: CareerColors.teal, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right_rounded, color: CareerColors.muted, size: 20),
+        ],
+      ),
+    ),
+  );
 }
 
 /// Explicit consent before the CV is processed by AI (UU No. 27/2022, proposal 3.1.4).
@@ -163,57 +227,67 @@ class _ConsentSheetState extends State<_ConsentSheet> {
 
   @override
   Widget build(BuildContext context) {
-    Widget point(IconData ic, String t) => Padding(
+    Widget point(IconData icon, String text) => Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(ic, size: 20, color: KColors.secondary),
+          Icon(icon, size: 20, color: CareerColors.teal),
           const SizedBox(width: 12),
-          Expanded(child: Text(t, style: KText.bodyMediumVariant)),
+          Expanded(child: Text(text, style: CareerText.body)),
         ],
       ),
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text('Izinkan KarirIn memproses CV-mu?', style: KText.headlineSmall),
-        const SizedBox(height: 16),
+        const CareerSheetHeader('Izinkan KarirIn memproses CV-mu?'),
+        const SizedBox(height: 8),
         point(Icons.check_circle_outline_rounded, 'Hanya dipakai untuk menyusun profil dan menghitung kecocokan.'),
         point(Icons.lock_outline_rounded, 'Disimpan terenkripsi dan hanya bisa diakses olehmu.'),
         point(Icons.delete_outline_rounded, 'Bisa kamu hapus kapan saja dari Pengaturan.'),
         const SizedBox(height: 4),
-        Material(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: () => setState(() => _ok = !_ok),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(4, 4, 12, 4),
-              child: Row(
-                children: [
-                  Checkbox(value: _ok, onChanged: (v) => setState(() => _ok = v ?? false)),
-                  const Expanded(
-                    child: Text(
-                      'Saya setuju data CV diproses sesuai UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi.',
-                      style: KText.bodyMedium,
+        Semantics(
+          checked: _ok,
+          child: Material(
+            color: _ok ? CareerColors.mint : CareerColors.background,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: _ok ? CareerColors.teal : CareerColors.line),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: () => setState(() => _ok = !_ok),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(4, 6, 14, 6),
+                child: Row(
+                  children: [
+                    Checkbox(value: _ok, activeColor: CareerColors.teal, onChanged: (v) => setState(() => _ok = v ?? false)),
+                    const Expanded(
+                      child: Text(
+                        'Saya setuju data CV diproses sesuai UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi.',
+                        style: CareerText.body,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 16),
-        PrimaryButton(
-          label: widget.photo ? 'Setuju & buka kamera' : 'Setuju & pilih berkas PDF',
+        const SizedBox(height: 12),
+        const Text(
+          'Demo: berkas tidak benar-benar diunggah. KarirIn memakai CV contoh (Rani) untuk menyusun profil.',
+          style: CareerText.small,
+        ),
+        const SizedBox(height: 18),
+        CareerButton(
+          label: widget.photo ? 'Setuju & buka kamera' : 'Setuju & pilih berkas',
+          icon: widget.photo ? Icons.photo_camera_outlined : Icons.upload_file_outlined,
           onPressed: _ok ? () => Navigator.pop(context, true) : null,
         ),
-        const SizedBox(height: 8),
-        Center(
-          child: TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Batal')),
-        ),
+        const SizedBox(height: 4),
+        TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Batal')),
       ],
     );
   }
