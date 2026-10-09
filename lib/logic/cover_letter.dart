@@ -3,12 +3,17 @@ import 'match_score.dart';
 
 enum LetterTone { formal, ringkas }
 
+/// Skills the letter highlights: the job's required, then optional, skills the user has (max 3).
+List<String> letterHighlights(Job job, Profile p) {
+  final r = computeMatch(job, p);
+  return [...r.matchedWajib, ...r.matchedTambahan].take(3).toList();
+}
+
 /// Template-based cover letter used by the prototype. In production the
 /// `generateLetter` Cloud Function asks Gemini for the same personalised text.
 /// [seed] alternates the opening sentence when the user taps "Buat ulang".
 String coverLetter(Job job, Profile p, LetterTone tone, int seed) {
-  final r = computeMatch(job, p);
-  final matched = [...r.matchedWajib, ...r.matchedTambahan].take(3).toList();
+  final matched = letterHighlights(job, p);
   final sk = matched.isEmpty ? 'administrasi' : joinId(matched);
   final e = p.exps.isEmpty ? null : p.exps.first;
   final expLine = e != null && e.desc.isNotEmpty
