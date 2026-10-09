@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:karirin/data/backend.dart';
 import 'package:karirin/data/catalog_extra.dart';
 import 'package:karirin/data/mock_data.dart';
 import 'package:karirin/data/models.dart';
@@ -8,6 +9,8 @@ import 'package:karirin/data/repositories/profile_repository.dart';
 import 'package:karirin/logic/match_score.dart';
 
 void main() {
+  test('flutter test berjalan dengan data mock, bukan Firebase', () => expect(backend, Backend.mock));
+
   group('serialisasi Firestore', () {
     test('lowongan kembali utuh dan skornya sama', () {
       for (final j in jobs) {
