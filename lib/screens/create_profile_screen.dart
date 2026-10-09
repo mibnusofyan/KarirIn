@@ -29,7 +29,10 @@ class CreateProfileScreen extends ConsumerWidget {
           onPressed: () => context.go(Routes.auth),
         ),
         title: const Text('Buat profil'),
-        bottom: const PreferredSize(preferredSize: Size.fromHeight(28), child: _Steps(current: 1)),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(28),
+          child: CareerStepBar(current: 1, total: 2, caption: 'Langkah 1 dari 2'),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
@@ -80,35 +83,6 @@ class CreateProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
-    ),
-  );
-}
-
-/// "Langkah 1 dari 2" with two segments.
-class _Steps extends StatelessWidget {
-  const _Steps({required this.current});
-  final int current;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
-    child: Row(
-      children: [
-        for (var i = 1; i <= 2; i++) ...[
-          if (i > 1) const SizedBox(width: 6),
-          Expanded(
-            child: Container(
-              height: 4,
-              decoration: BoxDecoration(
-                color: i <= current ? CareerColors.teal : CareerColors.line,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-        ],
-        const SizedBox(width: 12),
-        Text('Langkah $current dari 2', style: CareerText.small),
-      ],
     ),
   );
 }

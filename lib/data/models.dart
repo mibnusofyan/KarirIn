@@ -101,12 +101,20 @@ class Profile {
   String get firstName => name.split(' ').first;
   String get initials => name.split(' ').where((w) => w.isNotEmpty).take(2).map((w) => w[0]).join().toUpperCase();
 
-  Profile copyWith({List<String>? skills, List<WorkMode>? modes, ProfileSource? source}) => Profile(
-    name: name,
-    level: level,
-    major: major,
+  Profile copyWith({
+    String? name,
+    EduLevel? level,
+    String? major,
+    String? city,
+    List<String>? skills,
+    List<WorkMode>? modes,
+    ProfileSource? source,
+  }) => Profile(
+    name: name ?? this.name,
+    level: level ?? this.level,
+    major: major ?? this.major,
     school: school,
-    city: city,
+    city: city ?? this.city,
     modes: modes ?? this.modes,
     source: source ?? this.source,
     skills: skills ?? this.skills,

@@ -148,6 +148,12 @@ class AppNotifier extends Notifier<AppState> {
     return true;
   }
 
+  /// Corrects the identity fields read by AI (they feed the education and location scores).
+  void updateIdentity({required String name, required EduLevel level, required String major, required String city}) =>
+      state = state.copyWith(
+        profile: state.profile.copyWith(name: name.trim(), level: level, major: major.trim(), city: city.trim()),
+      );
+
   void toggleMode(WorkMode m) {
     final modes = state.profile.modes;
     state = state.copyWith(profile: state.profile.copyWith(modes: modes.contains(m) ? modes.where((x) => x != m).toList() : [...modes, m]));
