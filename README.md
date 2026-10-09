@@ -37,12 +37,12 @@ flutter run --dart-define=SIMULATE_OFFLINE=true
 
 ## Backend (Firebase)
 
-Rencana lengkap ada di `docs/backend-development-plan.md`: Firebase paket Spark (tanpa billing) + Firebase AI Logic (Gemini). Proyek Firebase: `my-tugas-web` (Firestore `asia-southeast2`). Sumber data dipilih saat build:
+Rencana lengkap ada di `docs/backend-development-plan.md`: Firebase paket Spark (tanpa billing) + Firebase AI Logic (Gemini). Proyek Firebase: `my-tugas-web` (Firestore `asia-southeast2`). Aplikasi Android memakai Firebase secara default; `flutter test` dan pratinjau web otomatis memakai data contoh (mock). Sumber data dapat dipaksa saat build:
 
 ```bash
-flutter run --dart-define=BACKEND=mock       # default: data contoh offline
-flutter run --dart-define=BACKEND=firebase   # proyek asli my-tugas-web
-flutter run --dart-define=BACKEND=firebase --dart-define=USE_EMULATOR=true   # Auth + Firestore emulator lokal (debug)
+flutter run                                  # default: proyek asli my-tugas-web
+flutter run --dart-define=BACKEND=mock       # data contoh offline (APK cadangan demo)
+flutter run --dart-define=USE_EMULATOR=true  # Auth + Firestore emulator lokal (debug)
 ```
 
 Pada mode `firebase`: login email/kata sandi dan Google (Firebase Auth), redirect otomatis (belum login → Masuk, belum punya profil → Buat profil, sudah → Beranda), profil disimpan ke `profiles/{uid}` setelah dikonfirmasi lalu setiap perubahan ikut tersimpan, simpanan lowongan dan pengaturan notifikasi di `users/{uid}`, katalog 20 lowongan dan 35 skill dibaca dari Firestore, Keluar, dan Hapus akun (menghapus data lalu akun). Ekstraksi CV, lamaran, dan sesi wawancara masih lokal sampai Tahap B2/B3.

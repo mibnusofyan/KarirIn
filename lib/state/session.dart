@@ -64,8 +64,8 @@ Future<void> _nextChange(Listenable l) {
 
 /// Firebase-only redirect: signed-out users stay on the welcome screens, users without a profile stay in
 /// profile creation, and signed-in users skip sign-in.
-String? sessionRedirect(String location, {Backend mode = backend}) {
-  if (mode == Backend.mock) return null;
+String? sessionRedirect(String location, {Backend? mode}) {
+  if ((mode ?? backend) == Backend.mock) return null;
   const welcome = {Routes.splash, Routes.onboarding, Routes.auth};
   const setup = {Routes.create, Routes.qa, Routes.processing, Routes.confirm};
   return switch (session.value) {

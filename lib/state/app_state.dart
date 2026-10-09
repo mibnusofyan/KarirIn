@@ -38,10 +38,10 @@ class AppState {
   });
 
   /// Mock builds start with Rani's demo data; Firebase builds start empty and load the signed-in user's data.
-  factory AppState.initial({bool demoData = backend == Backend.mock}) => AppState(
+  factory AppState.initial({bool? demoData}) => AppState(
     profile: raniProfile,
     learned: const [],
-    applications: demoData ? initialApplications : const [],
+    applications: (demoData ?? backend == Backend.mock) ? initialApplications : const [],
     savedJobIds: const {},
     gapJobId: 'j1',
     coachJobId: 'j1',

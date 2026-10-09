@@ -280,7 +280,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       ),
                       const Spacer(),
                       const SizedBox(height: 24),
-                      const Text(
+                      Text(
                         'Dengan melanjutkan, kamu menyetujui Syarat Layanan dan Kebijakan Privasi KarirIn.'
                         '${backend == Backend.mock ? ' Pada demo ini, akun belum tersambung ke server.' : ''}',
                         style: CareerText.small,
