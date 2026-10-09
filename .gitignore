@@ -49,3 +49,16 @@ app.*.map.json
 docs
 output
 KarirIn Mobile App Design-handoff
+# Secrets: release signing and Firebase Admin credentials
+/android/key.properties
+*.jks
+*.keystore
+service-account*.json
+/backend/.env
+/backend/node_modules/
+
+# Firebase CLI and emulators
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.firebase/

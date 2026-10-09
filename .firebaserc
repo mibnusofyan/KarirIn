@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "default": "my-tugas-web",
+    "emulator": "demo-karirin"
+  }
+}

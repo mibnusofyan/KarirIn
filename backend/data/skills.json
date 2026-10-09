@@ -1,0 +1,253 @@
+[
+  {
+    "id": "akuntansi-dasar",
+    "name": "Akuntansi Dasar",
+    "synonyms": [],
+    "resource": null
+  },
+  {
+    "id": "bahasa-inggris",
+    "name": "Bahasa Inggris",
+    "synonyms": [],
+    "resource": {
+      "type": "modul",
+      "duration": "10 jam",
+      "title": "Bahasa Inggris untuk Dunia Kerja",
+      "url": null
+    }
+  },
+  {
+    "id": "canva",
+    "name": "Canva",
+    "synonyms": [],
+    "resource": {
+      "type": "video",
+      "duration": "1 jam",
+      "title": "Desain Cepat dengan Canva",
+      "url": null
+    }
+  },
+  {
+    "id": "copywriting",
+    "name": "Copywriting",
+    "synonyms": [],
+    "resource": {
+      "type": "kursus",
+      "duration": "4 jam",
+      "title": "Copywriting untuk Media Sosial",
+      "url": null
+    }
+  },
+  {
+    "id": "fotografi-produk",
+    "name": "Fotografi Produk",
+    "synonyms": [],
+    "resource": {
+      "type": "video",
+      "duration": "90 mnt",
+      "title": "Foto Produk dengan Ponsel",
+      "url": null
+    }
+  },
+  {
+    "id": "jaringan-komputer",
+    "name": "Jaringan Komputer",
+    "synonyms": [],
+    "resource": null
+  },
+  {
+    "id": "ketelitian-data",
+    "name": "Ketelitian Data",
+    "synonyms": [],
+    "resource": {
+      "type": "modul",
+      "duration": "1 jam",
+      "title": "Teknik Cek Ganda Data Administrasi",
+      "url": null
+    }
+  },
+  {
+    "id": "komunikasi",
+    "name": "Komunikasi",
+    "synonyms": [],
+    "resource": {
+      "type": "video",
+      "duration": "2 jam",
+      "title": "Komunikasi Efektif di Tempat Kerja",
+      "url": null
+    }
+  },
+  {
+    "id": "manajemen-inventaris",
+    "name": "Manajemen Inventaris",
+    "synonyms": [],
+    "resource": {
+      "type": "modul",
+      "duration": "3 jam",
+      "title": "Dasar Manajemen Persediaan",
+      "url": null
+    }
+  },
+  {
+    "id": "manajemen-waktu",
+    "name": "Manajemen Waktu",
+    "synonyms": [],
+    "resource": null
+  },
+  {
+    "id": "meta-ads",
+    "name": "Meta Ads",
+    "synonyms": [],
+    "resource": {
+      "type": "modul",
+      "duration": "3 jam",
+      "title": "Iklan Berbayar di Instagram & Facebook",
+      "url": null
+    }
+  },
+  {
+    "id": "microsoft-excel",
+    "name": "Microsoft Excel",
+    "synonyms": [
+      "Excel",
+      "MS Excel"
+    ],
+    "resource": {
+      "type": "kursus",
+      "duration": "4 jam",
+      "title": "Excel untuk Administrasi",
+      "url": null
+    }
+  },
+  {
+    "id": "microsoft-word",
+    "name": "Microsoft Word",
+    "synonyms": [
+      "Word",
+      "MS Word"
+    ],
+    "resource": null
+  },
+  {
+    "id": "pelaporan-keuangan",
+    "name": "Pelaporan Keuangan",
+    "synonyms": [],
+    "resource": {
+      "type": "kursus",
+      "duration": "3 jam",
+      "title": "Dasar Menyusun Laporan Keuangan",
+      "url": null
+    }
+  },
+  {
+    "id": "pelayanan-pelanggan",
+    "name": "Pelayanan Pelanggan",
+    "synonyms": [],
+    "resource": {
+      "type": "video",
+      "duration": "2 jam",
+      "title": "Prinsip Pelayanan Prima",
+      "url": null
+    }
+  },
+  {
+    "id": "pembukuan",
+    "name": "Pembukuan",
+    "synonyms": [],
+    "resource": null
+  },
+  {
+    "id": "pencatatan-stok",
+    "name": "Pencatatan Stok",
+    "synonyms": [],
+    "resource": {
+      "type": "video",
+      "duration": "90 mnt",
+      "title": "Kartu Stok dan Stock Opname",
+      "url": null
+    }
+  },
+  {
+    "id": "perakitan-pc",
+    "name": "Perakitan PC",
+    "synonyms": [],
+    "resource": null
+  },
+  {
+    "id": "perpajakan",
+    "name": "Perpajakan",
+    "synonyms": [],
+    "resource": {
+      "type": "kursus",
+      "duration": "5 jam",
+      "title": "PPh 21 dan Dasar Perpajakan",
+      "url": null
+    }
+  },
+  {
+    "id": "python",
+    "name": "Python",
+    "synonyms": [],
+    "resource": {
+      "type": "kursus",
+      "duration": "8 jam",
+      "title": "Python Dasar untuk Data",
+      "url": null
+    }
+  },
+  {
+    "id": "sql",
+    "name": "SQL",
+    "synonyms": [],
+    "resource": {
+      "type": "kursus",
+      "duration": "6 jam",
+      "title": "SQL Dasar untuk Analisis Data",
+      "url": null
+    }
+  },
+  {
+    "id": "software-akuntansi",
+    "name": "Software Akuntansi",
+    "synonyms": [],
+    "resource": {
+      "type": "video",
+      "duration": "2 jam",
+      "title": "Pengenalan Software Akuntansi untuk UMKM",
+      "url": null
+    }
+  },
+  {
+    "id": "statistik-dasar",
+    "name": "Statistik Dasar",
+    "synonyms": [],
+    "resource": {
+      "type": "modul",
+      "duration": "5 jam",
+      "title": "Statistik Deskriptif untuk Pemula",
+      "url": null
+    }
+  },
+  {
+    "id": "visualisasi-data",
+    "name": "Visualisasi Data",
+    "synonyms": [],
+    "resource": {
+      "type": "kursus",
+      "duration": "4 jam",
+      "title": "Visualisasi Data dengan Spreadsheet",
+      "url": null
+    }
+  },
+  {
+    "id": "e-faktur",
+    "name": "e-Faktur",
+    "synonyms": [],
+    "resource": {
+      "type": "video",
+      "duration": "1 jam",
+      "title": "Membuat e-Faktur Langkah demi Langkah",
+      "url": null
+    }
+  }
+]
