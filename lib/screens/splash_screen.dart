@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../router.dart';
 import '../theme/career_theme.dart';
-import '../widgets/career_widgets.dart';
 import '../widgets/common.dart';
 
 /// Short branded splash: the K mark scales in, then onboarding. Tap anywhere to skip.
@@ -62,8 +61,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             },
             child: Stack(
               children: [
-                // The K mark's rising steps, echoed quietly in the corner.
-                const Positioned(right: 28, bottom: 120, child: Opacity(opacity: .5, child: CareerSteps())),
                 Center(
                   child: AnimatedBuilder(
                     animation: entrance,
