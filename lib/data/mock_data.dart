@@ -158,15 +158,18 @@ const skillSynonyms = <String, List<String>>{
 };
 
 /// Every skill the prototype knows: job requirements, Q&A options, Rani's CV and learning materials.
-/// Seeded into Firestore `skills` by `tool/export_seed.dart`.
-List<Skill> get skillCatalog {
+List<Skill> get skillCatalog => buildSkillCatalog(jobs, resources);
+
+/// Skills of [jobList] plus the Q&A options and Rani's CV, with synonyms and materials from [res].
+/// `tool/export_seed.dart` seeds Firestore `skills` with this over the full catalogue.
+List<Skill> buildSkillCatalog(Iterable<Job> jobList, Map<String, LearningResource> res) {
   final names = <String>{
-    for (final j in jobs) ...[...j.wajib, ...j.tambahan],
+    for (final j in jobList) ...[...j.wajib, ...j.tambahan],
     ...qaQuestions[2].options,
     ...raniProfile.skills,
-    ...resources.keys,
+    ...res.keys,
   };
-  return [for (final n in names.toList()..sort()) Skill(name: n, synonyms: skillSynonyms[n] ?? const [], resource: resources[n])];
+  return [for (final n in names.toList()..sort()) Skill(name: n, synonyms: skillSynonyms[n] ?? const [], resource: res[n])];
 }
 
 const qaQuestions = <QaQuestion>[

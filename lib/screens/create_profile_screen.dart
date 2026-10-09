@@ -15,7 +15,9 @@ class CreateProfileScreen extends ConsumerWidget {
   Future<void> _askConsent(BuildContext context, WidgetRef ref, ProfileSource source) async {
     final ok = await showCareerSheet<bool>(context, (_) => _ConsentSheet(photo: source == ProfileSource.cvPhoto));
     if (ok != true || !context.mounted) return;
-    ref.read(appProvider.notifier).useCvProfile(source);
+    ref.read(appProvider.notifier)
+      ..recordCvConsent()
+      ..useCvProfile(source);
     context.go('${Routes.processing}?kind=${source == ProfileSource.cvPhoto ? 'photo' : 'pdf'}');
   }
 

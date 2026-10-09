@@ -149,8 +149,13 @@ List<GapItem> skillGap(Job job, MatchResult r) => [
 ]..sort((a, b) => b.gain.compareTo(a.gain));
 
 /// Normalises common skill spellings to the KarirIn canonical list ("MS Excel" → "Microsoft Excel").
-String normalizeSkill(String raw) {
-  final v = raw.trim();
+/// [catalog] (Firestore `skills`) is matched first, case-insensitively, on names and synonyms.
+String normalizeSkill(String raw, [List<Skill> catalog = const []]) {
+  final v = raw.trim().replaceAll(RegExp(r'\s+'), ' ');
+  final key = v.toLowerCase();
+  for (final s in catalog) {
+    if (s.name.toLowerCase() == key || s.synonyms.any((x) => x.toLowerCase() == key)) return s.name;
+  }
   if (RegExp(r'^(ms\s*excel|excel)$', caseSensitive: false).hasMatch(v)) return 'Microsoft Excel';
   if (RegExp(r'^(ms\s*word|word)$', caseSensitive: false).hasMatch(v)) return 'Microsoft Word';
   return v;

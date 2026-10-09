@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../data/backend.dart';
+import '../data/repositories/auth_repository.dart';
+import '../data/repositories/providers.dart';
 import '../router.dart';
 import '../state/app_state.dart';
 import '../theme/career_theme.dart';
@@ -25,6 +28,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _password = TextEditingController();
   Map<String, String> _errs = {};
 
+  /// Firebase builds: what is in progress (`email` or `google`) and an error that belongs to no single field.
+  String? _busy;
+  String? _formError;
+
   @override
   void dispose() {
     _name.dispose();
@@ -36,6 +43,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   void _setMode(bool daftar) => setState(() {
     _daftar = daftar;
     _errs = {};
+    _formError = null;
   });
 
   /// Clears a field's error as soon as the user edits it.
@@ -44,15 +52,73 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   }
 
   void _submit() {
+    if (_busy != null) return;
     final er = <String, String>{};
     if (_daftar && _name.text.trim().isEmpty) er['name'] = 'Nama wajib diisi.';
     if (!RegExp(r'^\S+@\S+\.\S+$').hasMatch(_email.text.trim())) er['email'] = 'Masukkan email yang valid, mis. nama@email.com.';
     if (_password.text.length < 8) er['password'] = 'Kata sandi minimal 8 karakter.';
-    setState(() => _errs = er);
-    if (er.isEmpty) {
-      TextInput.finishAutofillContext();
-      ref.read(appProvider.notifier).setSignupName(_daftar ? _name.text : '');
+    setState(() {
+      _errs = er;
+      _formError = null;
+    });
+    if (er.isNotEmpty) return;
+    TextInput.finishAutofillContext();
+    ref.read(appProvider.notifier).setSignupName(_daftar ? _name.text : '');
+    if (backend == Backend.mock) {
       context.go(Routes.create);
+      return;
+    }
+    final auth = ref.read(authRepositoryProvider);
+    _run(
+      'email',
+      () => _daftar
+          ? auth.register(name: _name.text, email: _email.text, password: _password.text)
+          : auth.signIn(email: _email.text, password: _password.text),
+    );
+  }
+
+  /// Signs in on Firebase builds. On success the router moves on by itself once the user's data is loaded, so the
+  /// button keeps its progress state until then.
+  Future<void> _run(String what, Future<Object?> Function() action) async {
+    setState(() {
+      _busy = what;
+      _formError = null;
+    });
+    try {
+      final result = await action();
+      if (result == false && mounted) setState(() => _busy = null); // Google account picker closed.
+    } on AuthFailure catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _busy = null;
+        if (e.field != null) {
+          _errs = {..._errs, e.field!: e.message};
+        } else {
+          _formError = e.message;
+        }
+      });
+    }
+  }
+
+  void _google() {
+    if (_busy != null) return;
+    if (backend == Backend.mock) {
+      context.go(Routes.create);
+      return;
+    }
+    _run('google', ref.read(authRepositoryProvider).signInWithGoogle);
+  }
+
+  Future<void> _forgotPassword() async {
+    if (!RegExp(r'^\S+@\S+\.\S+$').hasMatch(_email.text.trim())) {
+      setState(() => _errs = {..._errs, 'email': 'Tulis email akunmu dulu, lalu ketuk Lupa kata sandi.'});
+      return;
+    }
+    try {
+      await ref.read(authRepositoryProvider).sendPasswordReset(_email.text);
+      if (mounted) showToast(context, 'Tautan atur ulang kata sandi dikirim ke ${_email.text.trim()}.');
+    } on AuthFailure catch (e) {
+      if (mounted) setState(() => _formError = e.message);
     }
   }
 
@@ -147,8 +213,26 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      CareerButton(label: _daftar ? 'Buat akun' : 'Masuk', onPressed: _submit),
+                      if (!_daftar)
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(onPressed: _busy == null ? _forgotPassword : null, child: const Text('Lupa kata sandi?')),
+                        )
+                      else
+                        const SizedBox(height: 12),
+                      if (_formError != null) ...[
+                        Text(_formError!, style: CareerText.small.copyWith(color: CareerColors.error)),
+                        const SizedBox(height: 12),
+                      ],
+                      const SizedBox(height: 12),
+                      CareerButton(
+                        label: _busy == 'email'
+                            ? 'Memproses…'
+                            : _daftar
+                            ? 'Buat akun'
+                            : 'Masuk',
+                        onPressed: _busy == null ? _submit : null,
+                      ),
                       const SizedBox(height: 16),
                       const Row(
                         children: [
@@ -162,7 +246,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       ),
                       const SizedBox(height: 16),
                       OutlinedButton(
-                        onPressed: () => context.go(Routes.create),
+                        onPressed: _busy == null ? _google : null,
                         style: OutlinedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: CareerColors.ink,
@@ -190,15 +274,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            const Flexible(child: Text('Lanjutkan dengan Google')),
+                            Flexible(child: Text(_busy == 'google' ? 'Menghubungkan…' : 'Lanjutkan dengan Google')),
                           ],
                         ),
                       ),
                       const Spacer(),
                       const SizedBox(height: 24),
                       const Text(
-                        'Dengan melanjutkan, kamu menyetujui Syarat Layanan dan Kebijakan Privasi KarirIn. '
-                        'Pada demo ini, akun belum tersambung ke server.',
+                        'Dengan melanjutkan, kamu menyetujui Syarat Layanan dan Kebijakan Privasi KarirIn.'
+                        '${backend == Backend.mock ? ' Pada demo ini, akun belum tersambung ke server.' : ''}',
                         style: CareerText.small,
                         textAlign: TextAlign.center,
                       ),

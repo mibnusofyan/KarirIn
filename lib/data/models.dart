@@ -140,6 +140,7 @@ class Profile {
     required this.source,
     required this.skills,
     required this.exps,
+    this.interests = const [],
   });
 
   final String name;
@@ -152,6 +153,9 @@ class Profile {
   final List<String> skills;
   final List<Experience> exps;
 
+  /// Fields of work the user is interested in (Q&A question 6).
+  final List<String> interests;
+
   String get firstName => name.split(' ').first;
   String get initials => name.split(' ').where((w) => w.isNotEmpty).take(2).map((w) => w[0]).join().toUpperCase();
 
@@ -163,6 +167,7 @@ class Profile {
     List<String>? skills,
     List<WorkMode>? modes,
     ProfileSource? source,
+    List<String>? interests,
   }) => Profile(
     name: name ?? this.name,
     level: level ?? this.level,
@@ -173,6 +178,7 @@ class Profile {
     source: source ?? this.source,
     skills: skills ?? this.skills,
     exps: exps,
+    interests: interests ?? this.interests,
   );
 
   /// Firestore `profiles/{uid}` fields owned by the profile itself.
@@ -186,6 +192,7 @@ class Profile {
     'source': source.name,
     'skills': skills,
     'exps': [for (final e in exps) e.toMap()],
+    'interests': interests,
   };
 
   factory Profile.fromMap(Map<String, Object?> m) => Profile(
@@ -198,6 +205,7 @@ class Profile {
     source: _byName(ProfileSource.values, m['source'], ProfileSource.qa),
     skills: _strings(m['skills']),
     exps: [for (final e in (m['exps'] as List?) ?? const []) Experience.fromMap(Map<String, Object?>.from(e as Map))],
+    interests: _strings(m['interests']),
   );
 }
 

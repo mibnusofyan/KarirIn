@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../data/mock_data.dart';
 import '../logic/interview.dart';
 import '../router.dart';
 import '../state/app_state.dart';
@@ -33,7 +32,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
   final List<AnsweredQuestion> _results = [];
   Timer? _waveTimer;
 
-  late final _job = jobById(ref.read(appProvider).coachJobId);
+  late final _job = ref.read(appProvider).job(ref.read(appProvider).coachJobId);
   late final _questions = questionsFor(_job);
 
   @override

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../router.dart';
+import '../state/session.dart';
 import '../theme/career_theme.dart';
 import '../widgets/career_widgets.dart';
 import '../widgets/common.dart';
@@ -43,6 +44,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.dispose();
   }
 
+  void _finish() {
+    markOnboardingSeen();
+    context.go(Routes.auth);
+  }
+
   void _next() {
     if (_i < _slides.length - 1) {
       _pc.nextPage(
@@ -50,7 +56,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeOutCubic,
       );
     } else {
-      context.go(Routes.auth);
+      _finish();
     }
   }
 
@@ -70,7 +76,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     const SizedBox(width: 8),
                     Text('${_i + 1} dari ${_slides.length}', style: CareerText.small),
                     const Spacer(),
-                    if (!last) TextButton(onPressed: () => context.go(Routes.auth), child: const Text('Lewati')),
+                    if (!last) TextButton(onPressed: _finish, child: const Text('Lewati')),
                     if (last) const SizedBox(height: 48),
                   ],
                 ),

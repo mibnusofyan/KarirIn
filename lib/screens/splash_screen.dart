@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
-import '../router.dart';
+import '../state/session.dart';
 import '../theme/career_theme.dart';
 import '../widgets/common.dart';
 
@@ -25,10 +25,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     ..forward();
   bool _left = false;
 
-  void _next() {
+  Future<void> _next() async {
     if (_left || !mounted) return;
     _left = true;
-    context.go(Routes.onboarding);
+    final route = await routeAfterSplash();
+    if (mounted) context.go(route);
   }
 
   @override

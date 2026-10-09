@@ -6,12 +6,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'data/backend.dart';
 import 'firebase/bootstrap.dart';
 import 'router.dart';
+import 'state/app_state.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (backend == Backend.firebase) await initFirebase();
-  runApp(const ProviderScope(child: KarirInApp()));
+  // Created up front so the app state starts listening to sign-in changes before the splash asks where to go.
+  final container = ProviderContainer()..read(appProvider);
+  runApp(UncontrolledProviderScope(container: container, child: const KarirInApp()));
 }
 
 /// Light system bars for every screen; the splash overrides this with its own navy region.

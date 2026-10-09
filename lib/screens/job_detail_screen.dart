@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../data/mock_data.dart';
 import '../data/models.dart';
 import '../logic/match_score.dart';
 import '../router.dart';
@@ -100,7 +99,7 @@ class JobDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(appProvider);
-    final job = jobById(jobId);
+    final job = state.job(jobId);
     final result = computeMatch(job, state.profile);
     final saved = state.savedJobIds.contains(jobId);
     final missing = result.missingWajib;

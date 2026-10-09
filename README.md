@@ -41,15 +41,20 @@ Rencana lengkap ada di `docs/backend-development-plan.md`: Firebase paket Spark 
 
 ```bash
 flutter run --dart-define=BACKEND=mock       # default: data contoh offline
-flutter run --dart-define=BACKEND=firebase   # perlu lib/firebase_options.dart hasil flutterfire configure
+flutter run --dart-define=BACKEND=firebase   # proyek asli my-tugas-web
+flutter run --dart-define=BACKEND=firebase --dart-define=USE_EMULATOR=true   # Auth + Firestore emulator lokal (debug)
 ```
+
+Pada mode `firebase`: login email/kata sandi dan Google (Firebase Auth), redirect otomatis (belum login → Masuk, belum punya profil → Buat profil, sudah → Beranda), profil disimpan ke `profiles/{uid}` setelah dikonfirmasi lalu setiap perubahan ikut tersimpan, simpanan lowongan dan pengaturan notifikasi di `users/{uid}`, katalog 20 lowongan dan 35 skill dibaca dari Firestore, Keluar, dan Hapus akun (menghapus data lalu akun). Ekstraksi CV, lamaran, dan sesi wawancara masih lokal sampai Tahap B2/B3.
 
 | Berkas | Isi |
 |---|---|
 | `firebase.json`, `.firebaserc` | Konfigurasi CLI dan emulator (Auth 9099, Firestore 8080, UI 4000); alias `emulator` = `demo-karirin` |
 | `lib/firebase_options.dart`, `android/app/google-services.json` | Hasil `flutterfire configure` (bukan rahasia) |
 | `firestore.rules` | Security rules: pengguna hanya mengakses datanya sendiri; katalog hanya ditulis skrip |
-| `tool/export_seed.dart` | Mengekspor lowongan dan skill dari `mock_data.dart` ke `backend/data/*.json` |
+| `lib/data/catalog_extra.dart` | 14 lowongan tambahan (j7–j20, termasuk TKJ) yang hanya masuk Firestore; mode mock tetap 6 lowongan |
+| `tool/export_seed.dart` | Mengekspor lowongan dan skill (`mock_data.dart` + `catalog_extra.dart`) ke `backend/data/*.json` |
+| `backend/test/rules.test.ts` | Uji security rules di emulator: `npm --prefix backend run test:rules` |
 | `backend/src/seed.ts` | Mengimpor katalog ke Firestore (merge; lowongan yang dihapus dari JSON dinonaktifkan) |
 
 Mengisi katalog:
@@ -60,6 +65,14 @@ npm --prefix backend run export-data
 firebase emulators:exec --project demo-karirin --only firestore "npm --prefix backend run seed:emulator"
 npm --prefix backend run seed    # proyek asli, butuh backend/.env + service account
 ```
+
+Menguji aplikasi terhadap emulator (data dan akun hanya ada di laptop):
+
+```bash
+firebase emulators:start --project my-tugas-web --only auth,firestore
+```
+
+Lalu isi katalog ke emulator dengan `FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 GCLOUD_PROJECT=my-tugas-web npx --prefix backend tsx backend/src/seed.ts`. Di Windows, `firebase emulators:exec` kadang meninggalkan proses Java yang tetap memegang port 8080; hentikan proses itu bila emulator berikutnya gagal dengan "port taken".
 
 Rahasia **tidak** masuk git: `android/key.properties` dan `android/app/upload-keystore.jks` (tanda tangan APK rilis; simpan cadangannya), `backend/.env`, dan berkas service account. Sidik jari keystore untuk konsol Firebase (SHA-1 untuk Google Sign-In, SHA-256 untuk App Check):
 

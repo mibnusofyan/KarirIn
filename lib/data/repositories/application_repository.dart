@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../models.dart';
+import 'streams.dart';
 
 /// Applications the user logged after applying through the company's official channel
 /// (`users/{uid}/applications`).
@@ -21,10 +22,8 @@ class MockApplicationRepository implements ApplicationRepository {
   List<JobApplication> _of(String uid) => List.unmodifiable(_apps[uid] ?? const <JobApplication>[]);
 
   @override
-  Stream<List<JobApplication>> watch(String uid) async* {
-    yield _of(uid);
-    yield* _changes.stream.where((id) => id == uid).map((_) => _of(uid));
-  }
+  Stream<List<JobApplication>> watch(String uid) =>
+      currentThenChanges(() => _of(uid), _changes.stream.where((id) => id == uid).map((_) => _of(uid)));
 
   @override
   Future<void> upsert(String uid, JobApplication application) async {

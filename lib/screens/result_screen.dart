@@ -17,7 +17,7 @@ class ResultScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final st = ref.watch(appProvider);
-    final job = jobById(st.coachJobId);
+    final job = st.job(st.coachJobId);
     final isExample = st.interviewResults.isEmpty;
     // Before any session has been completed, show the demo answers so the screen is never empty.
     final results = isExample ? [for (final q in interviewJ1) AnsweredQuestion(q, gradeAnswer(q.demo))] : st.interviewResults;

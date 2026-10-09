@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../data/mock_data.dart';
 import '../logic/match_score.dart';
 import '../router.dart';
 import '../state/app_state.dart';
@@ -31,7 +30,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _openNotifications() {
     final score = fmt(
-      computeMatch(jobById('j4'), ref.read(appProvider).profile).total,
+      computeMatch(ref.read(appProvider).job('j4'), ref.read(appProvider).profile).total,
     );
     showCareerSheet<void>(
       context,

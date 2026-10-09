@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../data/mock_data.dart';
 import '../data/models.dart';
 import '../logic/match_score.dart';
 import '../router.dart';
@@ -218,7 +217,7 @@ class _LearningStep extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final res = resourceFor(item.skill);
+    final res = ref.watch(appProvider).resourceForSkill(item.skill);
     final first = number == 1;
     return _Rail(
       last: last,
@@ -376,7 +375,7 @@ class _ResourceSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final res = resourceFor(item.skill);
+    final res = ref.watch(appProvider).resourceForSkill(item.skill);
     void masterAndClose({bool proof = false}) {
       final messenger = ScaffoldMessenger.of(context);
       final notifier = ref.read(appProvider.notifier);
