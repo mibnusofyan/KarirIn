@@ -6,7 +6,8 @@ import '../data/mock_data.dart';
 import '../logic/match_score.dart';
 import '../router.dart';
 import '../state/app_state.dart';
-import '../theme/app_theme.dart';
+import '../theme/career_theme.dart';
+import '../widgets/career_widgets.dart';
 import '../widgets/common.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -17,7 +18,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  /// null = "Semua".
   MatchCategory? _filter;
   bool _retrying = false;
 
@@ -30,44 +30,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _openNotifications() {
-    final p = ref.read(appProvider).profile;
-    final csScore = fmt(computeMatch(jobById('j4'), p).total);
-    showKSheet<void>(
+    final score = fmt(
+      computeMatch(jobById('j4'), ref.read(appProvider).profile).total,
+    );
+    showCareerSheet<void>(
       context,
       (ctx) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              const Expanded(child: Text('Notifikasi', style: KText.titleLarge)),
-              IconButton(onPressed: () => Navigator.pop(ctx), icon: const Icon(Icons.close_rounded), tooltip: 'Tutup'),
-            ],
-          ),
-          const SizedBox(height: 8),
-          _NotifItem(
+          const CareerSheetHeader('Notifikasi'),
+          _Notification(
             icon: Icons.work_outline_rounded,
-            bg: KColors.secondaryContainer,
-            fg: KColors.onSecondaryContainer,
-            meta: 'Lowongan baru · 1 jam lalu',
-            text: 'Customer Service Officer di BPR Artha Sejahtera cocok $csScore dengan profilmu.',
+            label: 'Lowongan baru · 1 jam lalu',
+            text:
+                'Customer Service Officer di BPR Artha Sejahtera cocok $score dengan profilmu.',
             onTap: () {
               Navigator.pop(ctx);
               context.push(Routes.job('j4'));
             },
           ),
-          const _NotifItem(
-            icon: Icons.event_rounded,
-            bg: KColors.tertiaryContainer,
-            fg: KColors.onTertiaryContainer,
-            meta: 'Pengingat · hari ini',
+          const Divider(),
+          const _Notification(
+            icon: Icons.event_outlined,
+            label: 'Pengingat · hari ini',
             text: 'Tes online Kasir di Toko Swalayan Mitra besok pukul 10.00.',
           ),
-          const _NotifItem(
+          const Divider(),
+          const _Notification(
             icon: Icons.mail_outline_rounded,
-            bg: KColors.primaryContainer,
-            fg: KColors.onPrimaryContainer,
-            meta: 'Tindak lanjut · kemarin',
-            text: 'Sudah 7 hari sejak melamar Admin Media Sosial. Pertimbangkan mengirim email tindak lanjut.',
+            label: 'Tindak lanjut · kemarin',
+            text:
+                'Sudah 7 hari sejak melamar Admin Media Sosial. Pertimbangkan mengirim email tindak lanjut.',
           ),
         ],
       ),
@@ -76,28 +69,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final st = ref.watch(appProvider);
-    final ranked = st.ranked;
-    final counts = {for (final c in MatchCategory.values) c: ranked.where((s) => s.result.category == c).length};
-    final shown = ranked.where((s) => _filter == null || s.result.category == _filter).toList();
+    final state = ref.watch(appProvider);
+    final ranked = state.ranked;
+    final shown = ranked
+        .where((s) => _filter == null || s.result.category == _filter)
+        .toList();
+    final recommendation = ranked
+        .where((s) => s.result.missingWajib.isNotEmpty && s.result.total >= 50)
+        .firstOrNull;
 
-    // "Rekomendasi aksi": the best-scoring job (≥50) that still misses a required skill.
-    final recSrc = ranked.where((s) => s.result.missingWajib.isNotEmpty && s.result.total >= 50).firstOrNull;
-
-    return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: 64,
+    return CareerTheme(
+      child: Scaffold(
+        body: SafeArea(
+          bottom: false,
+          child: CustomScrollView(
+            key: const PageStorageKey('career-home'),
+            slivers: [
+              SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 4, 0),
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 18),
                   child: Row(
                     children: [
-                      const KarirInMark(size: 32),
-                      const SizedBox(width: 10),
+                      const KarirInMark(size: 30),
+                      const SizedBox(width: 9),
                       const Expanded(
                         child: Text.rich(
                           TextSpan(
@@ -105,86 +99,206 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             children: [
                               TextSpan(
                                 text: 'In',
-                                style: TextStyle(color: KColors.secondary),
+                                style: TextStyle(color: CareerColors.teal),
                               ),
                             ],
                           ),
-                          style: TextStyle(fontSize: 22, height: 28 / 22, fontWeight: FontWeight.w700, color: KColors.brandNavy),
+                          style: TextStyle(
+                            fontFamily: 'PlusJakartaSans',
+                            fontSize: 21,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -.8,
+                            color: CareerColors.navy,
+                          ),
                         ),
                       ),
-                      IconButton(
+                      IconButton.filledTonal(
                         tooltip: 'Notifikasi',
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: CareerColors.ink,
+                          minimumSize: const Size(48, 48),
+                        ),
                         onPressed: _openNotifications,
-                        icon: const Badge(smallSize: 6, backgroundColor: KColors.error, child: Icon(Icons.notifications_outlined)),
+                        icon: const Badge(
+                          smallSize: 6,
+                          backgroundColor: CareerColors.teal,
+                          child: Icon(
+                            Icons.notifications_none_rounded,
+                            size: 23,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Halo, ${st.profile.firstName}', style: KText.headlineMedium),
-                    const SizedBox(height: 2),
-                    Text('${ranked.length} lowongan diurutkan dari yang paling cocok dengan profilmu.', style: KText.bodyMediumVariant),
-                  ],
-                ),
-              ),
-            ),
-            if (st.offline)
               SliverToBoxAdapter(
-                child: _OfflineCard(retrying: _retrying, onRetry: _retry),
-              )
-            else ...[
-              if (recSrc != null) SliverToBoxAdapter(child: _RecommendationCard(source: recSrc)),
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 48,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _chip('Semua · ${ranked.length}', _filter == null, () => setState(() => _filter = null)),
-                      for (final c in MatchCategory.values)
-                        _chip('${c.label} · ${counts[c]}', _filter == c, () => setState(() => _filter = c)),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Halo, ${state.profile.firstName}',
+                              style: CareerText.muted,
+                            ),
+                          ),
+                          const Icon(
+                            Icons.wb_sunny_outlined,
+                            color: CareerColors.amber,
+                            size: 20,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Langkah baru,\npeluang baru.',
+                        style: CareerText.heading,
+                      ),
                     ],
                   ),
                 ),
               ),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                sliver: SliverList.separated(
-                  itemCount: shown.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 8),
-                  itemBuilder: (_, i) => _JobCard(scored: shown[i]),
+              if (state.offline)
+                SliverToBoxAdapter(
+                  child: _OfflineCard(retrying: _retrying, onRetry: _retry),
+                )
+              else ...[
+                if (recommendation != null)
+                  SliverToBoxAdapter(
+                    child: _RecommendationCard(source: recommendation),
+                  ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 6),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Peluang untukmu',
+                            style: CareerText.title,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${ranked.length} lowongan',
+                          style: CareerText.small,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(16, 16, 16, 24),
-                  child: Text('Match Score adalah alat bantu keputusan, bukan hasil seleksi perusahaan.', style: KText.bodySmall),
+                SliverToBoxAdapter(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 14),
+                    child: Row(
+                      children: [
+                        _filterChip('Semua', ranked.length, null),
+                        for (final category in MatchCategory.values)
+                          _filterChip(
+                            category.label,
+                            ranked
+                                .where((s) => s.result.category == category)
+                                .length,
+                            category,
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                if (shown.isEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          const Icon(
+                            Icons.manage_search_rounded,
+                            size: 36,
+                            color: CareerColors.teal,
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Belum ada di kategori ini',
+                            style: CareerText.cardTitle,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Coba kategori lain untuk melihat peluang yang tersedia.',
+                            style: CareerText.muted,
+                            textAlign: TextAlign.center,
+                          ),
+                          TextButton(
+                            onPressed: () => setState(() => _filter = null),
+                            child: const Text('Lihat semua lowongan'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  sliver: SliverList.separated(
+                    itemCount: shown.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 14),
+                    itemBuilder: (_, i) => _JobCard(
+                      key: ValueKey(shown[i].job.id),
+                      scored: shown[i],
+                    ),
+                  ),
+                ),
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(24, 22, 24, 28),
+                    child: Text(
+                      'Diurutkan berdasarkan kecocokan profilmu. Match Score membantu kamu memilih, bukan keputusan perusahaan.',
+                      style: CareerText.small,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _chip(String label, bool sel, VoidCallback onTap) => Padding(
-    padding: const EdgeInsets.only(right: 8),
-    child: FilterChip(
-      label: Text(label),
-      selected: sel,
-      onSelected: (_) => onTap(),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    ),
-  );
+  Widget _filterChip(String label, int count, MatchCategory? category) {
+    final selected = _filter == category;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Semantics(
+        selected: selected,
+        button: true,
+        child: TextButton(
+          onPressed: () => setState(() => _filter = category),
+          style: TextButton.styleFrom(
+            foregroundColor: selected ? Colors.white : CareerColors.muted,
+            backgroundColor: selected ? CareerColors.navy : Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+            minimumSize: const Size(48, 48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+              side: BorderSide(
+                color: selected ? CareerColors.navy : CareerColors.line,
+              ),
+            ),
+            textStyle: CareerText.small.copyWith(fontWeight: FontWeight.w600),
+          ),
+          child: Text('$label  $count'),
+        ),
+      ),
+    );
+  }
 }
 
 class _RecommendationCard extends ConsumerWidget {
@@ -193,73 +307,79 @@ class _RecommendationCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final p = ref.watch(appProvider).profile;
+    final profile = ref.watch(appProvider).profile;
     final skill = source.result.missingWajib.first;
-    final to = computeMatch(source.job, p.copyWith(skills: [...p.skills, skill])).total;
+    final potential = computeMatch(
+      source.job,
+      profile.copyWith(skills: [...profile.skills, skill]),
+    ).total;
+    final gain = potential - source.result.total;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Material(
-        color: KColors.primaryContainer,
-        borderRadius: BorderRadius.circular(16),
+        color: CareerColors.navy,
+        borderRadius: BorderRadius.circular(24),
         clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () {
-            ref.read(appProvider.notifier).selectGapJob(source.job.id);
-            context.go(Routes.gap);
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const IconCircle(Icons.lightbulb_outline_rounded, bg: KColors.primary, fg: Colors.white),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'REKOMENDASI AKSI',
-                        style: TextStyle(
-                          fontSize: 12,
-                          height: 16 / 12,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: .5,
-                          color: KColors.onPrimaryContainer,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text.rich(
-                        TextSpan(
-                          children: [
-                            const TextSpan(text: 'Kuasai '),
-                            TextSpan(
-                              text: skill,
-                              style: const TextStyle(fontWeight: FontWeight.w700),
-                            ),
-                            const TextSpan(text: ' agar skor '),
-                            TextSpan(
-                              text: source.job.title,
-                              style: const TextStyle(fontWeight: FontWeight.w700),
-                            ),
-                            TextSpan(text: ' naik dari ${fmt(source.result.total)} ke ${fmt(to)}.'),
-                          ],
-                        ),
-                        style: KText.bodyMedium.copyWith(color: KColors.onPrimaryContainer),
-                      ),
-                      const SizedBox(height: 8),
-                      const Row(
-                        children: [
-                          Text('Buka Skill Gap', style: KText.sectionLabel),
-                          SizedBox(width: 4),
-                          Icon(Icons.arrow_forward_rounded, size: 18, color: KColors.primary),
-                        ],
-                      ),
-                    ],
-                  ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 6),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'LANGKAH PILIHANMU',
+                style: CareerText.small.copyWith(
+                  color: const Color(0xFFC4D6E7),
+                  fontSize: 10,
+                  letterSpacing: 1.6,
+                  fontWeight: FontWeight.w700,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Satu skill lagi.\nSelangkah lebih siap.',
+                      style: CareerText.title.copyWith(
+                        color: Colors.white,
+                        fontSize: 21,
+                      ),
+                    ),
+                  ),
+                  if (MediaQuery.textScalerOf(context).scale(14) < 20) ...[
+                    const SizedBox(width: 8),
+                    const CareerSteps(),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '$skill · +${fmt(gain)} poin',
+                style: CareerText.small.copyWith(
+                  color: const Color(0xFFE3F0F8),
+                ),
+              ),
+              const SizedBox(height: 2),
+              TextButton(
+                onPressed: () {
+                  ref.read(appProvider.notifier).selectGapJob(source.job.id);
+                  context.go(Routes.gap);
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: CareerColors.yellow,
+                  padding: EdgeInsets.zero,
+                  alignment: Alignment.centerLeft,
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(child: Text('Lihat rencana belajar')),
+                    SizedBox(width: 10),
+                    Icon(Icons.arrow_forward_rounded, size: 18),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -267,51 +387,81 @@ class _RecommendationCard extends ConsumerWidget {
   }
 }
 
-class _JobCard extends StatelessWidget {
-  const _JobCard({required this.scored});
+class _JobCard extends ConsumerWidget {
+  const _JobCard({super.key, required this.scored});
   final ScoredJob scored;
 
   @override
-  Widget build(BuildContext context) {
-    final j = scored.job, r = scored.result;
-    final missing = r.missingWajib;
-    return FilledCard(
-      onTap: () => context.push(Routes.job(j.id)),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ScoreTile(score: r.total),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(j.title, style: KText.titleMedium),
-                Text('${j.company} · ${j.city}', style: KText.bodyMediumVariant),
-                const SizedBox(height: 8),
-                Wrap(spacing: 6, runSpacing: 6, children: [CategoryTag(r.category), Tag(j.mode.label, outlined: true)]),
-                const SizedBox(height: 8),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      missing.isEmpty ? Icons.check_circle_outline_rounded : Icons.error_outline_rounded,
-                      size: 16,
-                      color: missing.isEmpty ? KColors.secondary : KColors.error,
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        missing.isEmpty ? 'Semua skill wajib terpenuhi' : 'Kurang ${missing.length} skill wajib: ${joinId(missing)}',
-                        style: TextStyle(fontSize: 12, height: 16 / 12, color: missing.isEmpty ? KColors.secondary : KColors.error),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final job = scored.job;
+    final result = scored.result;
+    final saved = ref.watch(
+      appProvider.select((s) => s.savedJobIds.contains(job.id)),
+    );
+    return Material(
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: CareerColors.line),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => context.push(Routes.job(job.id)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  CompanyAvatar(company: job.company, size: 40),
+                  const SizedBox(width: 10),
+                  Expanded(child: Text(job.company, style: CareerText.small)),
+                  IconButton(
+                    tooltip: saved
+                        ? 'Hapus ${job.title} dari simpanan'
+                        : 'Simpan ${job.title}',
+                    isSelected: saved,
+                    onPressed: () {
+                      ref.read(appProvider.notifier).toggleSaved(job.id);
+                      showToast(
+                        context,
+                        saved
+                            ? 'Lowongan dihapus dari simpanan'
+                            : 'Lowongan disimpan',
+                      );
+                    },
+                    icon: const Icon(Icons.bookmark_border_rounded, size: 21),
+                    selectedIcon: const Icon(Icons.bookmark_rounded, size: 21),
+                    color: saved ? CareerColors.teal : CareerColors.muted,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(job.title, style: CareerText.cardTitle),
+              const SizedBox(height: 7),
+              CareerMeta(
+                Icons.location_on_outlined,
+                '${job.city} · ${job.mode.label}',
+                style: CareerText.small,
+              ),
+              const SizedBox(height: 5),
+              Text(job.salary, style: CareerText.label.copyWith(fontSize: 14)),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 13),
+                child: Divider(),
+              ),
+              MatchBadge(result: result),
+              const SizedBox(height: 7),
+              Text(
+                result.missingWajib.isEmpty
+                    ? 'Semua skill wajib sudah sesuai'
+                    : '${result.matchedWajib.length} dari ${job.wajib.length} skill wajib sesuai',
+                style: CareerText.small,
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -324,25 +474,32 @@ class _OfflineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.all(16),
-    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-    decoration: BoxDecoration(color: KColors.surfaceContainerLow, borderRadius: BorderRadius.circular(28)),
+    margin: const EdgeInsets.all(20),
+    padding: const EdgeInsets.all(24),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(24),
+    ),
     child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const IconCircle(Icons.wifi_off_rounded, bg: KColors.errorContainer, fg: KColors.onErrorContainer, size: 64),
-        const SizedBox(height: 12),
-        const Text('Koneksi terputus', style: KText.titleLarge),
-        const SizedBox(height: 12),
+        const Icon(Icons.wifi_off_rounded, color: CareerColors.teal, size: 40),
+        const SizedBox(height: 16),
         const Text(
-          'Lowongan dan Match Score belum bisa dimuat. Periksa internet kamu, lalu coba lagi.',
+          'Koneksi terputus',
+          style: CareerText.title,
           textAlign: TextAlign.center,
-          style: KText.bodyMediumVariant,
         ),
-        const SizedBox(height: 20),
-        TonalButton(
+        const SizedBox(height: 10),
+        const Text(
+          'Peluangmu tetap menunggu. Periksa koneksi internet, lalu coba lagi.',
+          style: CareerText.muted,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 22),
+        CareerButton(
           label: retrying ? 'Memuat ulang…' : 'Coba lagi',
           icon: Icons.refresh_rounded,
-          height: 48,
           onPressed: retrying ? null : onRetry,
         ),
       ],
@@ -350,11 +507,15 @@ class _OfflineCard extends StatelessWidget {
   );
 }
 
-class _NotifItem extends StatelessWidget {
-  const _NotifItem({required this.icon, required this.bg, required this.fg, required this.meta, required this.text, this.onTap});
+class _Notification extends StatelessWidget {
+  const _Notification({
+    required this.icon,
+    required this.label,
+    required this.text,
+    this.onTap,
+  });
   final IconData icon;
-  final Color bg, fg;
-  final String meta, text;
+  final String label, text;
   final VoidCallback? onTap;
 
   @override
@@ -362,22 +523,28 @@ class _NotifItem extends StatelessWidget {
     onTap: onTap,
     borderRadius: BorderRadius.circular(12),
     child: Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 18),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IconCircle(icon, bg: bg, fg: fg),
-          const SizedBox(width: 16),
+          Icon(icon, color: CareerColors.teal, size: 22),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(meta, style: KText.bodySmall),
-                const SizedBox(height: 2),
-                Text(text, style: KText.bodyMedium),
+                Text(label, style: CareerText.small),
+                const SizedBox(height: 6),
+                Text(text, style: CareerText.body),
               ],
             ),
           ),
+          if (onTap != null)
+            const Icon(
+              Icons.chevron_right_rounded,
+              size: 20,
+              color: CareerColors.muted,
+            ),
         ],
       ),
     ),
