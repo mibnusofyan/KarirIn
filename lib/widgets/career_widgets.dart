@@ -361,3 +361,38 @@ InputDecoration careerInput({required String label, String? hint, String? error,
     focusedErrorBorder: border(CareerColors.error, 2),
   );
 }
+
+/// Segmented step progress with a caption, e.g. "Langkah 1 dari 2".
+class CareerStepBar extends StatelessWidget {
+  const CareerStepBar({super.key, required this.current, required this.total, required this.caption});
+  final int current, total;
+  final String caption;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: caption,
+    excludeSemantics: true,
+    child: Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+      child: Row(
+        children: [
+          for (var i = 1; i <= total; i++) ...[
+            if (i > 1) SizedBox(width: total > 4 ? 4 : 6),
+            Expanded(
+              child: AnimatedContainer(
+                duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 220),
+                height: 4,
+                decoration: BoxDecoration(
+                  color: i <= current ? CareerColors.teal : CareerColors.line,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(width: 12),
+          Text(caption, style: CareerText.small),
+        ],
+      ),
+    ),
+  );
+}
