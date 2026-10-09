@@ -34,7 +34,7 @@ class _ConfirmProfileScreenState extends ConsumerState<ConfirmProfileScreen> {
   void _add() {
     final raw = _newSkill.text.trim();
     if (raw.isEmpty) return;
-    final normalized = normalizeSkill(raw);
+    final normalized = normalizeSkill(raw, ref.read(appProvider).skills);
     final added = ref.read(appProvider.notifier).addSkill(raw);
     setState(() {
       _skillNote = !added
@@ -46,7 +46,11 @@ class _ConfirmProfileScreenState extends ConsumerState<ConfirmProfileScreen> {
     _newSkill.clear();
   }
 
-  void _done() => widget.editing ? context.back(Routes.profile) : context.go(Routes.home);
+  void _done() {
+    if (widget.editing) return context.back(Routes.profile);
+    ref.read(appProvider.notifier).confirmProfile();
+    context.go(Routes.home);
+  }
 
   @override
   Widget build(BuildContext context) {

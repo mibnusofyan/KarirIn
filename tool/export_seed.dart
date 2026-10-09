@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:karirin/data/catalog_extra.dart';
 import 'package:karirin/data/mock_data.dart';
 
 void main() {
@@ -13,10 +14,9 @@ void main() {
     stdout.writeln('${file.path}: ${(data as List).length} item');
   }
 
-  write('jobs.json', [
-    for (final j in jobs) {'id': j.id, ...j.toMap()},
-  ]);
+  final allJobs = [...jobs, ...extraJobs];
+  write('jobs.json', [for (final j in allJobs) {'id': j.id, ...j.toMap()}]);
   write('skills.json', [
-    for (final s in skillCatalog) {'id': s.id, ...s.toMap()},
+    for (final s in buildSkillCatalog(allJobs, {...resources, ...extraResources})) {'id': s.id, ...s.toMap()},
   ]);
 }

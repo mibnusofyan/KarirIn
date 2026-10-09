@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
@@ -18,9 +20,18 @@ const remoteConfigDefaults = <String, Object>{
   'max_cv_mb': 5,
 };
 
+/// `--dart-define=USE_EMULATOR=true` (debug builds): Auth and Firestore go to the Local Emulator Suite on the
+/// development machine instead of the real project. 10.0.2.2 is the host as seen from the Android emulator.
+const _useEmulator = bool.fromEnvironment('USE_EMULATOR');
+const _emulatorHost = String.fromEnvironment('EMULATOR_HOST', defaultValue: '10.0.2.2');
+
 /// Connects to Firebase before the first frame. Only called when built with `BACKEND=firebase`.
 Future<void> initFirebase() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  if (_useEmulator && !kReleaseMode) {
+    await FirebaseAuth.instance.useAuthEmulator(_emulatorHost, 9099);
+    FirebaseFirestore.instance.useFirestoreEmulator(_emulatorHost, 8080);
+  }
 
   // Play Integrity in release builds (configured for apps distributed outside Google Play); debug builds and
   // emulators use the debug provider, whose token is registered in the Firebase console.

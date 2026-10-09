@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../data/mock_data.dart';
 import '../data/models.dart';
 import '../router.dart';
 import '../state/app_state.dart';
@@ -63,7 +62,7 @@ enum _Filter {
 };
 
 /// The job in the catalogue this application belongs to, when it is one of ours.
-Job? jobFor(JobApplication a) => jobs.where((j) => j.title == a.title && j.company == a.company).firstOrNull;
+Job? jobFor(JobApplication a, List<Job> jobs) => jobs.where((j) => j.title == a.title && j.company == a.company).firstOrNull;
 
 class _TrackerScreenState extends ConsumerState<TrackerScreen> {
   _Filter _filter = _Filter.semua;
@@ -241,7 +240,7 @@ class _AgendaItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final style = stageStyle(app.status);
-    final job = jobFor(app);
+    final job = jobFor(app, ref.watch(appProvider).jobs);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(

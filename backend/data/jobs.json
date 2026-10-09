@@ -154,5 +154,356 @@
     "expYears": 0,
     "desc": "Mencatat barang masuk dan keluar, menyusun laporan stok harian, dan membantu stock opname bulanan.",
     "applyUrl": null
+  },
+  {
+    "id": "j7",
+    "title": "Teknisi Jaringan",
+    "company": "PT Banyumas Net Media",
+    "city": "Purwokerto",
+    "mode": "kantor",
+    "field": "teknologi",
+    "salaryText": "Rp3–3,6 jt / bulan",
+    "wajib": [
+      "Jaringan Komputer",
+      "Konfigurasi Router",
+      "Troubleshooting Hardware"
+    ],
+    "tambahan": [
+      "Perakitan PC",
+      "Komunikasi"
+    ],
+    "eduMin": "smaSmk",
+    "eduFields": [
+      "Teknik Komputer dan Jaringan",
+      "Teknik Elektronika",
+      "Informatika"
+    ],
+    "expYears": 0,
+    "desc": "Memasang dan merawat jaringan pelanggan rumah serta UMKM, menangani gangguan koneksi, dan mencatat laporan pekerjaan harian.",
+    "applyUrl": null
+  },
+  {
+    "id": "j8",
+    "title": "IT Support",
+    "company": "CV Mitra Komputindo",
+    "city": "Purwokerto",
+    "mode": "kantor",
+    "field": "teknologi",
+    "salaryText": "Rp3,2–3,8 jt / bulan",
+    "wajib": [
+      "Perakitan PC",
+      "Troubleshooting Hardware",
+      "Instalasi Software"
+    ],
+    "tambahan": [
+      "Jaringan Komputer",
+      "Pelayanan Pelanggan"
+    ],
+    "eduMin": "smaSmk",
+    "eduFields": [
+      "Semua"
+    ],
+    "expYears": 0,
+    "desc": "Merakit dan memperbaiki komputer klien kantor, memasang perangkat lunak, dan membantu pengguna yang mengalami kendala teknis.",
+    "applyUrl": null
+  },
+  {
+    "id": "j9",
+    "title": "Kasir",
+    "company": "Toko Swalayan Mitra",
+    "city": "Purwokerto",
+    "mode": "kantor",
+    "field": "layanan",
+    "salaryText": "Rp2,6–3 jt / bulan",
+    "wajib": [
+      "Pelayanan Pelanggan",
+      "Ketelitian Data",
+      "Komunikasi"
+    ],
+    "tambahan": [
+      "Microsoft Excel"
+    ],
+    "eduMin": "smaSmk",
+    "eduFields": [
+      "Semua"
+    ],
+    "expYears": 0,
+    "desc": "Melayani transaksi pembayaran, menghitung kas akhir shift, dan menjaga kerapian area kasir.",
+    "applyUrl": null
+  },
+  {
+    "id": "j10",
+    "title": "Staf Administrasi Umum",
+    "company": "PT Graha Niaga",
+    "city": "Purwokerto",
+    "mode": "kantor",
+    "field": "administrasi",
+    "salaryText": "Rp3,4–4 jt / bulan",
+    "wajib": [
+      "Microsoft Word",
+      "Microsoft Excel",
+      "Pengarsipan"
+    ],
+    "tambahan": [
+      "Komunikasi",
+      "Manajemen Waktu"
+    ],
+    "eduMin": "d3",
+    "eduFields": [
+      "Semua"
+    ],
+    "expYears": 0,
+    "desc": "Menyusun surat dan dokumen kantor, mengelola arsip fisik dan digital, serta membantu penjadwalan rapat.",
+    "applyUrl": null
+  },
+  {
+    "id": "j11",
+    "title": "Content Creator",
+    "company": "Batik Lumbon Banyumas",
+    "city": "Purwokerto",
+    "mode": "hybrid",
+    "field": "pemasaran",
+    "salaryText": "Rp3–3,5 jt / bulan",
+    "wajib": [
+      "Canva",
+      "Copywriting",
+      "Editing Video"
+    ],
+    "tambahan": [
+      "Fotografi Produk",
+      "Meta Ads"
+    ],
+    "eduMin": "smaSmk",
+    "eduFields": [
+      "Semua"
+    ],
+    "expYears": 0,
+    "desc": "Membuat konten video pendek dan foto produk batik, menulis keterangan unggahan, dan memantau respons pengikut.",
+    "applyUrl": null
+  },
+  {
+    "id": "j12",
+    "title": "Junior Accountant",
+    "company": "PT Agro Serayu Lestari",
+    "city": "Cilacap",
+    "mode": "kantor",
+    "field": "keuangan",
+    "salaryText": "Rp4,5–5,5 jt / bulan",
+    "wajib": [
+      "Akuntansi Dasar",
+      "Pelaporan Keuangan",
+      "Microsoft Excel",
+      "Perpajakan"
+    ],
+    "tambahan": [
+      "Software Akuntansi"
+    ],
+    "eduMin": "s1",
+    "eduFields": [
+      "Akuntansi"
+    ],
+    "expYears": 1,
+    "desc": "Menyusun jurnal dan laporan keuangan bulanan unit usaha perkebunan serta membantu persiapan audit tahunan.",
+    "applyUrl": null
+  },
+  {
+    "id": "j13",
+    "title": "Staf Data Entry",
+    "company": "Tani Digital Nusantara",
+    "city": "Yogyakarta",
+    "mode": "remote",
+    "field": "data",
+    "salaryText": "Rp2,8–3,2 jt / bulan",
+    "wajib": [
+      "Microsoft Excel",
+      "Ketelitian Data"
+    ],
+    "tambahan": [
+      "Microsoft Word",
+      "Manajemen Waktu"
+    ],
+    "eduMin": "smaSmk",
+    "eduFields": [
+      "Semua"
+    ],
+    "expYears": 0,
+    "desc": "Memasukkan data panen dan transaksi petani mitra ke spreadsheet, lalu memeriksa ulang kelengkapannya.",
+    "applyUrl": null
+  },
+  {
+    "id": "j14",
+    "title": "Customer Support Online",
+    "company": "Lapak Kriya Nusantara",
+    "city": "Yogyakarta",
+    "mode": "remote",
+    "field": "layanan",
+    "salaryText": "Rp3–3,6 jt / bulan",
+    "wajib": [
+      "Komunikasi",
+      "Pelayanan Pelanggan",
+      "Copywriting"
+    ],
+    "tambahan": [
+      "Bahasa Inggris"
+    ],
+    "eduMin": "d3",
+    "eduFields": [
+      "Semua"
+    ],
+    "expYears": 0,
+    "desc": "Menjawab pertanyaan pembeli lewat chat dan email, menangani komplain pengiriman, dan menyusun template balasan.",
+    "applyUrl": null
+  },
+  {
+    "id": "j15",
+    "title": "Staf Gudang & Pengiriman",
+    "company": "PT Serayu Logistik Mandiri",
+    "city": "Banyumas",
+    "mode": "kantor",
+    "field": "logistik",
+    "salaryText": "Rp2,9–3,3 jt / bulan",
+    "wajib": [
+      "Pencatatan Stok",
+      "Manajemen Inventaris"
+    ],
+    "tambahan": [
+      "Microsoft Excel",
+      "Komunikasi"
+    ],
+    "eduMin": "smaSmk",
+    "eduFields": [
+      "Semua"
+    ],
+    "expYears": 0,
+    "desc": "Menyiapkan pesanan, mencocokkan barang keluar dengan surat jalan, dan memperbarui kartu stok setiap hari.",
+    "applyUrl": null
+  },
+  {
+    "id": "j16",
+    "title": "Admin Marketplace",
+    "company": "Kopi Lereng Slamet",
+    "city": "Purwokerto",
+    "mode": "hybrid",
+    "field": "pemasaran",
+    "salaryText": "Rp2,8–3,4 jt / bulan",
+    "wajib": [
+      "Manajemen Marketplace",
+      "Copywriting",
+      "Microsoft Excel"
+    ],
+    "tambahan": [
+      "Canva",
+      "Fotografi Produk"
+    ],
+    "eduMin": "smaSmk",
+    "eduFields": [
+      "Semua"
+    ],
+    "expYears": 0,
+    "desc": "Mengelola etalase toko di marketplace, memproses pesanan, dan merekap penjualan mingguan.",
+    "applyUrl": null
+  },
+  {
+    "id": "j17",
+    "title": "Junior Web Developer",
+    "company": "Tani Digital Nusantara",
+    "city": "Yogyakarta",
+    "mode": "remote",
+    "field": "teknologi",
+    "salaryText": "Rp4,5–6 jt / bulan",
+    "wajib": [
+      "HTML & CSS",
+      "JavaScript",
+      "Git"
+    ],
+    "tambahan": [
+      "SQL",
+      "Komunikasi"
+    ],
+    "eduMin": "d3",
+    "eduFields": [
+      "Informatika",
+      "Sistem Informasi",
+      "Teknik Komputer dan Jaringan"
+    ],
+    "expYears": 0,
+    "desc": "Membangun halaman web internal untuk tim lapangan dan memperbaiki tampilan dasbor bersama developer senior.",
+    "applyUrl": null
+  },
+  {
+    "id": "j18",
+    "title": "Teller",
+    "company": "BPR Artha Sejahtera",
+    "city": "Purwokerto",
+    "mode": "kantor",
+    "field": "layanan",
+    "salaryText": "Rp3,5–4 jt / bulan",
+    "wajib": [
+      "Pelayanan Pelanggan",
+      "Komunikasi",
+      "Ketelitian Data"
+    ],
+    "tambahan": [
+      "Microsoft Excel",
+      "Bahasa Inggris"
+    ],
+    "eduMin": "d3",
+    "eduFields": [
+      "Semua"
+    ],
+    "expYears": 0,
+    "desc": "Melayani setoran dan penarikan nasabah, memeriksa keaslian uang, dan menyusun laporan kas harian.",
+    "applyUrl": null
+  },
+  {
+    "id": "j19",
+    "title": "Staf HRD",
+    "company": "PT Sinar Mandiri Abadi",
+    "city": "Purwokerto",
+    "mode": "kantor",
+    "field": "administrasi",
+    "salaryText": "Rp4–4,8 jt / bulan",
+    "wajib": [
+      "Rekrutmen",
+      "Microsoft Excel",
+      "Komunikasi"
+    ],
+    "tambahan": [
+      "Pengarsipan",
+      "Microsoft Word"
+    ],
+    "eduMin": "s1",
+    "eduFields": [
+      "Manajemen",
+      "Psikologi"
+    ],
+    "expYears": 0,
+    "desc": "Menyaring lamaran, menjadwalkan wawancara, dan mengelola data kehadiran serta kontrak karyawan.",
+    "applyUrl": null
+  },
+  {
+    "id": "j20",
+    "title": "Staf Data Penjualan",
+    "company": "CV Berkah Logistik",
+    "city": "Cilacap",
+    "mode": "hybrid",
+    "field": "data",
+    "salaryText": "Rp3,5–4,2 jt / bulan",
+    "wajib": [
+      "Microsoft Excel",
+      "Visualisasi Data",
+      "Ketelitian Data"
+    ],
+    "tambahan": [
+      "SQL",
+      "Komunikasi"
+    ],
+    "eduMin": "d3",
+    "eduFields": [
+      "Semua"
+    ],
+    "expYears": 0,
+    "desc": "Merekap data pengiriman dan penjualan, membuat grafik mingguan, dan menandai selisih data untuk ditindaklanjuti.",
+    "applyUrl": null
   }
 ]

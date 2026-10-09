@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../data/models.dart';
 import '../logic/match_score.dart';
+import '../data/repositories/auth_repository.dart';
 import '../router.dart';
 import '../state/app_state.dart';
 import '../theme/career_theme.dart';
@@ -65,8 +66,13 @@ class ProfileScreen extends ConsumerWidget {
         action: 'Hapus permanen',
       );
       if (!ok || !context.mounted) return;
-      n.deleteAccount();
-      context.go(Routes.auth);
+      try {
+        await n.deleteAccount();
+      } on AuthFailure catch (e) {
+        if (context.mounted) showToast(context, e.message);
+        return;
+      }
+      if (context.mounted) context.go(Routes.auth);
     }
 
     final cvSubtitle = st.hasCv
@@ -154,7 +160,14 @@ class ProfileScreen extends ConsumerWidget {
                 children: [
                   _Row(icon: Icons.description_outlined, title: 'Hapus berkas CV', subtitle: cvSubtitle, onTap: st.hasCv ? deleteCv : null),
                   const Divider(),
-                  _Row(icon: Icons.logout_rounded, title: 'Keluar', onTap: () => context.go(Routes.auth)),
+                  _Row(
+                    icon: Icons.logout_rounded,
+                    title: 'Keluar',
+                    onTap: () async {
+                      await n.signOut();
+                      if (context.mounted) context.go(Routes.auth);
+                    },
+                  ),
                   const Divider(),
                   _Row(icon: Icons.delete_outline_rounded, title: 'Hapus akun', color: CareerColors.error, onTap: deleteAccount),
                 ],

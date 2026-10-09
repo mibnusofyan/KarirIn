@@ -17,6 +17,7 @@ import 'screens/session_screen.dart';
 import 'screens/skill_gap_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/tracker_screen.dart';
+import 'state/session.dart';
 import 'widgets/nav_shell.dart';
 
 abstract final class Routes {
@@ -42,6 +43,8 @@ Page<void> _noAnim(Widget child, GoRouterState s) => NoTransitionPage(key: s.pag
 
 final router = GoRouter(
   initialLocation: Routes.splash,
+  refreshListenable: session,
+  redirect: (_, s) => sessionRedirect(s.matchedLocation),
   routes: [
     GoRoute(path: Routes.splash, builder: (_, _) => const SplashScreen()),
     GoRoute(path: Routes.onboarding, builder: (_, _) => const OnboardingScreen()),

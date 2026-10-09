@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:karirin/data/catalog_extra.dart';
 import 'package:karirin/data/mock_data.dart';
 import 'package:karirin/data/models.dart';
 import 'package:karirin/data/repositories/application_repository.dart';
@@ -43,6 +44,19 @@ void main() {
     });
   });
 
+  test('katalog tambahan: id unik, skill tercatat, ada lowongan TKJ untuk Bayu', () {
+    final all = [...jobs, ...extraJobs];
+    expect({for (final j in all) j.id}, hasLength(all.length));
+    final names = {for (final s in buildSkillCatalog(all, {...resources, ...extraResources})) s.name};
+    for (final j in extraJobs) {
+      expect(names.containsAll([...j.wajib, ...j.tambahan]), isTrue, reason: j.id);
+      expect(j.wajib, isNotEmpty);
+      expect(j.tambahan, isNotEmpty, reason: 'St dibagi jumlah skill tambahan');
+      expect(Job.fromMap(j.id, j.toMap()).toMap(), j.toMap());
+    }
+    expect(extraJobs.where((j) => j.eduFields.contains('Teknik Komputer dan Jaringan') || j.wajib.contains('Perakitan PC')), isNotEmpty);
+  });
+
   group('repository mock', () {
     test('lowongan dan skill tersedia', () async {
       const repo = MockJobRepository();
@@ -50,17 +64,17 @@ void main() {
       expect(await repo.fetchSkills(), isNotEmpty);
     });
 
-    test('profil: null sampai disimpan, lalu ikut berubah', () async {
+    test('profil: null sampai disimpan, terpisah per pengguna, dapat dihapus', () async {
       final repo = MockProfileRepository();
-      final seen = <String?>[];
-      final sub = repo.watch('u1').listen((p) => seen.add(p?.name));
-      await pumpEventQueue();
-      await repo.save('u1', raniProfile);
+      expect(await repo.fetch('u1'), isNull);
+      await repo.save('u1', raniProfile, learned: ['Pelaporan Keuangan']);
       await repo.save('u2', raniProfile.copyWith(name: 'Orang Lain'));
+      final stored = await repo.fetch('u1');
+      expect(stored?.profile.name, 'Rani Lestari');
+      expect(stored?.learned, ['Pelaporan Keuangan']);
       await repo.delete('u1');
-      await pumpEventQueue();
-      await sub.cancel();
-      expect(seen, [null, 'Rani Lestari', null]);
+      expect(await repo.fetch('u1'), isNull);
+      expect((await repo.fetch('u2'))?.profile.name, 'Orang Lain');
     });
 
     test('lamaran: tambah di atas, ubah, hapus', () async {

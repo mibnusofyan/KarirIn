@@ -1,35 +1,52 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../models.dart';
+
+/// A confirmed profile plus the skills the user marked as mastered through Skill Gap.
+typedef StoredProfile = ({Profile profile, List<String> learned});
 
 /// The confirmed profile of one user (`profiles/{uid}`).
 abstract interface class ProfileRepository {
-  /// Emits null until the user has confirmed a profile.
-  Stream<Profile?> watch(String uid);
-  Future<void> save(String uid, Profile profile);
+  /// Null until the user has confirmed a profile.
+  Future<StoredProfile?> fetch(String uid);
+  Future<void> save(String uid, Profile profile, {List<String> learned = const []});
   Future<void> delete(String uid);
 }
 
 /// In-memory profiles, lost when the app closes.
 class MockProfileRepository implements ProfileRepository {
-  final _profiles = <String, Profile>{};
-  final _changes = StreamController<String>.broadcast();
+  final _profiles = <String, StoredProfile>{};
 
   @override
-  Stream<Profile?> watch(String uid) async* {
-    yield _profiles[uid];
-    yield* _changes.stream.where((id) => id == uid).map((_) => _profiles[uid]);
+  Future<StoredProfile?> fetch(String uid) async => _profiles[uid];
+
+  @override
+  Future<void> save(String uid, Profile profile, {List<String> learned = const []}) async =>
+      _profiles[uid] = (profile: profile, learned: learned);
+
+  @override
+  Future<void> delete(String uid) async => _profiles.remove(uid);
+}
+
+class FirestoreProfileRepository implements ProfileRepository {
+  FirestoreProfileRepository([FirebaseFirestore? db]) : _db = db ?? FirebaseFirestore.instance;
+  final FirebaseFirestore _db;
+
+  DocumentReference<Map<String, dynamic>> _doc(String uid) => _db.collection('profiles').doc(uid);
+
+  @override
+  Future<StoredProfile?> fetch(String uid) async {
+    final data = (await _doc(uid).get()).data();
+    if (data == null) return null;
+    return (profile: Profile.fromMap(data), learned: [for (final s in (data['learned'] as List?) ?? const []) s as String]);
   }
 
   @override
-  Future<void> save(String uid, Profile profile) async {
-    _profiles[uid] = profile;
-    _changes.add(uid);
-  }
+  Future<void> save(String uid, Profile profile, {List<String> learned = const []}) =>
+      _doc(uid).set({...profile.toMap(), 'learned': learned, 'updatedAt': FieldValue.serverTimestamp()});
 
   @override
-  Future<void> delete(String uid) async {
-    _profiles.remove(uid);
-    _changes.add(uid);
-  }
+  Future<void> delete(String uid) => _doc(uid).delete();
 }

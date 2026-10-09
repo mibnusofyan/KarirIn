@@ -39,6 +39,17 @@
     }
   },
   {
+    "id": "editing-video",
+    "name": "Editing Video",
+    "synonyms": [],
+    "resource": {
+      "type": "kursus",
+      "duration": "4 jam",
+      "title": "Editing Video Pendek dengan Ponsel",
+      "url": null
+    }
+  },
+  {
     "id": "fotografi-produk",
     "name": "Fotografi Produk",
     "synonyms": [],
@@ -50,10 +61,59 @@
     }
   },
   {
+    "id": "git",
+    "name": "Git",
+    "synonyms": [],
+    "resource": {
+      "type": "video",
+      "duration": "2 jam",
+      "title": "Git dan GitHub untuk Pemula",
+      "url": null
+    }
+  },
+  {
+    "id": "html-css",
+    "name": "HTML & CSS",
+    "synonyms": [],
+    "resource": {
+      "type": "kursus",
+      "duration": "8 jam",
+      "title": "HTML & CSS untuk Pemula",
+      "url": null
+    }
+  },
+  {
+    "id": "instalasi-software",
+    "name": "Instalasi Software",
+    "synonyms": [],
+    "resource": {
+      "type": "modul",
+      "duration": "1 jam",
+      "title": "Instalasi Sistem Operasi dan Aplikasi",
+      "url": null
+    }
+  },
+  {
     "id": "jaringan-komputer",
     "name": "Jaringan Komputer",
     "synonyms": [],
-    "resource": null
+    "resource": {
+      "type": "kursus",
+      "duration": "6 jam",
+      "title": "Dasar Jaringan Komputer",
+      "url": null
+    }
+  },
+  {
+    "id": "javascript",
+    "name": "JavaScript",
+    "synonyms": [],
+    "resource": {
+      "type": "kursus",
+      "duration": "10 jam",
+      "title": "JavaScript Dasar",
+      "url": null
+    }
   },
   {
     "id": "ketelitian-data",
@@ -78,6 +138,17 @@
     }
   },
   {
+    "id": "konfigurasi-router",
+    "name": "Konfigurasi Router",
+    "synonyms": [],
+    "resource": {
+      "type": "video",
+      "duration": "2 jam",
+      "title": "Konfigurasi Router dan Access Point",
+      "url": null
+    }
+  },
+  {
     "id": "manajemen-inventaris",
     "name": "Manajemen Inventaris",
     "synonyms": [],
@@ -89,10 +160,26 @@
     }
   },
   {
+    "id": "manajemen-marketplace",
+    "name": "Manajemen Marketplace",
+    "synonyms": [],
+    "resource": {
+      "type": "kursus",
+      "duration": "3 jam",
+      "title": "Mengelola Toko di Marketplace",
+      "url": null
+    }
+  },
+  {
     "id": "manajemen-waktu",
     "name": "Manajemen Waktu",
     "synonyms": [],
-    "resource": null
+    "resource": {
+      "type": "video",
+      "duration": "1 jam",
+      "title": "Manajemen Waktu di Tempat Kerja",
+      "url": null
+    }
   },
   {
     "id": "meta-ads",
@@ -168,10 +255,26 @@
     }
   },
   {
+    "id": "pengarsipan",
+    "name": "Pengarsipan",
+    "synonyms": [],
+    "resource": {
+      "type": "modul",
+      "duration": "2 jam",
+      "title": "Manajemen Arsip Kantor",
+      "url": null
+    }
+  },
+  {
     "id": "perakitan-pc",
     "name": "Perakitan PC",
     "synonyms": [],
-    "resource": null
+    "resource": {
+      "type": "video",
+      "duration": "90 mnt",
+      "title": "Merakit PC Langkah demi Langkah",
+      "url": null
+    }
   },
   {
     "id": "perpajakan",
@@ -192,6 +295,17 @@
       "type": "kursus",
       "duration": "8 jam",
       "title": "Python Dasar untuk Data",
+      "url": null
+    }
+  },
+  {
+    "id": "rekrutmen",
+    "name": "Rekrutmen",
+    "synonyms": [],
+    "resource": {
+      "type": "modul",
+      "duration": "3 jam",
+      "title": "Dasar Proses Rekrutmen",
       "url": null
     }
   },
@@ -225,6 +339,17 @@
       "type": "modul",
       "duration": "5 jam",
       "title": "Statistik Deskriptif untuk Pemula",
+      "url": null
+    }
+  },
+  {
+    "id": "troubleshooting-hardware",
+    "name": "Troubleshooting Hardware",
+    "synonyms": [],
+    "resource": {
+      "type": "modul",
+      "duration": "3 jam",
+      "title": "Diagnosis Kerusakan Komputer",
       "url": null
     }
   },

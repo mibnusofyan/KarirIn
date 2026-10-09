@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/mock_data.dart';
 import '../logic/cover_letter.dart';
 import '../router.dart';
 import '../state/app_state.dart';
@@ -37,7 +36,7 @@ class _LetterScreenState extends ConsumerState<LetterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final job = jobById(widget.jobId);
+    final job = ref.watch(appProvider).job(widget.jobId);
     final profile = ref.watch(appProvider).profile;
     final text = coverLetter(job, profile, _tone, _seed);
     final highlights = letterHighlights(job, profile);
