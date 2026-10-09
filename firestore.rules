@@ -1,0 +1,65 @@
+rules_version = '2';
+
+// KarirIn security rules (backend plan section 4.1).
+// Each user reads and writes only their own data; the catalogue (jobs, skills) is written only by
+// the team's Admin SDK scripts, which bypass these rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function validStage(s) { return s in ['dikirim', 'tes', 'wawancara', 'diterima', 'ditolak']; }
+
+    match /jobs/{jobId} {
+      allow read: if signedIn();
+      allow write: if false;
+
+      match /questionSets/{setId} {
+        allow read: if signedIn();
+        allow write: if false;
+      }
+    }
+
+    match /skills/{skillId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    match /profiles/{uid} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && request.resource.data.level in ['smaSmk', 'd3', 's1']
+        && request.resource.data.skills is list
+        && request.resource.data.skills.size() <= 60;
+    }
+
+    match /users/{uid} {
+      allow read, create, update, delete: if isOwner(uid);
+
+      match /applications/{appId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && validStage(request.resource.data.status)
+          && request.resource.data.title is string
+          && request.resource.data.title.size() <= 120;
+      }
+
+      // A finished practice session is written once and never edited.
+      match /interviews/{sessionId} {
+        allow read, create, delete: if isOwner(uid);
+        allow update: if false;
+      }
+
+      match /matches/{jobId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      // Created by the notify-new-jobs script; the app may only mark them read or delete them.
+      match /notifications/{id} {
+        allow read, delete: if isOwner(uid);
+        allow update: if isOwner(uid)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+        allow create: if false;
+      }
+    }
+  }
+}

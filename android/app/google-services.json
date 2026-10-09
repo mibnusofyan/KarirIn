@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "838907311602",
+    "project_id": "my-tugas-web",
+    "storage_bucket": "my-tugas-web.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:838907311602:android:27fdf0ce0368666fa6676b",
+        "android_client_info": {
+          "package_name": "id.karirin.karirin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "838907311602-4iekm2iee8at6gcjmdraied35227nu5v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "id.karirin.karirin",
+            "certificate_hash": "8368ca34550605b213227578dac8f2f05396bc05"
+          }
+        },
+        {
+          "client_id": "838907311602-q6ijgvcjo0s7natlkk4usnurm0ooij72.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "id.karirin.karirin",
+            "certificate_hash": "33961042adeeaab1293c5130946f73bdfa1908aa"
+          }
+        },
+        {
+          "client_id": "838907311602-uplancvl14gj2d5sgovn5q9di3dqncho.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDP0_jnqIh9-Y9wCZRDMBDfqvbxt6H3muY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "838907311602-uplancvl14gj2d5sgovn5q9di3dqncho.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

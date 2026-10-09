@@ -1,0 +1,24 @@
+{
+  "name": "karirin-backend",
+  "private": true,
+  "type": "module",
+  "description": "KarirIn team scripts: seed the Firestore catalogue (later: interview questions, new-job notifications).",
+  "scripts": {
+    "export-data": "cd .. && dart run tool/export_seed.dart",
+    "seed": "tsx src/seed.ts",
+    "seed:emulator": "cross-env FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 GCLOUD_PROJECT=demo-karirin tsx src/seed.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "cross-env": "^10.1.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

@@ -3,6 +3,11 @@
 /// be swapped for Firebase without touching the UI.
 library;
 
+/// Firestore stores enums by name, so renaming an enum value is a data migration.
+T _byName<T extends Enum>(List<T> values, Object? name, T fallback) => values.firstWhere((v) => v.name == name, orElse: () => fallback);
+
+List<String> _strings(Object? v) => [for (final x in (v as List?) ?? const []) x as String];
+
 enum EduLevel {
   smaSmk('SMA/SMK', 1),
   d3('D3', 2),
@@ -39,6 +44,7 @@ class Job {
     required this.eduFields,
     required this.expYears,
     required this.desc,
+    this.applyUrl,
   });
 
   final String id;
@@ -57,7 +63,44 @@ class Job {
   final int expYears;
   final String desc;
 
+  /// Official application channel; null until the curated job has one.
+  final String? applyUrl;
+
   bool get anyMajor => eduFields.contains('Semua');
+
+  /// Firestore `jobs/{id}` fields (the id is the document id).
+  Map<String, Object?> toMap() => {
+    'title': title,
+    'company': company,
+    'city': city,
+    'mode': mode.name,
+    'field': field,
+    'salaryText': salary,
+    'wajib': wajib,
+    'tambahan': tambahan,
+    'eduMin': eduMin.name,
+    'eduFields': eduFields,
+    'expYears': expYears,
+    'desc': desc,
+    'applyUrl': applyUrl,
+  };
+
+  factory Job.fromMap(String id, Map<String, Object?> m) => Job(
+    id: id,
+    title: m['title'] as String,
+    company: m['company'] as String,
+    city: m['city'] as String,
+    mode: _byName(WorkMode.values, m['mode'], WorkMode.kantor),
+    field: m['field'] as String,
+    salary: (m['salaryText'] as String?) ?? '',
+    wajib: _strings(m['wajib']),
+    tambahan: _strings(m['tambahan']),
+    eduMin: _byName(EduLevel.values, m['eduMin'], EduLevel.smaSmk),
+    eduFields: _strings(m['eduFields']),
+    expYears: (m['expYears'] as num?)?.toInt() ?? 0,
+    desc: (m['desc'] as String?) ?? '',
+    applyUrl: m['applyUrl'] as String?,
+  );
 }
 
 enum ExperienceType { magang, organisasi, kerja }
@@ -71,6 +114,17 @@ class Experience {
   final int months;
   final String field;
   final String desc;
+
+  Map<String, Object?> toMap() => {'title': title, 'org': org, 'type': type.name, 'months': months, 'field': field, 'desc': desc};
+
+  factory Experience.fromMap(Map<String, Object?> m) => Experience(
+    title: m['title'] as String,
+    org: (m['org'] as String?) ?? '-',
+    type: _byName(ExperienceType.values, m['type'], ExperienceType.magang),
+    months: (m['months'] as num?)?.toInt() ?? 0,
+    field: (m['field'] as String?) ?? 'umum',
+    desc: (m['desc'] as String?) ?? '',
+  );
 }
 
 enum ProfileSource { cvPdf, cvPhoto, qa }
@@ -120,6 +174,31 @@ class Profile {
     skills: skills ?? this.skills,
     exps: exps,
   );
+
+  /// Firestore `profiles/{uid}` fields owned by the profile itself.
+  Map<String, Object?> toMap() => {
+    'name': name,
+    'level': level.name,
+    'major': major,
+    'school': school,
+    'city': city,
+    'modes': [for (final m in modes) m.name],
+    'source': source.name,
+    'skills': skills,
+    'exps': [for (final e in exps) e.toMap()],
+  };
+
+  factory Profile.fromMap(Map<String, Object?> m) => Profile(
+    name: m['name'] as String,
+    level: _byName(EduLevel.values, m['level'], EduLevel.smaSmk),
+    major: (m['major'] as String?) ?? '-',
+    school: (m['school'] as String?) ?? '-',
+    city: (m['city'] as String?) ?? '',
+    modes: [for (final x in (m['modes'] as List?) ?? const []) _byName(WorkMode.values, x, WorkMode.kantor)],
+    source: _byName(ProfileSource.values, m['source'], ProfileSource.qa),
+    skills: _strings(m['skills']),
+    exps: [for (final e in (m['exps'] as List?) ?? const []) Experience.fromMap(Map<String, Object?>.from(e as Map))],
+  );
 }
 
 enum ResourceType {
@@ -132,10 +211,41 @@ enum ResourceType {
 }
 
 class LearningResource {
-  const LearningResource(this.type, this.duration, this.title);
+  const LearningResource(this.type, this.duration, this.title, {this.url});
   final ResourceType type;
   final String duration;
   final String title;
+
+  /// Free learning material; null until the team curates a link.
+  final String? url;
+
+  Map<String, Object?> toMap() => {'type': type.name, 'duration': duration, 'title': title, 'url': url};
+
+  factory LearningResource.fromMap(Map<String, Object?> m) => LearningResource(
+    _byName(ResourceType.values, m['type'], ResourceType.modul),
+    (m['duration'] as String?) ?? '',
+    m['title'] as String,
+    url: m['url'] as String?,
+  );
+}
+
+/// A canonical skill with its spelling variants (Firestore `skills`).
+class Skill {
+  const Skill({required this.name, this.synonyms = const [], this.resource});
+  final String name;
+  final List<String> synonyms;
+  final LearningResource? resource;
+
+  /// Document id: lowercase name with non-alphanumerics collapsed to `-`.
+  String get id => name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-').replaceAll(RegExp(r'^-|-$'), '');
+
+  Map<String, Object?> toMap() => {'name': name, 'synonyms': synonyms, 'resource': resource?.toMap()};
+
+  factory Skill.fromMap(Map<String, Object?> m) => Skill(
+    name: m['name'] as String,
+    synonyms: _strings(m['synonyms']),
+    resource: m['resource'] == null ? null : LearningResource.fromMap(Map<String, Object?>.from(m['resource'] as Map)),
+  );
 }
 
 enum AppStage {

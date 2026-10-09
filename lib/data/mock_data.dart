@@ -151,6 +151,24 @@ const resources = <String, LearningResource>{
 
 LearningResource resourceFor(String skill) => resources[skill] ?? LearningResource(ResourceType.modul, '2 jam', '$skill untuk Pemula');
 
+/// Spelling variants that `normalizeSkill` maps to the canonical name.
+const skillSynonyms = <String, List<String>>{
+  'Microsoft Excel': ['Excel', 'MS Excel'],
+  'Microsoft Word': ['Word', 'MS Word'],
+};
+
+/// Every skill the prototype knows: job requirements, Q&A options, Rani's CV and learning materials.
+/// Seeded into Firestore `skills` by `tool/export_seed.dart`.
+List<Skill> get skillCatalog {
+  final names = <String>{
+    for (final j in jobs) ...[...j.wajib, ...j.tambahan],
+    ...qaQuestions[2].options,
+    ...raniProfile.skills,
+    ...resources.keys,
+  };
+  return [for (final n in names.toList()..sort()) Skill(name: n, synonyms: skillSynonyms[n] ?? const [], resource: resources[n])];
+}
+
 const qaQuestions = <QaQuestion>[
   QaQuestion(title: 'Apa pendidikan terakhirmu?', help: 'Pilih satu.', kind: QuestionKind.single, options: ['SMA/SMK', 'D3', 'S1']),
   QaQuestion(
