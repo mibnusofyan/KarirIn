@@ -6,10 +6,11 @@ import '../data/mock_data.dart';
 import '../logic/cover_letter.dart';
 import '../router.dart';
 import '../state/app_state.dart';
-import '../theme/app_theme.dart';
+import '../theme/career_theme.dart';
+import '../widgets/career_widgets.dart';
 import '../widgets/common.dart';
 
-/// Surat lamaran otomatis, personalised from the profile and the selected job.
+/// Surat lamaran: compact controls above a document-like preview; copying is the one real action.
 class LetterScreen extends ConsumerStatefulWidget {
   const LetterScreen({super.key, required this.jobId});
   final String jobId;
@@ -37,107 +38,166 @@ class _LetterScreenState extends ConsumerState<LetterScreen> {
   @override
   Widget build(BuildContext context) {
     final job = jobById(widget.jobId);
-    final text = coverLetter(job, ref.watch(appProvider).profile, _tone, _seed);
-    return Scaffold(
-      appBar: topBar(
-        title: 'Surat lamaran',
-        onBack: () => context.back(Routes.job(job.id)),
-        actions: [
-          IconButton(
-            tooltip: 'Buat ulang',
-            onPressed: _busy ? null : _regenerate,
-            icon: const Icon(Icons.autorenew_rounded, color: KColors.onSurfaceVariant),
+    final profile = ref.watch(appProvider).profile;
+    final text = coverLetter(job, profile, _tone, _seed);
+    final highlights = letterHighlights(job, profile);
+    final words = text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+
+    return CareerTheme(
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            tooltip: 'Kembali',
+            icon: const Icon(Icons.arrow_back_rounded, size: 22),
+            onPressed: () => context.back(Routes.job(job.id)),
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
+          title: const Text('Surat lamaran'),
+        ),
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+          children: [
+            Row(
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                CompanyAvatar(company: job.company, size: 44),
+                const SizedBox(width: 12),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(job.company, style: KText.labelLarge.copyWith(color: KColors.onSurfaceVariant)),
+                      const Text('SURAT UNTUK', style: CareerText.eyebrow),
                       const SizedBox(height: 2),
-                      Text(job.title, style: KText.titleLarge),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: SegmentedButton<LetterTone>(
-                    segments: const [
-                      ButtonSegment(value: LetterTone.formal, label: Text('Formal lengkap')),
-                      ButtonSegment(value: LetterTone.ringkas, label: Text('Ringkas')),
-                    ],
-                    selected: {_tone},
-                    onSelectionChanged: (s) => setState(() => _tone = s.first),
-                  ),
-                ),
-                AnimatedOpacity(
-                  opacity: _busy ? .3 : 1,
-                  duration: const Duration(milliseconds: 200),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: KColors.outlineVariant),
-                    ),
-                    child: SelectableText(
-                      text,
-                      style: const TextStyle(fontSize: 14, height: 22 / 14, color: KColors.onSurface),
-                    ),
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(16, 12, 16, 20),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.auto_awesome_rounded, size: 16, color: KColors.onSurfaceVariant),
-                      SizedBox(width: 8),
-                      Expanded(child: Text('Disusun AI dari profil dan lowongan ini. Baca ulang sebelum dikirim.', style: KText.bodySmall)),
+                      Text(job.title, style: CareerText.label),
+                      Text(job.company, style: CareerText.small),
                     ],
                   ),
                 ),
               ],
             ),
-          ),
-          BottomActionBar(
-            child: Row(
+            const SizedBox(height: 20),
+            Row(
               children: [
                 Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => showToast(context, 'Membuka menu bagikan…'),
-                    icon: const Icon(Icons.share_outlined, size: 20),
-                    label: const Text('Bagikan'),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(56),
-                      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                    ),
-                  ),
+                  child: _ToneSwitch(tone: _tone, onChanged: (t) => setState(() => _tone = t)),
                 ),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: PrimaryButton(
-                    label: 'Salin',
-                    icon: Icons.content_copy_rounded,
-                    onPressed: () async {
-                      await Clipboard.setData(ClipboardData(text: text));
-                      if (context.mounted) showToast(context, 'Surat lamaran disalin');
-                    },
+                IconButton.outlined(
+                  tooltip: 'Buat ulang',
+                  onPressed: _busy ? null : _regenerate,
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size(52, 52),
+                    side: const BorderSide(color: CareerColors.line),
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
+                  icon: const Icon(Icons.autorenew_rounded, color: CareerColors.teal),
                 ),
               ],
             ),
+            if (highlights.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  const Text('Menyorot:', style: CareerText.small),
+                  for (final s in highlights)
+                    CareerPill(s, icon: Icons.check_rounded, color: CareerColors.teal, background: CareerColors.mint),
+                ],
+              ),
+            ],
+            const SizedBox(height: 18),
+            Semantics(
+              label: 'Pratinjau surat lamaran',
+              child: AnimatedOpacity(
+                opacity: _busy ? .35 : 1,
+                duration: const Duration(milliseconds: 200),
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: CareerColors.line),
+                    boxShadow: const [BoxShadow(color: Color(0x14172B3A), blurRadius: 18, offset: Offset(0, 6))],
+                  ),
+                  child: SelectableText(text, style: CareerText.body.copyWith(fontSize: 14.5, height: 1.75)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text('$words kata · ${_tone == LetterTone.formal ? 'Formal lengkap' : 'Ringkas'}', style: CareerText.small),
+            const SizedBox(height: 16),
+            const CareerMeta(
+              Icons.info_outline_rounded,
+              'Pada demo ini, surat disusun dari templat berdasarkan profil dan lowongan. Baca ulang dan sesuaikan sebelum dikirim.',
+              style: CareerText.small,
+            ),
+          ],
+        ),
+        bottomNavigationBar: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            border: Border(top: BorderSide(color: CareerColors.line)),
           ),
-        ],
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+              child: CareerButton(
+                label: 'Salin surat',
+                icon: Icons.content_copy_rounded,
+                onPressed: _busy
+                    ? null
+                    : () async {
+                        await Clipboard.setData(ClipboardData(text: text));
+                        if (context.mounted) showToast(context, 'Surat lamaran disalin');
+                      },
+              ),
+            ),
+          ),
+        ),
       ),
+    );
+  }
+}
+
+class _ToneSwitch extends StatelessWidget {
+  const _ToneSwitch({required this.tone, required this.onChanged});
+  final LetterTone tone;
+  final ValueChanged<LetterTone> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget option(String label, LetterTone value) {
+      final selected = tone == value;
+      return Expanded(
+        child: Semantics(
+          button: true,
+          selected: selected,
+          child: TextButton(
+            onPressed: () => onChanged(value),
+            style: TextButton.styleFrom(
+              backgroundColor: selected ? CareerColors.navy : Colors.transparent,
+              foregroundColor: selected ? Colors.white : CareerColors.muted,
+              minimumSize: const Size.fromHeight(44),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              textStyle: CareerText.label,
+            ),
+            child: Text(label, textAlign: TextAlign.center),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: CareerColors.line),
+      ),
+      child: Row(children: [option('Formal lengkap', LetterTone.formal), const SizedBox(width: 4), option('Ringkas', LetterTone.ringkas)]),
     );
   }
 }

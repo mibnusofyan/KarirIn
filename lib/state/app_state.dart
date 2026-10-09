@@ -22,6 +22,7 @@ class AppState {
     required this.notifyNewJobs,
     required this.notifyReminders,
     required this.signupName,
+    this.cvDeleted = false,
   });
 
   factory AppState.initial() => const AppState(
@@ -56,6 +57,12 @@ class AppState {
   /// Name typed on the Daftar form, used for a profile built from Q&A.
   final String signupName;
 
+  /// The uploaded CV file was deleted from Pengaturan; the extracted profile stays.
+  final bool cvDeleted;
+
+  /// Whether a CV file is stored for this profile.
+  bool get hasCv => profile.source != ProfileSource.qa && !cvDeleted;
+
   List<ScoredJob> get ranked => rankJobs(jobs, profile);
 
   AppState copyWith({
@@ -71,6 +78,7 @@ class AppState {
     bool? notifyNewJobs,
     bool? notifyReminders,
     String? signupName,
+    bool? cvDeleted,
   }) => AppState(
     profile: profile ?? this.profile,
     learned: learned ?? this.learned,
@@ -84,6 +92,7 @@ class AppState {
     notifyNewJobs: notifyNewJobs ?? this.notifyNewJobs,
     notifyReminders: notifyReminders ?? this.notifyReminders,
     signupName: signupName ?? this.signupName,
+    cvDeleted: cvDeleted ?? this.cvDeleted,
   );
 }
 
@@ -100,6 +109,7 @@ class AppNotifier extends Notifier<AppState> {
   void useCvProfile(ProfileSource source) => state = state.copyWith(
     profile: raniProfile.copyWith(source: source),
     learned: [],
+    cvDeleted: false,
   );
 
   /// Builds a profile from the 8 Q&A answers (persona Bayu, no CV).
@@ -209,6 +219,9 @@ class AppNotifier extends Notifier<AppState> {
   }
 
   void saveInterviewResults(List<AnsweredQuestion> r) => state = state.copyWith(interviewResults: r);
+
+  /// Hapus berkas CV: removes the stored file but keeps the confirmed profile.
+  void deleteCv() => state = state.copyWith(cvDeleted: true);
 
   void setOffline(bool v) => state = state.copyWith(offline: v);
   void toggleNotifyNewJobs() => state = state.copyWith(notifyNewJobs: !state.notifyNewJobs);
