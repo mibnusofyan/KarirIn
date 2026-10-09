@@ -2,24 +2,24 @@ import 'package:flutter/material.dart';
 
 import '../logic/match_score.dart';
 import '../theme/career_theme.dart';
+import 'common.dart';
 
-Future<T?> showCareerSheet<T>(BuildContext context, WidgetBuilder builder) =>
-    showModalBottomSheet<T>(
-      context: context,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.white,
-      builder: (ctx) => CareerTheme(
-        child: SafeArea(
-          top: false,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-            child: Builder(builder: builder),
-          ),
-        ),
+Future<T?> showCareerSheet<T>(BuildContext context, WidgetBuilder builder) => showModalBottomSheet<T>(
+  context: context,
+  useRootNavigator: true,
+  isScrollControlled: true,
+  useSafeArea: true,
+  backgroundColor: Colors.white,
+  builder: (ctx) => CareerTheme(
+    child: SafeArea(
+      top: false,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        child: Builder(builder: builder),
       ),
-    );
+    ),
+  ),
+);
 
 class CareerSheetHeader extends StatelessWidget {
   const CareerSheetHeader(this.title, {super.key});
@@ -29,11 +29,7 @@ class CareerSheetHeader extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     children: [
       Expanded(child: Text(title, style: CareerText.title)),
-      IconButton(
-        tooltip: 'Tutup',
-        onPressed: () => Navigator.pop(context),
-        icon: const Icon(Icons.close_rounded),
-      ),
+      IconButton(tooltip: 'Tutup', onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close_rounded)),
     ],
   );
 }
@@ -46,11 +42,7 @@ class CompanyAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final words = company
-        .split(' ')
-        .where(
-          (w) => !['PT', 'CV', 'BPR', 'KAP', '&'].contains(w) && w.isNotEmpty,
-        );
+    final words = company.split(' ').where((w) => !['PT', 'CV', 'BPR', 'KAP', '&'].contains(w) && w.isNotEmpty);
     final initials = words.take(2).map((w) => w[0]).join();
     const palettes = [
       (CareerColors.mint, CareerColors.teal),
@@ -58,25 +50,17 @@ class CompanyAvatar extends StatelessWidget {
       (CareerColors.amberLight, CareerColors.amber),
       (Color(0xFFF1E8E0), Color(0xFF79563D)),
     ];
-    final palette =
-        palettes[company.codeUnits.fold(0, (sum, n) => sum + n) %
-            palettes.length];
+    final palette = palettes[company.codeUnits.fold(0, (sum, n) => sum + n) % palettes.length];
     return ExcludeSemantics(
       child: Container(
         width: size,
         height: size,
         alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: palette.$1,
-          borderRadius: BorderRadius.circular(size * .3),
-        ),
+        decoration: BoxDecoration(color: palette.$1, borderRadius: BorderRadius.circular(size * .3)),
         child: Text(
           initials,
           textScaler: TextScaler.noScaling,
-          style: CareerText.title.copyWith(
-            fontSize: size * .34,
-            color: palette.$2,
-          ),
+          style: CareerText.title.copyWith(fontSize: size * .34, color: palette.$2),
         ),
       ),
     );
@@ -84,13 +68,7 @@ class CompanyAvatar extends StatelessWidget {
 }
 
 class CareerPill extends StatelessWidget {
-  const CareerPill(
-    this.label, {
-    super.key,
-    this.icon,
-    this.color = CareerColors.muted,
-    this.background = CareerColors.background,
-  });
+  const CareerPill(this.label, {super.key, this.icon, this.color = CareerColors.muted, this.background = CareerColors.background});
   final String label;
   final IconData? icon;
   final Color color, background;
@@ -98,17 +76,11 @@ class CareerPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-    decoration: BoxDecoration(
-      color: background,
-      borderRadius: BorderRadius.circular(10),
-    ),
+    decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(10)),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (icon != null) ...[
-          Icon(icon, size: 15, color: color),
-          const SizedBox(width: 5),
-        ],
+        if (icon != null) ...[Icon(icon, size: 15, color: color), const SizedBox(width: 5)],
         Flexible(
           child: Text(label, style: CareerText.small.copyWith(color: color)),
         ),
@@ -125,14 +97,11 @@ class MatchBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final high = result.category == MatchCategory.high;
     return Semantics(
-      label:
-          'Match Score ${fmt(result.total)} dari 100. ${result.category.label}',
+      label: 'Match Score ${fmt(result.total)} dari 100. ${result.category.label}',
       excludeSemantics: true,
       child: CareerPill(
         '${fmt(result.total)} / 100 · ${result.category.label}',
-        icon: high
-            ? Icons.check_circle_outline_rounded
-            : Icons.trending_up_rounded,
+        icon: high ? Icons.check_circle_outline_rounded : Icons.trending_up_rounded,
         color: high ? CareerColors.teal : CareerColors.amber,
         background: high ? CareerColors.mint : CareerColors.amberLight,
       ),
@@ -162,12 +131,7 @@ class CareerMeta extends StatelessWidget {
 }
 
 class CareerButton extends StatelessWidget {
-  const CareerButton({
-    super.key,
-    required this.label,
-    required this.onPressed,
-    this.icon = Icons.arrow_forward_rounded,
-  });
+  const CareerButton({super.key, required this.label, required this.onPressed, this.icon = Icons.arrow_forward_rounded});
   final String label;
   final VoidCallback? onPressed;
   final IconData icon;
@@ -192,11 +156,7 @@ class CareerSteps extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const ExcludeSemantics(
-    child: SizedBox(
-      width: 88,
-      height: 84,
-      child: CustomPaint(painter: _StepsPainter()),
-    ),
+    child: SizedBox(width: 88, height: 84, child: CustomPaint(painter: _StepsPainter())),
   );
 }
 
@@ -207,24 +167,10 @@ class _StepsPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint();
     for (var i = 0; i < 3; i++) {
-      paint.color = [
-        const Color(0xFF3B597E),
-        const Color(0xFF5D8B98),
-        const Color(0xFFB5E5D4),
-      ][i];
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromLTWH(i * 27, 61 - i * 18, 22, 23 + i * 18),
-          const Radius.circular(5),
-        ),
-        paint,
-      );
+      paint.color = [const Color(0xFF3B597E), const Color(0xFF5D8B98), const Color(0xFFB5E5D4)][i];
+      canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(i * 27, 61 - i * 18, 22, 23 + i * 18), const Radius.circular(5)), paint);
     }
-    canvas.drawCircle(
-      const Offset(65, 11),
-      7,
-      paint..color = CareerColors.yellow,
-    );
+    canvas.drawCircle(const Offset(65, 11), 7, paint..color = CareerColors.yellow);
   }
 
   @override
@@ -233,12 +179,7 @@ class _StepsPainter extends CustomPainter {
 
 /// The job a screen works towards, with a "Ganti" action instead of a long list.
 class SelectedJobCard extends StatelessWidget {
-  const SelectedJobCard({
-    super.key,
-    required this.eyebrow,
-    required this.scored,
-    required this.onChange,
-  });
+  const SelectedJobCard({super.key, required this.eyebrow, required this.scored, required this.onChange});
   final String eyebrow;
   final ScoredJob scored;
   final VoidCallback onChange;
@@ -270,10 +211,7 @@ class SelectedJobCard extends StatelessWidget {
           ),
           TextButton(
             onPressed: onChange,
-            child: Text(
-              'Ganti',
-              semanticsLabel: 'Ganti lowongan, saat ini ${job.title}',
-            ),
+            child: Text('Ganti', semanticsLabel: 'Ganti lowongan, saat ini ${job.title}'),
           ),
         ],
       ),
@@ -282,62 +220,114 @@ class SelectedJobCard extends StatelessWidget {
 }
 
 /// Bottom sheet to pick a target job; returns the chosen job id.
-Future<String?> showJobPicker(
-  BuildContext context, {
-  required String title,
-  required List<ScoredJob> ranked,
-  required String selectedId,
-}) => showCareerSheet<String>(
-  context,
-  (ctx) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      CareerSheetHeader(title),
-      const Text(
-        'Diurutkan dari yang paling cocok dengan profilmu.',
-        style: CareerText.muted,
-      ),
-      const SizedBox(height: 8),
-      for (final (i, s) in ranked.indexed) ...[
-        if (i > 0) const Divider(),
-        Semantics(
-          selected: s.job.id == selectedId,
-          child: InkWell(
-            onTap: () => Navigator.pop(ctx, s.job.id),
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              child: Row(
-                children: [
-                  CompanyAvatar(company: s.job.company, size: 40),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(s.job.title, style: CareerText.label),
-                        const SizedBox(height: 2),
-                        Text(s.job.company, style: CareerText.small),
-                        const SizedBox(height: 8),
-                        MatchBadge(result: s.result),
-                      ],
-                    ),
+Future<String?> showJobPicker(BuildContext context, {required String title, required List<ScoredJob> ranked, required String selectedId}) =>
+    showCareerSheet<String>(
+      context,
+      (ctx) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          CareerSheetHeader(title),
+          const Text('Diurutkan dari yang paling cocok dengan profilmu.', style: CareerText.muted),
+          const SizedBox(height: 8),
+          for (final (i, s) in ranked.indexed) ...[
+            if (i > 0) const Divider(),
+            Semantics(
+              selected: s.job.id == selectedId,
+              child: InkWell(
+                onTap: () => Navigator.pop(ctx, s.job.id),
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  child: Row(
+                    children: [
+                      CompanyAvatar(company: s.job.company, size: 40),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(s.job.title, style: CareerText.label),
+                            const SizedBox(height: 2),
+                            Text(s.job.company, style: CareerText.small),
+                            const SizedBox(height: 8),
+                            MatchBadge(result: s.result),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        s.job.id == selectedId ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                        color: s.job.id == selectedId ? CareerColors.teal : CareerColors.line,
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    s.job.id == selectedId
-                        ? Icons.check_circle_rounded
-                        : Icons.radio_button_unchecked_rounded,
-                    color: s.job.id == selectedId
-                        ? CareerColors.teal
-                        : CareerColors.line,
-                  ),
-                ],
+                ),
               ),
             ),
+          ],
+        ],
+      ),
+    );
+
+/// One rubric aspect (0–25) as a labelled bar.
+class RubricRow extends StatelessWidget {
+  const RubricRow({super.key, required this.name, required this.value, this.track = CareerColors.background});
+  final String name;
+  final int value;
+  final Color track;
+
+  @override
+  Widget build(BuildContext context) {
+    final v = value / 25;
+    return Semantics(
+      label: '$name $value dari 25',
+      excludeSemantics: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text(name, style: CareerText.body)),
+              Text('$value / 25', style: CareerText.label),
+            ],
           ),
-        ),
-      ],
-    ],
-  ),
-);
+          const SizedBox(height: 6),
+          Bar(value: v, color: v >= .75 ? CareerColors.teal : CareerColors.amber, track: track, height: 6),
+        ],
+      ),
+    );
+  }
+}
+
+/// Highlighted insight row: a strength (mint) or the next priority (amber).
+class InsightTile extends StatelessWidget {
+  const InsightTile({super.key, required this.positive, required this.title, required this.body});
+  final bool positive;
+  final String title, body;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = positive ? CareerColors.teal : CareerColors.amber;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: positive ? CareerColors.mint : CareerColors.amberLight, borderRadius: BorderRadius.circular(18)),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(positive ? Icons.thumb_up_alt_outlined : Icons.flag_outlined, color: color, size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: CareerText.label.copyWith(color: color)),
+                const SizedBox(height: 4),
+                Text(body, style: CareerText.body),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

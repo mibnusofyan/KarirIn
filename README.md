@@ -4,7 +4,7 @@ Aplikasi pendamping karier untuk pencari kerja muda (ITASE 7.0 2026, SDG 8): Mat
 
 Implementasi Flutter dari desain **KarirIn Prototype M3** (Material 3, 16 layar).
 
-Beranda, Detail Lowongan, Rencana Belajar (Skill Gap), dan Persiapan Latihan telah diperbarui mengikuti [rencana redesign](docs/ui-redesign-plan.md): palet navy–teal, Plus Jakarta Sans lokal, kartu lowongan beridentitas perusahaan, dan rincian kecocokan yang dapat dibuka. Fondasi visual baru berada di `lib/theme/career_theme.dart` dan `lib/widgets/career_widgets.dart`, diterapkan bertahap per layar. Layar lainnya masih memakai tema M3 awal.
+Beranda, Detail Lowongan, Rencana Belajar (Skill Gap), Persiapan Latihan, Sesi Latihan, dan Hasil Latihan telah diperbarui mengikuti [rencana redesign](docs/ui-redesign-plan.md): palet navy–teal, Plus Jakarta Sans lokal, kartu lowongan beridentitas perusahaan, dan rincian kecocokan yang dapat dibuka. Fondasi visual baru berada di `lib/theme/career_theme.dart` dan `lib/widgets/career_widgets.dart`, diterapkan bertahap per layar. Layar lainnya masih memakai tema M3 awal.
 
 ## Menjalankan
 
