@@ -14,7 +14,7 @@ class NavShell extends StatelessWidget {
     (Routes.home, 'Beranda', Icons.home_outlined, Icons.home_rounded),
     (
       Routes.gap,
-      'Skill Gap',
+      'Belajar',
       Icons.trending_up_rounded,
       Icons.trending_up_rounded,
     ),
@@ -33,6 +33,9 @@ class NavShell extends StatelessWidget {
     ),
   ];
 
+  /// Tabs already moved to the new visual language (see docs/ui-redesign-plan.md).
+  static const _redesigned = {Routes.home, Routes.gap, Routes.coach};
+
   @override
   Widget build(BuildContext context) {
     final idx = _tabs
@@ -41,7 +44,7 @@ class NavShell extends StatelessWidget {
     return Scaffold(
       body: child,
       bottomNavigationBar: Theme(
-        data: location == Routes.home
+        data: _redesigned.contains(location)
             ? CareerTheme.of(context)
             : Theme.of(context),
         child: NavigationBar(
