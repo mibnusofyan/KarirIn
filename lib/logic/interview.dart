@@ -38,7 +38,9 @@ const _improve = {
   'Kejelasan': 'Gunakan kalimat yang lebih lengkap agar pewawancara mudah mengikuti alurnya.',
   'Bukti konkret': 'Tambahkan bukti konkret seperti angka, jumlah, atau hasil yang terukur.',
 };
-const _good = {
+
+/// What went well, per strongest aspect (also used as the session's main strength).
+const strengthByAspect = {
   'Relevansi': 'Jawabanmu menjawab inti pertanyaan.',
   'Struktur STAR': 'Alur ceritamu runtut dari situasi ke hasil.',
   'Kejelasan': 'Bahasamu jelas dan mudah dipahami.',
@@ -46,10 +48,10 @@ const _good = {
 };
 
 const focusByAspect = {
-  'Relevansi': 'Fokus berikutnya: jawab inti pertanyaan di kalimat pertama.',
-  'Struktur STAR': 'Fokus berikutnya: susun cerita dengan pola Situasi, Tugas, Aksi, Hasil.',
-  'Kejelasan': 'Fokus berikutnya: gunakan kalimat yang lebih lengkap dan runtut.',
-  'Bukti konkret': 'Fokus berikutnya: sertakan angka atau hasil terukur di setiap cerita.',
+  'Relevansi': 'Jawab inti pertanyaan di kalimat pertama.',
+  'Struktur STAR': 'Susun cerita dengan pola Situasi, Tugas, Aksi, Hasil.',
+  'Kejelasan': 'Gunakan kalimat yang lebih lengkap dan runtut.',
+  'Bukti konkret': 'Sertakan angka atau hasil terukur di setiap cerita.',
 };
 
 /// Offline heuristic grader used by the prototype. In production this is the
@@ -69,7 +71,7 @@ AnswerScore gradeAnswer(String answer) {
   final asp = [('Relevansi', rel), ('Struktur STAR', str), ('Kejelasan', jel), ('Bukti konkret', buk)];
   final lo = ([...asp]..sort((a, b) => a.$2.compareTo(b.$2))).first.$1;
   final hi = ([...asp]..sort((a, b) => b.$2.compareTo(a.$2))).first.$1;
-  return AnswerScore(relevansi: rel, struktur: str, kejelasan: jel, bukti: buk, good: _good[hi]!, improve: _improve[lo]!);
+  return AnswerScore(relevansi: rel, struktur: str, kejelasan: jel, bukti: buk, good: strengthByAspect[hi]!, improve: _improve[lo]!);
 }
 
 /// Five questions built from the job description: 3 behavioural + 2 technical.

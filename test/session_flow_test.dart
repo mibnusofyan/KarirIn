@@ -20,7 +20,7 @@ void main() {
     for (var i = 0; i < 4; i++) {
       expect(find.text('Pertanyaan ${i + 1} dari 5'), findsOneWidget);
       final demo = find.text('Isi contoh (demo)');
-      await tester.scrollUntilVisible(demo, 100, scrollable: find.byType(Scrollable).first);
+      await tester.scrollUntilVisible(demo.hitTestable(), 100, scrollable: find.byType(Scrollable).first);
       await tester.tap(demo);
       await tester.pump();
       expect(find.text(interviewJ1[i].demo), findsOneWidget, reason: 'demo fill on question ${i + 1}');
