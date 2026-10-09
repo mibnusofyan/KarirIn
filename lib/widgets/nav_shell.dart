@@ -34,7 +34,7 @@ class NavShell extends StatelessWidget {
   ];
 
   /// Tabs already moved to the new visual language (see docs/ui-redesign-plan.md).
-  static const _redesigned = {Routes.home, Routes.gap, Routes.coach};
+  static const _redesigned = {Routes.home, Routes.gap, Routes.coach, Routes.tracker};
 
   @override
   Widget build(BuildContext context) {

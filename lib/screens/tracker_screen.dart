@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../data/mock_data.dart';
 import '../data/models.dart';
+import '../router.dart';
 import '../state/app_state.dart';
-import '../theme/app_theme.dart';
+import '../theme/career_theme.dart';
+import '../widgets/career_widgets.dart';
 import '../widgets/common.dart';
 
-/// Pelacak lamaran: status per application plus follow-up reminders.
+/// Pelacak lamaran: summary and agenda first, then every application with its next step.
 class TrackerScreen extends ConsumerStatefulWidget {
   const TrackerScreen({super.key});
 
@@ -14,85 +18,214 @@ class TrackerScreen extends ConsumerStatefulWidget {
   ConsumerState<TrackerScreen> createState() => _TrackerScreenState();
 }
 
-(Color, Color) stageColors(AppStage s) => switch (s) {
-  AppStage.dikirim => (KColors.primaryContainer, KColors.onPrimaryContainer),
-  AppStage.tes || AppStage.wawancara => (KColors.tertiaryContainer, KColors.onTertiaryContainer),
-  AppStage.diterima => (KColors.secondaryContainer, KColors.onSecondaryContainer),
-  AppStage.ditolak => (KColors.errorContainer, KColors.onErrorContainer),
+enum _Filter {
+  semua('Semua'),
+  aktif('Aktif'),
+  selesai('Selesai');
+
+  const _Filter(this.label);
+  final String label;
+
+  bool accepts(AppStage s) => switch (this) {
+    semua => true,
+    aktif => s.isActive,
+    selesai => !s.isActive,
+  };
+}
+
+/// Visual identity per stage: icon + label + colour (never colour alone).
+({IconData icon, Color fg, Color bg, String description}) stageStyle(AppStage s) => switch (s) {
+  AppStage.dikirim => (
+    icon: Icons.send_outlined,
+    fg: CareerColors.navy,
+    bg: const Color(0xFFE8ECF6),
+    description: 'Lamaran terkirim lewat kanal resmi',
+  ),
+  AppStage.tes => (
+    icon: Icons.edit_note_rounded,
+    fg: CareerColors.amber,
+    bg: CareerColors.amberLight,
+    description: 'Ada jadwal tes atau psikotes',
+  ),
+  AppStage.wawancara => (
+    icon: Icons.record_voice_over_outlined,
+    fg: CareerColors.amber,
+    bg: CareerColors.amberLight,
+    description: 'Diundang wawancara',
+  ),
+  AppStage.diterima => (icon: Icons.verified_outlined, fg: CareerColors.teal, bg: CareerColors.mint, description: 'Mendapat tawaran kerja'),
+  AppStage.ditolak => (
+    icon: Icons.do_not_disturb_on_outlined,
+    fg: CareerColors.muted,
+    bg: const Color(0xFFEDEFEC),
+    description: 'Proses berhenti di perusahaan ini',
+  ),
 };
 
+/// The job in the catalogue this application belongs to, when it is one of ours.
+Job? jobFor(JobApplication a) => jobs.where((j) => j.title == a.title && j.company == a.company).firstOrNull;
+
 class _TrackerScreenState extends ConsumerState<TrackerScreen> {
-  /// null = "Semua".
-  AppStage? _filter;
+  _Filter _filter = _Filter.semua;
 
   @override
   Widget build(BuildContext context) {
     final apps = ref.watch(appProvider).applications;
-    final shown = apps.where((a) => _filter == null || a.status == _filter).toList();
-    final active = apps.where((a) => a.status.isActive).length;
+    final active = apps.where((a) => a.status.isActive).toList();
+    final agenda = active.where((a) => a.remind != null).toList();
+    final shown = apps.where((a) => _filter.accepts(a.status)).toList();
 
-    Widget chip(String label, int count, AppStage? stage) {
-      final on = _filter == stage;
-      return Padding(
-        padding: const EdgeInsets.only(right: 8),
-        child: FilterChip(
-          selected: on,
-          onSelected: (_) => setState(() => _filter = stage),
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          label: Row(
-            mainAxisSize: MainAxisSize.min,
+    return CareerTheme(
+      child: Scaffold(
+        body: SafeArea(
+          bottom: false,
+          child: ListView(
+            key: const PageStorageKey('career-tracker'),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
             children: [
-              Text(label),
-              const SizedBox(width: 8),
-              Badge(
-                label: Text('$count'),
-                backgroundColor: on ? KColors.secondary : KColors.surfaceContainerHighest,
-                textColor: on ? Colors.white : KColors.onSurfaceVariant,
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                largeSize: 20,
+              const Text('PELACAK LAMARAN', style: CareerText.eyebrow),
+              const SizedBox(height: 6),
+              Text('Pantau setiap\nlangkahmu.', style: CareerText.heading.copyWith(fontSize: 26)),
+              const SizedBox(height: 8),
+              const Text('Catat status dari kanal resmi perusahaan. KarirIn membantu mengingat tindak lanjutnya.', style: CareerText.muted),
+              const SizedBox(height: 20),
+              _Summary(apps: apps),
+              if (agenda.isNotEmpty) ...[
+                const SizedBox(height: 28),
+                const Text('Pengingat aktif', style: CareerText.title),
+                const SizedBox(height: 4),
+                const Text('Dari lamaran yang masih berjalan.', style: CareerText.small),
+                const SizedBox(height: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: CareerColors.line),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    children: [
+                      for (final (i, a) in agenda.indexed) ...[if (i > 0) const Divider(), _AgendaItem(app: a)],
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 28),
+              Row(
+                children: [
+                  const Expanded(child: Text('Semua lamaran', style: CareerText.title)),
+                  Text('${apps.length} lamaran', style: CareerText.small),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [for (final f in _Filter.values) _filterButton(f, apps.where((a) => f.accepts(a.status)).length)],
+              ),
+              const SizedBox(height: 14),
+              for (final a in shown) ...[_ApplicationCard(key: ValueKey(a.id), app: a), const SizedBox(height: 12)],
+              if (shown.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.inbox_outlined, size: 36, color: CareerColors.teal),
+                      const SizedBox(height: 10),
+                      Text(
+                        apps.isEmpty ? 'Belum ada lamaran' : 'Belum ada lamaran ${_filter.label.toLowerCase()}',
+                        style: CareerText.cardTitle,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Lamaran yang kamu catat dari Detail Lowongan akan muncul di sini.',
+                        style: CareerText.muted,
+                        textAlign: TextAlign.center,
+                      ),
+                      if (apps.isNotEmpty)
+                        TextButton(onPressed: () => setState(() => _filter = _Filter.semua), child: const Text('Lihat semua lamaran')),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 12),
+              const Text(
+                'KarirIn tidak mengirim lamaran atas namamu. Pada demo ini, pengingat disimpan di aplikasi dan belum dikirim sebagai notifikasi.',
+                style: CareerText.small,
+                textAlign: TextAlign.center,
               ),
             ],
           ),
         ),
-      );
-    }
+      ),
+    );
+  }
 
-    return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: ListView(
+  Widget _filterButton(_Filter f, int count) {
+    final selected = _filter == f;
+    return Semantics(
+      selected: selected,
+      button: true,
+      child: TextButton(
+        onPressed: () => setState(() => _filter = f),
+        style: TextButton.styleFrom(
+          foregroundColor: selected ? Colors.white : CareerColors.muted,
+          backgroundColor: selected ? CareerColors.navy : Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+          minimumSize: const Size(48, 48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: BorderSide(color: selected ? CareerColors.navy : CareerColors.line),
+          ),
+          textStyle: CareerText.small.copyWith(fontWeight: FontWeight.w600),
+        ),
+        child: Text('${f.label}  $count'),
+      ),
+    );
+  }
+}
+
+class _Summary extends StatelessWidget {
+  const _Summary({required this.apps});
+  final List<JobApplication> apps;
+
+  @override
+  Widget build(BuildContext context) {
+    const light = Color(0xFFC4D6E7);
+    int count(bool Function(AppStage) test) => apps.where((a) => test(a.status)).length;
+    final active = count((s) => s.isActive);
+    final stats = [
+      ('Dikirim', count((s) => s == AppStage.dikirim)),
+      ('Tes & wawancara', count((s) => s == AppStage.tes || s == AppStage.wawancara)),
+      ('Selesai', count((s) => !s.isActive)),
+    ];
+    return Semantics(
+      label: '$active lamaran aktif. ${stats.map((s) => '${s.$1} ${s.$2}').join(', ')}',
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(color: CareerColors.navy, borderRadius: BorderRadius.circular(24)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            PageHeader(title: 'Lamaran', subtitle: '$active lamaran aktif'),
-            SizedBox(
-              height: 48,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                children: [
-                  chip('Semua', apps.length, null),
-                  for (final s in AppStage.values) chip(s.label, apps.where((a) => a.status == s).length, s),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  for (final a in shown) ...[_AppCard(app: a), const SizedBox(height: 8)],
-                  if (shown.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 32),
-                      child: Text('Belum ada lamaran di tahap ini.', textAlign: TextAlign.center, style: KText.bodyMediumVariant),
-                    ),
-                ],
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 16, 16, 24),
-              child: Text(
-                'Lamaran dikirim lewat kanal resmi perusahaan. Catat statusnya di sini agar pengingat tindak lanjut terjadwal.',
-                style: KText.bodySmall,
-              ),
+            Text('LAMARAN AKTIF', style: CareerText.eyebrow.copyWith(color: light)),
+            const SizedBox(height: 4),
+            Text('$active', style: CareerText.heading.copyWith(fontSize: 36, color: Colors.white)),
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 20,
+              runSpacing: 10,
+              children: [
+                for (final (label, n) in stats)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('$n', style: CareerText.cardTitle.copyWith(color: CareerColors.yellow)),
+                      Text(label, style: CareerText.small.copyWith(color: light)),
+                    ],
+                  ),
+              ],
             ),
           ],
         ),
@@ -101,47 +234,128 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
   }
 }
 
-class _AppCard extends StatelessWidget {
-  const _AppCard({required this.app});
+class _AgendaItem extends ConsumerWidget {
+  const _AgendaItem({required this.app});
   final JobApplication app;
 
   @override
-  Widget build(BuildContext context) {
-    final (bg, fg) = stageColors(app.status);
-    return FilledCard(
-      onTap: () => showKSheet<void>(context, (_) => _StatusSheet(app: app)),
-      child: Column(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final style = stageStyle(app.status);
+    final job = jobFor(app);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: Text(app.title, style: KText.titleMedium)),
-              const SizedBox(width: 8),
-              Tag(app.status.label, bg: bg, fg: fg),
-            ],
+          Container(
+            padding: const EdgeInsets.all(9),
+            decoration: BoxDecoration(color: style.bg, borderRadius: BorderRadius.circular(12)),
+            child: Icon(Icons.event_outlined, color: style.fg, size: 20),
           ),
-          const SizedBox(height: 4),
-          Text('${app.company} · dikirim ${app.date}', style: KText.bodyMediumVariant),
-          if (app.remind != null) ...[
-            const SizedBox(height: 8),
-            const Divider(),
-            const SizedBox(height: 8),
-            Row(
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.notifications_active_rounded, size: 16, color: KColors.tertiary),
-                const SizedBox(width: 8),
-                Text(
-                  app.remind!,
-                  style: const TextStyle(fontSize: 12, height: 16 / 12, fontWeight: FontWeight.w500),
-                ),
+                Text(app.remind!, style: CareerText.label),
+                const SizedBox(height: 2),
+                Text('${app.title} · ${app.company}', style: CareerText.small),
+                if (app.status == AppStage.wawancara && job != null)
+                  TextButton.icon(
+                    onPressed: () {
+                      ref.read(appProvider.notifier).selectCoachJob(job.id);
+                      context.go(Routes.coach);
+                    },
+                    style: TextButton.styleFrom(padding: EdgeInsets.zero, alignment: Alignment.centerLeft),
+                    icon: const Icon(Icons.record_voice_over_outlined, size: 17),
+                    label: const Text('Latihan wawancara'),
+                  ),
               ],
             ),
-          ],
+          ),
         ],
       ),
     );
   }
+}
+
+class StatusChip extends StatelessWidget {
+  const StatusChip(this.stage, {super.key});
+  final AppStage stage;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = stageStyle(stage);
+    return CareerPill(stage.label, icon: s.icon, color: s.fg, background: s.bg);
+  }
+}
+
+class _ApplicationCard extends StatelessWidget {
+  const _ApplicationCard({super.key, required this.app});
+  final JobApplication app;
+
+  String get _nextStep => switch (app.status) {
+    AppStage.dikirim => 'Tunggu kabar, lalu kirim email tindak lanjut bila perlu',
+    AppStage.tes => 'Siapkan diri untuk tes',
+    AppStage.wawancara => 'Latih jawabanmu sebelum wawancara',
+    AppStage.diterima => 'Pelajari detail tawaran sebelum menjawab',
+    AppStage.ditolak => 'Lanjutkan ke peluang lain yang cocok',
+  };
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: Colors.white,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+      side: const BorderSide(color: CareerColors.line),
+    ),
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
+      onTap: () => showCareerSheet<void>(context, (_) => _StatusSheet(app: app)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CompanyAvatar(company: app.company, size: 40),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(app.title, style: CareerText.cardTitle),
+                      const SizedBox(height: 2),
+                      Text('${app.company} · dikirim ${app.date}', style: CareerText.small),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            StatusChip(app.status),
+            const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider()),
+            Text('LANGKAH BERIKUTNYA', style: CareerText.eyebrow),
+            const SizedBox(height: 4),
+            Text(_nextStep, style: CareerText.body),
+            if (app.remind != null) ...[
+              const SizedBox(height: 6),
+              CareerMeta(Icons.notifications_none_rounded, 'Pengingat: ${app.remind}', style: CareerText.small),
+            ],
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => showCareerSheet<void>(context, (_) => _StatusSheet(app: app)),
+                child: Text('Ubah status', semanticsLabel: 'Ubah status ${app.title}'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class _StatusSheet extends ConsumerStatefulWidget {
@@ -160,50 +374,97 @@ class _StatusSheetState extends ConsumerState<_StatusSheet> {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      Text(widget.app.title, style: KText.titleLarge),
-      Text(widget.app.company, style: KText.bodyMediumVariant),
-      const SectionLabel('Ubah status', padding: EdgeInsets.only(top: 16, bottom: 4)),
-      RadioGroup<AppStage>(
-        groupValue: _status,
-        onChanged: (v) => setState(() => _status = v ?? _status),
-        child: Column(
-          children: [
-            for (final s in AppStage.values)
-              InkWell(
-                onTap: () => setState(() => _status = s),
-                child: SizedBox(
-                  height: 48,
-                  child: Row(
-                    children: [
-                      Radio<AppStage>(value: s),
-                      const SizedBox(width: 4),
-                      Text(s.label, style: KText.bodyLarge),
-                    ],
-                  ),
-                ),
+      const CareerSheetHeader('Perbarui status'),
+      Text('${widget.app.title} · ${widget.app.company}', style: CareerText.muted),
+      const SizedBox(height: 16),
+      for (final s in AppStage.values) _StageOption(stage: s, selected: _status == s, onTap: () => setState(() => _status = s)),
+      const SizedBox(height: 8),
+      if (_status.isActive)
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 8, 8, 12),
+          decoration: BoxDecoration(color: CareerColors.background, borderRadius: BorderRadius.circular(16)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Expanded(child: Text('Ingatkan tindak lanjut', style: CareerText.label)),
+                  Switch(value: _remind, activeTrackColor: CareerColors.teal, onChanged: (v) => setState(() => _remind = v)),
+                ],
               ),
-          ],
+              Text(
+                _remind ? 'Pengingat: ${followUpReminder(_status)} (7 hari lagi)' : 'Tidak ada pengingat untuk lamaran ini.',
+                style: CareerText.small,
+              ),
+            ],
+          ),
         ),
-      ),
-      SizedBox(
-        height: 56,
-        child: Row(
-          children: [
-            const Expanded(child: Text('Ingatkan tindak lanjut dalam 7 hari', style: KText.bodyMedium)),
-            Switch(value: _remind, onChanged: (v) => setState(() => _remind = v)),
-          ],
-        ),
-      ),
-      const SizedBox(height: 4),
-      PrimaryButton(
+      const SizedBox(height: 20),
+      CareerButton(
         label: 'Simpan status',
+        icon: Icons.check_rounded,
         onPressed: () {
-          ref.read(appProvider.notifier).updateApplication(widget.app.id, _status, _remind);
+          ref.read(appProvider.notifier).updateApplication(widget.app.id, _status, _status.isActive && _remind);
           final messenger = ScaffoldMessenger.of(context);
           Navigator.pop(context);
-          toastVia(messenger, 'Status lamaran disimpan');
+          toastVia(messenger, 'Status ${widget.app.title}: ${_status.label}');
         },
       ),
     ],
   );
+}
+
+class _StageOption extends StatelessWidget {
+  const _StageOption({required this.stage, required this.selected, required this.onTap});
+  final AppStage stage;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = stageStyle(stage);
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: '${stage.label}. ${s.description}',
+      excludeSemantics: true,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Material(
+          color: selected ? s.bg : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: selected ? s.fg : CareerColors.line, width: selected ? 2 : 1),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(s.icon, color: s.fg, size: 22),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(stage.label, style: CareerText.label),
+                        Text(s.description, style: CareerText.small),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    selected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                    color: selected ? s.fg : CareerColors.line,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

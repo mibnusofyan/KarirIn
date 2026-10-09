@@ -87,6 +87,9 @@ class AppState {
   );
 }
 
+/// Reminder set 7 days after a status change (demo date; reminders are stored as text).
+String followUpReminder(AppStage status) => status == AppStage.wawancara ? 'Persiapan wawancara 15 Okt' : 'Tindak lanjut 15 Okt';
+
 class AppNotifier extends Notifier<AppState> {
   @override
   AppState build() => AppState.initial();
@@ -194,13 +197,7 @@ class AppNotifier extends Notifier<AppState> {
     state = state.copyWith(
       applications: [
         for (final a in state.applications)
-          if (a.id == id)
-            a.copyWith(
-              status: status,
-              remind: () => remind ? (status == AppStage.wawancara ? 'Persiapan wawancara 15 Okt' : 'Tindak lanjut 15 Okt') : null,
-            )
-          else
-            a,
+          if (a.id == id) a.copyWith(status: status, remind: () => remind ? followUpReminder(status) : null) else a,
       ],
     );
   }
