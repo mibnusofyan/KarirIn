@@ -5,6 +5,9 @@ import '../mock_data.dart';
 import 'application_repository.dart';
 import '../../services/ai/ai_service.dart';
 import '../../services/cv_storage.dart';
+import '../../services/network.dart';
+import '../../services/reminders.dart';
+import 'activity_repository.dart';
 import 'auth_repository.dart';
 import 'interview_repository.dart';
 import 'job_repository.dart';
@@ -32,12 +35,19 @@ final profileRepositoryProvider = Provider<ProfileRepository>(
   (_) => _pick(mock: MockProfileRepository.new, firebase: FirestoreProfileRepository.new),
 );
 
-/// Firebase implementation arrives in Tahap B3; until then `BACKEND=firebase` fails loudly instead of silently using mocks.
 final applicationRepositoryProvider = Provider<ApplicationRepository>(
-  (_) => _pick(
+  (_) => _pick<ApplicationRepository>(
     mock: () => MockApplicationRepository({mockUid: initialApplications}),
-    firebase: () => throw UnimplementedError('Repository lamaran Firebase dibuat pada Tahap B3.'),
+    firebase: FirestoreApplicationRepository.new,
   ),
+);
+
+final activityRepositoryProvider = Provider<ActivityRepository>(
+  (_) => _pick<ActivityRepository>(mock: MockActivityRepository.new, firebase: FirestoreActivityRepository.new),
+);
+
+final reminderSchedulerProvider = Provider<ReminderScheduler>(
+  (_) => _pick<ReminderScheduler>(mock: () => const NoopReminderScheduler(), firebase: LocalReminderScheduler.new),
 );
 
 final interviewRepositoryProvider = Provider<InterviewRepository>(
@@ -50,3 +60,7 @@ final aiServiceProvider = Provider<AiService>(
 );
 
 final cvStorageProvider = Provider<CvStorage>((_) => const CvStorage());
+
+final networkStatusProvider = Provider<NetworkStatus>(
+  (_) => _pick<NetworkStatus>(mock: () => const NoNetworkStatus(), firebase: DeviceNetworkStatus.new),
+);

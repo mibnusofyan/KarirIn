@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../data/backend.dart';
 import '../data/models.dart';
 import '../router.dart';
+import '../services/reminders.dart';
 import '../state/app_state.dart';
 import '../theme/career_theme.dart';
 import '../widgets/career_widgets.dart';
@@ -148,8 +150,10 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
                   ),
                 ),
               const SizedBox(height: 12),
-              const Text(
-                'KarirIn tidak mengirim lamaran atas namamu. Pada demo ini, pengingat disimpan di aplikasi dan belum dikirim sebagai notifikasi.',
+              Text(
+                backend == Backend.mock
+                    ? 'KarirIn tidak mengirim lamaran atas namamu. Pada demo ini, pengingat disimpan di aplikasi dan belum dikirim sebagai notifikasi.'
+                    : 'KarirIn tidak mengirim lamaran atas namamu. Pengingat muncul sebagai notifikasi di perangkat ini pukul 09.00.',
                 style: CareerText.small,
                 textAlign: TextAlign.center,
               ),
@@ -392,7 +396,9 @@ class _StatusSheetState extends ConsumerState<_StatusSheet> {
                 ],
               ),
               Text(
-                _remind ? 'Pengingat: ${followUpReminder(_status)} (7 hari lagi)' : 'Tidak ada pengingat untuk lamaran ini.',
+                _remind
+                    ? 'Pengingat: ${followUpReminder(_status, at: backend == Backend.firebase ? followUpAt(DateTime.now()) : null)} (7 hari lagi)'
+                    : 'Tidak ada pengingat untuk lamaran ini.',
                 style: CareerText.small,
               ),
             ],

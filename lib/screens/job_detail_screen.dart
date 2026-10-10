@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../data/backend.dart';
 import '../data/models.dart';
 import '../logic/match_score.dart';
 import '../router.dart';
@@ -15,6 +17,8 @@ class JobDetailScreen extends ConsumerWidget {
   final String jobId;
 
   Future<void> _apply(BuildContext context, WidgetRef ref, Job job) async {
+    final demo = backend == Backend.mock;
+    final url = demo ? null : _httpUrl(job.applyUrl);
     final ok = await showCareerSheet<bool>(
       context,
       (ctx) => Column(
@@ -27,14 +31,22 @@ class JobDetailScreen extends ConsumerWidget {
             style: CareerText.body,
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Pada demo ini, KarirIn mencatat lamaran ke pelacak. Belum ada lamaran yang dikirim atau situs perusahaan yang dibuka.',
+          Text(
+            demo
+                ? 'Pada demo ini, KarirIn mencatat lamaran ke pelacak. Belum ada lamaran yang dikirim atau situs perusahaan yang dibuka.'
+                : url != null
+                ? 'KarirIn membuka halaman lamaran resmi, lalu mencatatnya di pelacak beserta pengingat tindak lanjut.'
+                : 'Tautan resmi lowongan ini belum tersedia. Lamar lewat kanal resmi perusahaan, lalu catat di pelacak agar KarirIn mengingatkan tindak lanjutnya.',
             style: CareerText.muted,
           ),
           const SizedBox(height: 24),
           CareerButton(
-            label: 'Catat lamaran (demo)',
-            icon: Icons.check_rounded,
+            label: demo
+                ? 'Catat lamaran (demo)'
+                : url != null
+                ? 'Buka kanal resmi & catat'
+                : 'Catat lamaran',
+            icon: url != null ? Icons.open_in_new_rounded : Icons.check_rounded,
             onPressed: () => Navigator.pop(ctx, true),
           ),
           TextButton(
@@ -45,6 +57,8 @@ class JobDetailScreen extends ConsumerWidget {
       ),
     );
     if (ok != true || !context.mounted) return;
+    if (url != null) await launchUrl(url, mode: LaunchMode.externalApplication);
+    if (!context.mounted) return;
     ref.read(appProvider.notifier).recordApplication(job);
     context.go(Routes.tracker);
     showToast(context, 'Lamaran dicatat di pelacak');
@@ -738,4 +752,10 @@ class _PreparationOption extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// A usable web link, or null for a missing or malformed one.
+Uri? _httpUrl(String? raw) {
+  final u = Uri.tryParse(raw?.trim() ?? '');
+  return u != null && (u.scheme == 'https' || u.scheme == 'http') && u.host.isNotEmpty ? u : null;
 }

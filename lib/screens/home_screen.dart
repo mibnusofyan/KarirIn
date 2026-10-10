@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../data/backend.dart';
+import '../data/models.dart';
+import '../data/repositories/activity_repository.dart';
+import '../data/repositories/providers.dart';
 import '../logic/match_score.dart';
 import '../router.dart';
 import '../state/app_state.dart';
@@ -22,13 +26,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _retry() async {
     setState(() => _retrying = true);
-    await Future<void>.delayed(const Duration(milliseconds: 900));
+    if (backend == Backend.mock) {
+      await Future<void>.delayed(const Duration(milliseconds: 900));
+      if (!mounted) return;
+      setState(() => _retrying = false);
+      ref.read(appProvider.notifier).setOffline(false);
+      return;
+    }
+    final offline = await ref.read(networkStatusProvider).isOffline();
     if (!mounted) return;
     setState(() => _retrying = false);
-    ref.read(appProvider.notifier).setOffline(false);
+    ref.read(appProvider.notifier).setOffline(offline);
+    if (offline) showToast(context, 'Masih belum ada koneksi. Periksa Wi-Fi atau data seluler.');
   }
 
   void _openNotifications() {
+    if (backend == Backend.firebase) {
+      showCareerSheet<void>(context, (_) => const _NotificationList());
+      return;
+    }
     final score = fmt(
       computeMatch(ref.read(appProvider).job('j4'), ref.read(appProvider).profile).total,
     );
@@ -548,4 +564,84 @@ class _Notification extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// Firebase builds: notifications from the team's notify-new-jobs script plus the upcoming follow-up reminders.
+class _NotificationList extends ConsumerStatefulWidget {
+  const _NotificationList();
+
+  @override
+  ConsumerState<_NotificationList> createState() => _NotificationListState();
+}
+
+class _NotificationListState extends ConsumerState<_NotificationList> {
+  late final Future<List<AppNotification>> _notifications = () async {
+    final uid = ref.read(authRepositoryProvider).currentUid;
+    if (uid == null) return const <AppNotification>[];
+    try {
+      return await ref.read(activityRepositoryProvider).fetchNotifications(uid);
+    } catch (_) {
+      return const <AppNotification>[];
+    }
+  }();
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final reminders = [
+      for (final a in ref.watch(appProvider).applications)
+        if (a.status.isActive && a.remind != null && a.reminderAt != null && a.reminderAt!.isAfter(now)) a,
+    ]..sort((a, b) => a.reminderAt!.compareTo(b.reminderAt!));
+    return FutureBuilder(
+      future: _notifications,
+      builder: (context, snap) {
+        final items = <Widget>[
+          for (final n in snap.data ?? const <AppNotification>[])
+            _Notification(
+              icon: Icons.work_outline_rounded,
+              label: '${n.title}${n.createdAt == null ? '' : ' · ${formatShortDateId(n.createdAt!)}'}',
+              text: n.body,
+              onTap: n.jobId == null
+                  ? null
+                  : () {
+                      Navigator.pop(context);
+                      context.push(Routes.job(n.jobId!));
+                    },
+            ),
+          for (final a in reminders)
+            _Notification(
+              icon: Icons.event_outlined,
+              label: 'Pengingat · ${formatShortDateId(a.reminderAt!)}',
+              text: '${a.remind}: ${a.title} di ${a.company}.',
+              onTap: () {
+                Navigator.pop(context);
+                context.go(Routes.tracker);
+              },
+            ),
+        ];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const CareerSheetHeader('Notifikasi'),
+            if (snap.connectionState != ConnectionState.done)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(child: CircularProgressIndicator(color: CareerColors.teal)),
+              )
+            else if (items.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Text(
+                  'Belum ada notifikasi. Lowongan baru yang cocok dan pengingat lamaranmu akan muncul di sini.',
+                  style: CareerText.muted,
+                  textAlign: TextAlign.center,
+                ),
+              )
+            else
+              for (final (i, w) in items.indexed) ...[if (i > 0) const Divider(), w],
+          ],
+        );
+      },
+    );
+  }
 }

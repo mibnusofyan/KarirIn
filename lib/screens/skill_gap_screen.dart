@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../data/backend.dart';
 import '../data/models.dart';
 import '../logic/match_score.dart';
 import '../router.dart';
@@ -376,12 +378,33 @@ class _ResourceSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final res = ref.watch(appProvider).resourceForSkill(item.skill);
-    void masterAndClose({bool proof = false}) {
+    void masterAndClose({String? proof}) {
       final messenger = ScaffoldMessenger.of(context);
       final notifier = ref.read(appProvider.notifier);
       Navigator.pop(context);
-      if (proof) toastVia(messenger, 'Bukti belajar dicatat (demo)');
+      if (proof != null) {
+        notifier.recordLearningProof(item.skill, proof);
+        toastVia(messenger, backend == Backend.mock ? 'Bukti belajar dicatat (demo)' : 'Bukti belajar disimpan');
+      }
       SkillGapScreen.master(messenger, notifier, item.skill);
+    }
+
+    Future<void> openMaterial() async {
+      final u = Uri.tryParse(res.url?.trim() ?? '');
+      final url = u != null && u.scheme.startsWith('http') && u.host.isNotEmpty ? u : null;
+      if (backend == Backend.mock || url == null) {
+        showToast(context, 'Demo: tautan materi belum tersambung ke penyedia');
+        return;
+      }
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication) && context.mounted) {
+        showToast(context, 'Tautan materi tidak dapat dibuka.');
+      }
+    }
+
+    Future<void> addProof() async {
+      if (backend == Backend.mock) return masterAndClose(proof: 'demo');
+      final proof = await showDialog<String>(context: context, builder: (_) => const _ProofDialog());
+      if (proof != null && context.mounted) masterAndClose(proof: proof);
     }
 
     return Column(
@@ -421,12 +444,12 @@ class _ResourceSheet extends ConsumerWidget {
           alignment: WrapAlignment.center,
           children: [
             TextButton.icon(
-              onPressed: () => showToast(context, 'Demo: tautan materi belum tersambung ke penyedia'),
+              onPressed: openMaterial,
               icon: const Icon(Icons.open_in_new_rounded, size: 17),
               label: const Text('Buka materi'),
             ),
             TextButton.icon(
-              onPressed: () => masterAndClose(proof: true),
+              onPressed: addProof,
               icon: const Icon(Icons.upload_rounded, size: 17),
               label: const Text('Unggah bukti'),
             ),
@@ -435,4 +458,52 @@ class _ResourceSheet extends ConsumerWidget {
       ],
     );
   }
+}
+
+/// Proof of learning: a certificate link or a short note on what was learned.
+class _ProofDialog extends StatefulWidget {
+  const _ProofDialog();
+
+  @override
+  State<_ProofDialog> createState() => _ProofDialogState();
+}
+
+class _ProofDialogState extends State<_ProofDialog> {
+  final _c = TextEditingController();
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => CareerTheme(
+    child: AlertDialog(
+      backgroundColor: Colors.white,
+      title: const Text('Unggah bukti belajar', style: CareerText.title),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text('Tempel tautan sertifikat atau tulis singkat apa yang sudah kamu pelajari.', style: CareerText.body),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _c,
+            autofocus: true,
+            minLines: 1,
+            maxLines: 4,
+            maxLength: 300,
+            keyboardType: TextInputType.url,
+            onChanged: (_) => setState(() {}),
+            decoration: careerInput(label: 'Tautan atau catatan', hint: 'https://…'),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+        TextButton(onPressed: _c.text.trim().isEmpty ? null : () => Navigator.pop(context, _c.text.trim()), child: const Text('Simpan')),
+      ],
+    ),
+  );
 }

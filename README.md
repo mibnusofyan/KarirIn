@@ -45,6 +45,10 @@ flutter run --dart-define=BACKEND=mock       # data contoh offline (APK cadangan
 flutter run --dart-define=USE_EMULATOR=true  # Auth + Firestore emulator lokal (debug)
 ```
 
+Opsi build debug lain: `--dart-define=APP_CHECK_DEBUG_TOKEN=<uuid>` memakai token debug App Check yang sudah didaftarkan di konsol (tanpa itu, tiap instal baru mencetak token baru di log dan panggilan Gemini ditolak sampai token itu didaftarkan), dan `--dart-define=REMINDER_DEMO_MINUTES=1` membuat pengingat lamaran muncul 1 menit setelah dicatat (untuk demo/uji), bukan H+7 pukul 09.00.
+
+Bila APK debug tidak memuat perubahan Dart terbaru (pernah terjadi: Gradle menganggap kompilasi Flutter sudah mutakhir), jalankan `flutter clean` lalu build ulang.
+
 Pada mode `firebase`: login email/kata sandi dan Google (Firebase Auth), redirect otomatis (belum login → Masuk, belum punya profil → Buat profil, sudah → Beranda), profil disimpan ke `profiles/{uid}` setelah dikonfirmasi lalu setiap perubahan ikut tersimpan, simpanan lowongan dan pengaturan notifikasi di `users/{uid}`, katalog 20 lowongan dan 35 skill dibaca dari Firestore, Keluar, dan Hapus akun (menghapus data lalu akun).
 
 Fitur AI (Tahap B2) memakai Gemini lewat Firebase AI Logic (nama model di Remote Config `ai_model_extract` dan `ai_model_fast`, sakelar `ai_enabled`):
@@ -54,7 +58,16 @@ Fitur AI (Tahap B2) memakai Gemini lewat Firebase AI Logic (nama model di Remote
 - **Surat lamaran**: nada formal/ringkas, buat ulang, salin, dan bagikan.
 - Bila AI gagal (kuota, jaringan, keluaran tidak valid), penilaian dan surat memakai logika lokal dengan label "offline"; ekstraksi CV menampilkan galat dengan pilihan coba lagi atau tanya-jawab.
 
-Lamaran dan pengingat masih lokal sampai Tahap B3.
+Pelacak lamaran (Tahap B3):
+
+- Lamaran tersimpan di `users/{uid}/applications` (tanggal nyata dan riwayat status) dan tersinkron langsung, termasuk perubahan saat offline. "Lamar sekarang" membuka tautan resmi lowongan bila ada, lalu mencatatnya.
+- Pengingat tindak lanjut adalah notifikasi lokal terjadwal (H+7 pukul 09.00), dibatalkan saat lamaran selesai atau toggle dimatikan, dan dijadwalkan ulang saat masuk di perangkat baru. Izin notifikasi Android 13+ diminta saat pertama kali dibutuhkan.
+- Rencana Belajar: "Buka materi" membuka tautan materi dari koleksi `skills`; "Unggah bukti" menyimpan tautan sertifikat atau catatan di profil.
+- Snapshot Match Score per lowongan di `users/{uid}/matches` diperbarui setiap profil berubah, untuk validasi skor (subbab 3.2.3).
+- Beranda menampilkan kartu offline saat perangkat tidak terhubung, dan sheet notifikasi berisi notifikasi dari Firestore serta pengingat yang akan datang.
+- Hapus akun menghapus semua subkoleksi pengguna, salinan CV, dan pengingat terjadwal.
+
+Tautan materi belajar saat ini adalah pencarian video gratis berdasarkan judul materi (`tool/export_seed.dart`); ganti dengan kursus pilihan tim di `lib/data/mock_data.dart`/`catalog_extra.dart` (`LearningResource.url`), lalu jalankan export dan seed.
 
 | Berkas | Isi |
 |---|---|
@@ -101,6 +114,6 @@ Pada build mock (`--dart-define=BACKEND=mock`, juga dipakai `flutter test` dan p
 - **Mode suara**: animasi rekam; transkrip diisi jawaban contoh.
 - **Autentikasi**: alur UI saja.
 
-Pada build Firebase yang masih lokal: pelacak lamaran dan pengingat (Tahap B3), serta notifikasi push lowongan baru (Tahap B5).
+Pada build Firebase yang belum tersedia: notifikasi push lowongan baru (Tahap B5).
 
 Match Score **tidak** disimulasikan: dihitung dengan rumus tetap `100 × (0,50·Sw + 0,15·St + 0,15·Sp + 0,10·Se + 0,10·Sl)` dan diuji terhadap contoh Tabel 2.4 (Rani: 80 → 92,5).

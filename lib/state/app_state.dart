@@ -15,6 +15,7 @@ import '../logic/interview.dart';
 import '../logic/match_score.dart';
 import '../services/ai/ai_parsing.dart';
 import '../services/ai/ai_service.dart';
+import '../services/reminders.dart';
 import 'session.dart';
 
 /// Set with `--dart-define=SIMULATE_OFFLINE=true` to demo black-box scenario 11 (koneksi terputus).
@@ -36,6 +37,7 @@ class AppState {
     required this.signupName,
     this.jobs = mock.jobs,
     this.skills = const [],
+    this.learningProofs = const {},
     this.cvDeleted = false,
   });
 
@@ -78,6 +80,9 @@ class AppState {
   /// Canonical skills with synonyms and learning materials; empty until loaded.
   final List<Skill> skills;
 
+  /// Proof of learning per mastered skill (certificate link or note), from "Unggah bukti".
+  final Map<String, String> learningProofs;
+
   /// The uploaded CV file was deleted from Pengaturan; the extracted profile stays.
   final bool cvDeleted;
 
@@ -107,6 +112,7 @@ class AppState {
     String? signupName,
     List<Job>? jobs,
     List<Skill>? skills,
+    Map<String, String>? learningProofs,
     bool? cvDeleted,
   }) => AppState(
     profile: profile ?? this.profile,
@@ -123,12 +129,17 @@ class AppState {
     signupName: signupName ?? this.signupName,
     jobs: jobs ?? this.jobs,
     skills: skills ?? this.skills,
+    learningProofs: learningProofs ?? this.learningProofs,
     cvDeleted: cvDeleted ?? this.cvDeleted,
   );
 }
 
-/// Reminder set 7 days after a status change (demo date; reminders are stored as text).
-String followUpReminder(AppStage status) => status == AppStage.wawancara ? 'Persiapan wawancara 15 Okt' : 'Tindak lanjut 15 Okt';
+/// Reminder text for a status change. Firebase builds pass the real date ([followUpAt]); mock builds keep the
+/// prototype's demo date.
+String followUpReminder(AppStage status, {DateTime? at}) {
+  final day = at == null ? '15 Okt' : formatShortDateId(at);
+  return status == AppStage.wawancara ? 'Persiapan wawancara $day' : 'Tindak lanjut $day';
+}
 
 /// Offline writes never complete, so actions that must reach the server give up after this long.
 const _writeTimeout = Duration(seconds: 15);
@@ -142,11 +153,22 @@ class AppNotifier extends Notifier<AppState> {
 
   bool get _firebase => ref.read(backendProvider) == Backend.firebase;
 
+  /// Live applications of the signed-in user (Firestore keeps them in sync, including offline edits).
+  StreamSubscription<List<JobApplication>>? _appsSub;
+
   @override
   AppState build() {
     if (_firebase) {
       final sub = ref.read(authRepositoryProvider).authStateChanges().listen(_onAuth);
-      ref.onDispose(sub.cancel);
+      // Black-box scenario 11: Beranda shows the offline card while the device has no connection.
+      final net = ref.read(networkStatusProvider);
+      final netSub = net.offlineChanges.listen(setOffline);
+      unawaited(net.isOffline().then(setOffline).catchError(_report));
+      ref.onDispose(() {
+        sub.cancel();
+        netSub.cancel();
+        _appsSub?.cancel();
+      });
     }
     return AppState.initial(demoData: !_firebase);
   }
@@ -155,6 +177,8 @@ class AppNotifier extends Notifier<AppState> {
     if (user == null) {
       _uid = null;
       _confirmed = false;
+      await _appsSub?.cancel();
+      _appsSub = null;
       state = AppState.initial(demoData: false);
       session.value = SessionStatus.signedOut;
       return;
@@ -189,6 +213,7 @@ class AppNotifier extends Notifier<AppState> {
       skills: skills,
       profile: stored?.profile,
       learned: stored?.learned,
+      learningProofs: stored?.proofs,
       savedJobIds: userData.savedJobIds,
       notifyNewJobs: userData.notifyNewJobs,
       notifyReminders: userData.notifyReminders,
@@ -197,6 +222,36 @@ class AppNotifier extends Notifier<AppState> {
       coachJobId: firstJob,
     );
     session.value = _confirmed ? SessionStatus.ready : SessionStatus.needsProfile;
+    _watchApplications(user.uid);
+  }
+
+  void _watchApplications(String uid) {
+    var first = true;
+    _appsSub?.cancel();
+    _appsSub = ref.read(applicationRepositoryProvider).watch(uid).listen((apps) {
+      state = state.copyWith(applications: apps);
+      // Reminders live on the device, so a new install or device gets them back from the stored applications.
+      if (first && state.notifyReminders) unawaited(_rescheduleAll());
+      first = false;
+    }, onError: _report);
+  }
+
+  ReminderScheduler get _reminders => ref.read(reminderSchedulerProvider);
+
+  Future<void> _rescheduleAll() async {
+    for (final a in state.applications) {
+      await _reminders.schedule(a);
+    }
+  }
+
+  /// Stores [a] and (re)schedules its reminder on the device.
+  void _saveApplication(JobApplication a) {
+    _write((uid) => ref.read(applicationRepositoryProvider).upsert(uid, a));
+    if (!state.notifyReminders || a.reminderAt == null) {
+      unawaited(_reminders.cancel(a.id));
+      return;
+    }
+    unawaited(_reminders.requestPermission().then((_) => _reminders.schedule(a)).catchError(_report));
   }
 
   static void _report(Object e, StackTrace s) => debugPrint('KarirIn sync: $e\n$s');
@@ -215,7 +270,13 @@ class AppNotifier extends Notifier<AppState> {
     if (_confirmed) _saveProfile();
   }
 
-  void _saveProfile() => _write((uid) => ref.read(profileRepositoryProvider).save(uid, state.profile, learned: state.learned));
+  void _saveProfile() {
+    final (profile, learned, proofs) = (state.profile, state.learned, state.learningProofs);
+    _write((uid) => ref.read(profileRepositoryProvider).save(uid, profile, learned: learned, proofs: proofs));
+    // Score snapshot per job for validating the Match Score against manual ratings (proposal 3.2.3).
+    final ranked = state.ranked;
+    _write((uid) => ref.read(activityRepositoryProvider).saveMatches(uid, ranked));
+  }
 
   /// "Simpan profil" on Konfirmasi Profil: stores the reviewed profile and unlocks the main app.
   void confirmProfile() {
@@ -237,7 +298,6 @@ class AppNotifier extends Notifier<AppState> {
     return ref.read(userRepositoryProvider).recordCvConsent(uid, version);
   });
 
-  /// Profile extracted from an uploaded CV (simulated: Rani's CV).
   /// The CV picked on Buat Profil, held in memory until Processing reads it.
   CvFile? _pendingCv;
 
@@ -258,6 +318,7 @@ class AppNotifier extends Notifier<AppState> {
     unawaited(ref.read(cvStorageProvider).save(cv.bytes, cv.extension).catchError(_report));
   }
 
+  /// Profile "extracted" from an uploaded CV on mock builds (Rani's CV).
   void useCvProfile(ProfileSource source) {
     state = state.copyWith(cvDeleted: false);
     _setProfile(raniProfile.copyWith(source: source), learned: []);
@@ -334,6 +395,13 @@ class AppNotifier extends Notifier<AppState> {
     return (before: before, after: computeMatch(job, np).total, jobTitle: job.title);
   }
 
+  /// "Unggah bukti": keeps a certificate link or note for a mastered skill.
+  void recordLearningProof(String skill, String proof) {
+    if (proof.trim().isEmpty) return;
+    state = state.copyWith(learningProofs: {...state.learningProofs, skill: proof.trim()});
+    if (_confirmed) _saveProfile();
+  }
+
   void toggleSaved(String jobId) {
     final s = Set.of(state.savedJobIds);
     s.contains(jobId) ? s.remove(jobId) : s.add(jobId);
@@ -344,6 +412,24 @@ class AppNotifier extends Notifier<AppState> {
   /// Logs an application sent via the company's official channel.
   void recordApplication(Job job) {
     if (state.applications.any((a) => a.title == job.title && a.company == job.company)) return;
+    if (_firebase) {
+      final now = DateTime.now();
+      final at = followUpAt(now);
+      final a = JobApplication(
+        id: 'a${now.millisecondsSinceEpoch}',
+        jobId: job.id,
+        title: job.title,
+        company: job.company,
+        status: AppStage.dikirim,
+        date: formatShortDateId(now),
+        appliedAt: now,
+        remind: state.notifyReminders ? followUpReminder(AppStage.dikirim, at: at) : null,
+        reminderAt: state.notifyReminders ? at : null,
+      );
+      state = state.copyWith(applications: [a, ...state.applications]);
+      _saveApplication(a);
+      return;
+    }
     state = state.copyWith(
       applications: [
         JobApplication(
@@ -360,6 +446,19 @@ class AppNotifier extends Notifier<AppState> {
   }
 
   void updateApplication(String id, AppStage status, bool remind) {
+    if (_firebase) {
+      final at = followUpAt(DateTime.now());
+      final old = state.applications.where((a) => a.id == id).firstOrNull;
+      if (old == null) return;
+      final a = old.copyWith(
+        status: status,
+        remind: () => remind ? followUpReminder(status, at: at) : null,
+        reminderAt: () => remind ? at : null,
+      );
+      state = state.copyWith(applications: [for (final x in state.applications) x.id == id ? a : x]);
+      _saveApplication(a);
+      return;
+    }
     state = state.copyWith(
       applications: [
         for (final a in state.applications)
@@ -392,6 +491,8 @@ class AppNotifier extends Notifier<AppState> {
   void toggleNotifyReminders() {
     state = state.copyWith(notifyReminders: !state.notifyReminders);
     _saveNotifications();
+    if (!_firebase) return;
+    unawaited(state.notifyReminders ? _reminders.requestPermission().then((_) => _rescheduleAll()) : _reminders.cancelAll());
   }
 
   void _saveNotifications() => _write(
@@ -401,6 +502,7 @@ class AppNotifier extends Notifier<AppState> {
   /// Keluar. On Firebase builds the auth listener then resets the state and the router returns to Masuk.
   Future<void> signOut() async {
     if (!_firebase) return;
+    await _reminders.cancelAll().catchError(_report);
     await ref.read(authRepositoryProvider).signOut();
   }
 
@@ -419,6 +521,7 @@ class AppNotifier extends Notifier<AppState> {
       } on TimeoutException {
         throw authFailureFor('network-request-failed');
       }
+      await _reminders.cancelAll().catchError(_report);
       await auth.deleteAccount();
       await ref.read(cvStorageProvider).delete().catchError(_report);
       return;

@@ -277,24 +277,72 @@ class JobApplication {
     required this.status,
     required this.date,
     this.remind,
+    this.jobId,
+    this.appliedAt,
+    this.reminderAt,
   });
 
   final String id;
   final String title;
   final String company;
   final AppStage status;
+
+  /// Display date ("8 Okt"); derived from [appliedAt] when stored in Firestore.
   final String date;
+
+  /// Reminder text ("Tindak lanjut 15 Okt"); null when no reminder.
   final String? remind;
 
-  JobApplication copyWith({AppStage? status, String? Function()? remind}) => JobApplication(
+  /// The catalogue job, when the application was logged from KarirIn.
+  final String? jobId;
+  final DateTime? appliedAt;
+
+  /// When the follow-up notification fires; null when no reminder is scheduled.
+  final DateTime? reminderAt;
+
+  JobApplication copyWith({AppStage? status, String? Function()? remind, DateTime? Function()? reminderAt}) => JobApplication(
     id: id,
     title: title,
     company: company,
     status: status ?? this.status,
     date: date,
     remind: remind != null ? remind() : this.remind,
+    jobId: jobId,
+    appliedAt: appliedAt,
+    reminderAt: reminderAt != null ? reminderAt() : this.reminderAt,
   );
+
+  /// Firestore `users/{uid}/applications/{id}` (dates are converted to Timestamps by the repository).
+  Map<String, Object?> toMap() => {
+    'jobId': jobId,
+    'title': title,
+    'company': company,
+    'status': status.name,
+    'appliedAt': appliedAt,
+    'reminderAt': reminderAt,
+    'reminderLabel': remind,
+  };
+
+  factory JobApplication.fromMap(String id, Map<String, Object?> m, {required DateTime? Function(Object?) toDate}) {
+    final applied = toDate(m['appliedAt']);
+    return JobApplication(
+      id: id,
+      jobId: m['jobId'] as String?,
+      title: (m['title'] as String?) ?? '',
+      company: (m['company'] as String?) ?? '',
+      status: _byName(AppStage.values, m['status'], AppStage.dikirim),
+      date: applied == null ? '' : formatShortDateId(applied),
+      appliedAt: applied,
+      reminderAt: toDate(m['reminderAt']),
+      remind: m['reminderLabel'] as String?,
+    );
+  }
 }
+
+const _shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+/// "15 Okt", the short date used across the tracker.
+String formatShortDateId(DateTime d) => '${d.day} ${_shortMonths[d.month - 1]}';
 
 enum QuestionKind { single, multi, text, area }
 
