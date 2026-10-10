@@ -32,6 +32,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- New-job push messages sent by notify-new-jobs arrive in this channel (created by the app). -->
+        <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="new_jobs"/>
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"/>
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
             <intent-filter>

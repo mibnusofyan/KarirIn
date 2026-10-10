@@ -124,6 +124,18 @@ Pada build mock (`--dart-define=BACKEND=mock`, juga dipakai `flutter test` dan p
 - **Mode suara**: animasi rekam; transkrip diisi jawaban contoh.
 - **Autentikasi**: alur UI saja.
 
-Pada build Firebase yang belum tersedia: notifikasi push lowongan baru (Tahap B5).
+Notifikasi lowongan baru (Tahap B5): setiap perangkat menyimpan token FCM di `users/{uid}.fcmTokens` (izin notifikasi diminta setelah profil pertama disimpan). Setelah lowongan baru ditambahkan ke `catalog_extra.dart` dan diekspor, jalankan:
+
+```bash
+npm --prefix backend run seed
+npm --prefix backend run notify -- j21 --dry-run
+npm --prefix backend run notify -- j21
+```
+
+Skrip menghitung Match Score dengan port TypeScript (`backend/src/match-score.ts`, dijamin sama dengan Dart lewat `test/fixtures/match_cases.json`), lalu untuk pengguna dengan skor ≥ 75 yang tidak mematikan pengaturannya menyimpan dokumen di `users/{uid}/notifications` dan mengirim push. Mengetuk notifikasi membuka detail lowongan. Jalankan ulang aman: tiap pengguna hanya dinotifikasi sekali per lowongan. Alternatif tanpa laptop: GitHub → Actions → "Kirim notifikasi lowongan baru" (butuh secret `FIREBASE_SERVICE_ACCOUNT`).
+
+CI GitHub Actions (`.github/workflows/ci.yml`) menjalankan `flutter analyze`, `flutter test`, typecheck backend, uji kesetaraan Match Score Dart/TypeScript, dan uji security rules di setiap PR.
+
+App Check: Firebase AI Logic sudah di-enforce (permintaan Gemini hanya dari aplikasi asli atau token debug terdaftar); Firestore dan Auth sengaja tidak di-enforce agar aplikasi tetap bisa dipakai di perangkat yang gagal Play Integrity (misalnya emulator), dengan fitur AI jatuh ke cadangan.
 
 Match Score **tidak** disimulasikan: dihitung dengan rumus tetap `100 × (0,50·Sw + 0,15·St + 0,15·Sp + 0,10·Se + 0,10·Sl)` dan diuji terhadap contoh Tabel 2.4 (Rani: 80 → 92,5).

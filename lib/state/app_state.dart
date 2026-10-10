@@ -223,6 +223,8 @@ class AppNotifier extends Notifier<AppState> {
     );
     session.value = _confirmed ? SessionStatus.ready : SessionStatus.needsProfile;
     _watchApplications(user.uid);
+    // New-job push messages; the permission prompt waits until the user has a profile to be matched against.
+    unawaited(ref.read(pushServiceProvider).register(user.uid, askPermission: _confirmed && userData.notifyNewJobs));
   }
 
   void _watchApplications(String uid) {
@@ -280,9 +282,12 @@ class AppNotifier extends Notifier<AppState> {
 
   /// "Simpan profil" on Konfirmasi Profil: stores the reviewed profile and unlocks the main app.
   void confirmProfile() {
+    final first = !_confirmed;
     _confirmed = true;
     _saveProfile();
     if (_firebase) session.value = SessionStatus.ready;
+    final uid = _uid;
+    if (first && uid != null && state.notifyNewJobs) unawaited(ref.read(pushServiceProvider).register(uid, askPermission: true));
   }
 
   void setSignupName(String name) => state = state.copyWith(signupName: name);
@@ -486,6 +491,8 @@ class AppNotifier extends Notifier<AppState> {
   void toggleNotifyNewJobs() {
     state = state.copyWith(notifyNewJobs: !state.notifyNewJobs);
     _saveNotifications();
+    final uid = _uid;
+    if (state.notifyNewJobs && uid != null) unawaited(ref.read(pushServiceProvider).register(uid, askPermission: true));
   }
 
   void toggleNotifyReminders() {
@@ -503,6 +510,8 @@ class AppNotifier extends Notifier<AppState> {
   Future<void> signOut() async {
     if (!_firebase) return;
     await _reminders.cancelAll().catchError(_report);
+    final uid = _uid;
+    if (uid != null) await ref.read(pushServiceProvider).unregister(uid);
     await ref.read(authRepositoryProvider).signOut();
   }
 
@@ -515,6 +524,7 @@ class AppNotifier extends Notifier<AppState> {
       // Checked up front: the data must be deleted while still signed in (security rules), and a delete that
       // Firebase then refuses would leave an empty account behind.
       if (!auth.recentlySignedIn) throw authFailureFor('requires-recent-login');
+      await ref.read(pushServiceProvider).unregister(uid);
       try {
         await ref.read(profileRepositoryProvider).delete(uid).timeout(_writeTimeout);
         await ref.read(userRepositoryProvider).delete(uid).timeout(_writeTimeout);

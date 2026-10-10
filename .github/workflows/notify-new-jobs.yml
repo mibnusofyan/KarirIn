@@ -1,0 +1,52 @@
+# Manual: after adding jobs to lib/data/catalog_extra.dart and exporting backend/data/jobs.json, run this from
+# GitHub → Actions → "Kirim notifikasi lowongan baru". It seeds the catalogue, then notifies users whose profile
+# scores at least 75 on the new jobs (notification document + push message).
+# Needs the repository secret FIREBASE_SERVICE_ACCOUNT (the service account key JSON of my-tugas-web).
+name: Kirim notifikasi lowongan baru
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_ids:
+        description: ID lowongan baru, dipisah spasi (mis. j21 j22)
+        required: true
+      dry_run:
+        description: Uji saja, tampilkan siapa yang akan dinotifikasi tanpa mengirim
+        type: boolean
+        default: true
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      GCLOUD_PROJECT: my-tugas-web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - name: Kredensial service account
+        env:
+          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          test -n "$SERVICE_ACCOUNT" || { echo "Secret FIREBASE_SERVICE_ACCOUNT belum diisi"; exit 1; }
+          printf '%s' "$SERVICE_ACCOUNT" > "$RUNNER_TEMP/service-account.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/service-account.json" >> "$GITHUB_ENV"
+      - name: Impor katalog
+        if: ${{ !inputs.dry_run }}
+        run: npm run seed
+      - name: Kirim notifikasi
+        env:
+          JOB_IDS: ${{ inputs.job_ids }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          [[ "$JOB_IDS" =~ ^[A-Za-z0-9_\ -]+$ ]] || { echo "ID lowongan tidak valid: $JOB_IDS"; exit 1; }
+          if [ "$DRY_RUN" = "true" ]; then npm run notify -- $JOB_IDS --dry-run; else npm run notify -- $JOB_IDS; fi
+      - if: always()
+        run: rm -f "$RUNNER_TEMP/service-account.json"

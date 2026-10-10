@@ -6,7 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'data/backend.dart';
 import 'firebase/bootstrap.dart';
 import 'router.dart';
+import 'services/reminders.dart' show notificationTaps;
 import 'state/app_state.dart';
+import 'state/session.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
@@ -14,6 +16,7 @@ Future<void> main() async {
   if (backend == Backend.firebase) await initFirebase();
   // Created up front so the app state starts listening to sign-in changes before the splash asks where to go.
   final container = ProviderContainer()..read(appProvider);
+  notificationTaps.stream.listen(openFromNotification);
   runApp(UncontrolledProviderScope(container: container, child: const KarirInApp()));
 }
 

@@ -8,9 +8,10 @@
     "seed": "tsx src/seed.ts",
     "seed:emulator": "cross-env FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 GCLOUD_PROJECT=demo-karirin tsx src/seed.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:rules": "cd .. && firebase emulators:exec --project demo-karirin --only firestore \"npm --prefix backend test\"",
-    "questions": "tsx src/generate-questions.ts"
+    "test": "vitest run test/match-score.test.ts",
+    "test:rules": "cd .. && firebase emulators:exec --project demo-karirin --only firestore \"npm --prefix backend exec vitest run test/rules.test.ts\"",
+    "questions": "tsx src/generate-questions.ts",
+    "notify": "tsx src/notify-new-jobs.ts"
   },
   "engines": {
     "node": ">=20"
