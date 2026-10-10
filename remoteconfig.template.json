@@ -1,0 +1,29 @@
+{
+  "parameters": {
+    "ai_model_extract": {
+      "defaultValue": { "value": "gemini-3.8-flash" },
+      "description": "Gemini model that reads CVs (accuracy first). Change if the model is retired or its free quota runs out.",
+      "valueType": "STRING"
+    },
+    "ai_model_fast": {
+      "defaultValue": { "value": "gemini-3.5-flash-lite" },
+      "description": "Gemini model for grading interview answers and cover letters (many calls; free quota is per model).",
+      "valueType": "STRING"
+    },
+    "ai_enabled": {
+      "defaultValue": { "value": "true" },
+      "description": "Emergency switch: false makes grading and letters use the local fallback and CV reading show an error.",
+      "valueType": "BOOLEAN"
+    },
+    "consent_version": {
+      "defaultValue": { "value": "2026-10-v2" },
+      "description": "Version of the CV consent text stored with each user's consent.",
+      "valueType": "STRING"
+    },
+    "max_cv_mb": {
+      "defaultValue": { "value": "5" },
+      "description": "Largest CV PDF accepted, in MB.",
+      "valueType": "NUMBER"
+    }
+  }
+}
