@@ -3,6 +3,11 @@ import 'match_score.dart';
 
 enum LetterTone { formal, ringkas }
 
+const _months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+/// "10 Oktober 2026".
+String formatDateId(DateTime d) => '${d.day} ${_months[d.month - 1]} ${d.year}';
+
 /// Skills the letter highlights: the job's required, then optional, skills the user has (max 3).
 List<String> letterHighlights(Job job, Profile p) {
   final r = computeMatch(job, p);
@@ -27,7 +32,7 @@ String coverLetter(Job job, Profile p, LetterTone tone, int seed) {
     return 'Yth. Tim Rekrutmen ${job.company},\n\n$open Saya menguasai $sk. $expLine\n\n'
         'CV saya terlampir. Terima kasih atas waktu dan pertimbangannya.\n\nSalam,\n${p.name}';
   }
-  return '${p.city}, 8 Oktober 2026\n\nKepada Yth.\nTim Rekrutmen ${job.company}\ndi ${job.city}\n\nDengan hormat,\n\n'
+  return '${p.city}, ${formatDateId(DateTime.now())}\n\nKepada Yth.\nTim Rekrutmen ${job.company}\ndi ${job.city}\n\nDengan hormat,\n\n'
       '$open Saya memiliki keterampilan $sk yang sesuai dengan kebutuhan posisi ini.\n\n'
       '$expLine Pengalaman tersebut melatih saya bekerja teliti, rapi, dan tepat waktu.\n\n'
       'Saya yakin dapat berkontribusi bagi tim ${job.company}. Bersama surat ini saya lampirkan CV sebagai bahan pertimbangan. '

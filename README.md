@@ -45,7 +45,16 @@ flutter run --dart-define=BACKEND=mock       # data contoh offline (APK cadangan
 flutter run --dart-define=USE_EMULATOR=true  # Auth + Firestore emulator lokal (debug)
 ```
 
-Pada mode `firebase`: login email/kata sandi dan Google (Firebase Auth), redirect otomatis (belum login → Masuk, belum punya profil → Buat profil, sudah → Beranda), profil disimpan ke `profiles/{uid}` setelah dikonfirmasi lalu setiap perubahan ikut tersimpan, simpanan lowongan dan pengaturan notifikasi di `users/{uid}`, katalog 20 lowongan dan 35 skill dibaca dari Firestore, Keluar, dan Hapus akun (menghapus data lalu akun). Ekstraksi CV, lamaran, dan sesi wawancara masih lokal sampai Tahap B2/B3.
+Pada mode `firebase`: login email/kata sandi dan Google (Firebase Auth), redirect otomatis (belum login → Masuk, belum punya profil → Buat profil, sudah → Beranda), profil disimpan ke `profiles/{uid}` setelah dikonfirmasi lalu setiap perubahan ikut tersimpan, simpanan lowongan dan pengaturan notifikasi di `users/{uid}`, katalog 20 lowongan dan 35 skill dibaca dari Firestore, Keluar, dan Hapus akun (menghapus data lalu akun).
+
+Fitur AI (Tahap B2) memakai Gemini lewat Firebase AI Logic (nama model di Remote Config `ai_model_extract` dan `ai_model_fast`, sakelar `ai_enabled`):
+
+- **Ekstraksi CV**: PDF (maks. 5 MB) atau foto kamera dibaca Gemini menjadi profil, divalidasi (`lib/services/ai/ai_parsing.dart`), lalu diperiksa pengguna. Berkas tidak disimpan di server; salinannya hanya di penyimpanan privat perangkat.
+- **Penilaian wawancara**: rubrik 4 aspek + contoh jawaban yang dipersonalisasi; sesi tersimpan di `users/{uid}/interviews`. Mode suara memakai pengenalan suara perangkat (`id_ID`).
+- **Surat lamaran**: nada formal/ringkas, buat ulang, salin, dan bagikan.
+- Bila AI gagal (kuota, jaringan, keluaran tidak valid), penilaian dan surat memakai logika lokal dengan label "offline"; ekstraksi CV menampilkan galat dengan pilihan coba lagi atau tanya-jawab.
+
+Lamaran dan pengingat masih lokal sampai Tahap B3.
 
 | Berkas | Isi |
 |---|---|
@@ -56,6 +65,8 @@ Pada mode `firebase`: login email/kata sandi dan Google (Firebase Auth), redirec
 | `tool/export_seed.dart` | Mengekspor lowongan dan skill (`mock_data.dart` + `catalog_extra.dart`) ke `backend/data/*.json` |
 | `backend/test/rules.test.ts` | Uji security rules di emulator: `npm --prefix backend run test:rules` |
 | `backend/src/seed.ts` | Mengimpor katalog ke Firestore (merge; lowongan yang dihapus dari JSON dinonaktifkan) |
+| `backend/src/generate-questions.ts` | Draf 5 pertanyaan wawancara per lowongan dari Gemini → ditinjau tim (`reviewedBy`) → diterbitkan ke `jobs/{id}/questionSets` |
+| `tool/make_sample_cvs.py`, `test_data/cv/` | CV contoh fiktif (Rani, Bayu, Sinta) untuk menguji ekstraksi; pakai juga untuk demo dan UAT |
 
 Mengisi katalog:
 
@@ -83,11 +94,13 @@ Rahasia **tidak** masuk git: `android/key.properties` dan `android/app/upload-ke
 
 ## Yang masih disimulasikan
 
-Prototipe ini berjalan sepenuhnya offline dengan data contoh, sehingga bisa didemokan tanpa backend:
+Pada build mock (`--dart-define=BACKEND=mock`, juga dipakai `flutter test` dan pratinjau web) aplikasi berjalan offline dengan data contoh:
 
-- **Ekstraksi CV / profil**: memakai profil persona Rani (CV) atau jawaban tanya-jawab (Bayu). Produksi: unggah ke Cloud Storage → fungsi `extractProfile` → Gemini.
-- **Penilaian wawancara & surat lamaran**: heuristik lokal dengan bentuk keluaran yang sama dengan JSON dari Gemini.
-- **Mode suara**: animasi rekam; transkrip diisi jawaban contoh. Produksi: `speech_to_text`.
-- **Autentikasi, notifikasi, unggah berkas**: alur UI lengkap, belum tersambung ke Firebase.
+- **Ekstraksi CV / profil**: memakai profil persona Rani (CV) atau jawaban tanya-jawab (Bayu).
+- **Penilaian wawancara & surat lamaran**: heuristik lokal dengan bentuk keluaran yang sama dengan JSON dari Gemini; juga menjadi cadangan build Firebase saat AI tidak tersedia.
+- **Mode suara**: animasi rekam; transkrip diisi jawaban contoh.
+- **Autentikasi**: alur UI saja.
+
+Pada build Firebase yang masih lokal: pelacak lamaran dan pengingat (Tahap B3), serta notifikasi push lowongan baru (Tahap B5).
 
 Match Score **tidak** disimulasikan: dihitung dengan rumus tetap `100 × (0,50·Sw + 0,15·St + 0,15·Sp + 0,10·Se + 0,10·Sl)` dan diuji terhadap contoh Tabel 2.4 (Rani: 80 → 92,5).

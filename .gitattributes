@@ -1,0 +1,2 @@
+# PDFs (e.g. the generated sample CVs) can be pure ASCII; line-ending conversion would break their byte offsets.
+*.pdf binary

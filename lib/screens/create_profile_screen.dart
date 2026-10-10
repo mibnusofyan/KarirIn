@@ -1,12 +1,18 @@
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../data/backend.dart';
 import '../data/models.dart';
 import '../router.dart';
 import '../state/app_state.dart';
 import '../theme/career_theme.dart';
+import '../services/ai/ai_service.dart';
 import '../widgets/career_widgets.dart';
+import '../widgets/common.dart';
 
 /// Buat profil: one recommended path (CV PDF) with the alternatives in plain sight.
 class CreateProfileScreen extends ConsumerWidget {
@@ -15,10 +21,39 @@ class CreateProfileScreen extends ConsumerWidget {
   Future<void> _askConsent(BuildContext context, WidgetRef ref, ProfileSource source) async {
     final ok = await showCareerSheet<bool>(context, (_) => _ConsentSheet(photo: source == ProfileSource.cvPhoto));
     if (ok != true || !context.mounted) return;
-    ref.read(appProvider.notifier)
-      ..recordCvConsent()
-      ..useCvProfile(source);
+    final n = ref.read(appProvider.notifier);
+    if (backend == Backend.mock) {
+      n.useCvProfile(source);
+    } else {
+      final cv = await (source == ProfileSource.cvPhoto ? _takePhoto() : _pickPdf(context));
+      if (cv == null || !context.mounted) return;
+      n
+        ..recordCvConsent()
+        ..setPendingCv(cv);
+    }
+    if (!context.mounted) return;
     context.go('${Routes.processing}?kind=${source == ProfileSource.cvPhoto ? 'photo' : 'pdf'}');
+  }
+
+  static Future<CvFile?> _pickPdf(BuildContext context) async {
+    final res = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: const ['pdf'], withData: true);
+    final bytes = res?.files.single.bytes;
+    if (bytes == null) return null;
+    var maxMb = 5;
+    try {
+      maxMb = FirebaseRemoteConfig.instance.getInt('max_cv_mb');
+    } catch (_) {}
+    if (bytes.length > maxMb * 1024 * 1024) {
+      if (context.mounted) showToast(context, 'Ukuran CV maksimal $maxMb MB. Perkecil berkasnya, lalu coba lagi.');
+      return null;
+    }
+    return CvFile(bytes: bytes, mimeType: 'application/pdf', source: ProfileSource.cvPdf);
+  }
+
+  static Future<CvFile?> _takePhoto() async {
+    final photo = await ImagePicker().pickImage(source: ImageSource.camera, maxWidth: 1600, maxHeight: 1600, imageQuality: 85);
+    if (photo == null) return null;
+    return CvFile(bytes: await photo.readAsBytes(), mimeType: 'image/jpeg', source: ProfileSource.cvPhoto);
   }
 
   @override
@@ -219,9 +254,20 @@ class _ConsentSheetState extends State<_ConsentSheet> {
       children: [
         const CareerSheetHeader('Izinkan KarirIn memproses CV-mu?'),
         const SizedBox(height: 8),
-        point(Icons.check_circle_outline_rounded, 'Hanya dipakai untuk menyusun profil dan menghitung kecocokan.'),
-        point(Icons.lock_outline_rounded, 'Disimpan terenkripsi dan hanya bisa diakses olehmu.'),
-        point(Icons.delete_outline_rounded, 'Bisa kamu hapus kapan saja dari Pengaturan.'),
+        if (backend == Backend.mock) ...[
+          point(Icons.check_circle_outline_rounded, 'Hanya dipakai untuk menyusun profil dan menghitung kecocokan.'),
+          point(Icons.lock_outline_rounded, 'Disimpan terenkripsi dan hanya bisa diakses olehmu.'),
+          point(Icons.delete_outline_rounded, 'Bisa kamu hapus kapan saja dari Pengaturan.'),
+        ] else ...[
+          point(Icons.auto_awesome_outlined, 'CV dibaca oleh layanan AI Google Gemini hanya untuk menyusun profilmu.'),
+          point(Icons.phone_android_rounded, 'Berkas CV tidak disimpan di server KarirIn; salinannya hanya ada di perangkatmu.'),
+          point(Icons.delete_outline_rounded, 'Bisa kamu hapus kapan saja dari Pengaturan.'),
+          point(
+            Icons.info_outline_rounded,
+            'KarirIn memakai Gemini versi gratis, yang datanya dapat dipakai Google untuk meningkatkan layanan. '
+            'Bila keberatan, gunakan jalur tanya-jawab.',
+          ),
+        ],
         const SizedBox(height: 4),
         Semantics(
           checked: _ok,
@@ -252,10 +298,11 @@ class _ConsentSheetState extends State<_ConsentSheet> {
           ),
         ),
         const SizedBox(height: 12),
-        const Text(
-          'Demo: berkas tidak benar-benar diunggah. KarirIn memakai CV contoh (Rani) untuk menyusun profil.',
-          style: CareerText.small,
-        ),
+        if (backend == Backend.mock)
+          const Text(
+            'Demo: berkas tidak benar-benar diunggah. KarirIn memakai CV contoh (Rani) untuk menyusun profil.',
+            style: CareerText.small,
+          ),
         const SizedBox(height: 18),
         CareerButton(
           label: widget.photo ? 'Setuju & buka kamera' : 'Setuju & pilih berkas',

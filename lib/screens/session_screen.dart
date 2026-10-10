@@ -4,7 +4,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
+import '../data/backend.dart';
+import '../data/models.dart';
+import '../data/repositories/providers.dart';
 import '../logic/interview.dart';
 import '../router.dart';
 import '../state/app_state.dart';
@@ -33,17 +37,36 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
   Timer? _waveTimer;
 
   late final _job = ref.read(appProvider).job(ref.read(appProvider).coachJobId);
-  late final _questions = questionsFor(_job);
+
+  /// The job's reviewed AI question set from Firestore, else the built-in template. Null while loading.
+  List<InterviewQuestion>? _loaded;
+  List<InterviewQuestion> get _questions => _loaded!;
+
+  final _speech = SpeechToText();
+  bool _speechReady = false;
 
   @override
   void initState() {
     super.initState();
     _answer.addListener(() => setState(() {}));
+    if (backend == Backend.mock) {
+      _loaded = questionsFor(_job);
+    } else {
+      ref
+          .read(jobRepositoryProvider)
+          .fetchQuestions(_job.id)
+          .timeout(const Duration(seconds: 6))
+          .then<List<InterviewQuestion>?>((qs) => qs, onError: (Object _) => null)
+          .then((qs) {
+            if (mounted) setState(() => _loaded = qs ?? questionsFor(_job));
+          });
+    }
   }
 
   @override
   void dispose() {
     _waveTimer?.cancel();
+    _speech.cancel();
     _answer.dispose();
     super.dispose();
   }
@@ -52,8 +75,58 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
   bool get _last => _q >= _questions.length - 1;
   bool get _hasProgress => _results.isNotEmpty || _answer.text.trim().isNotEmpty;
 
-  /// Voice mode (simulated speech-to-text): the transcript is filled with the demo answer on stop.
-  void _toggleMic() {
+  void _startWave() => _waveTimer = Timer.periodic(const Duration(milliseconds: 120), (_) {
+    setState(() => _wave = List.generate(28, (_) => 6 + _rnd.nextInt(43).toDouble()));
+  });
+
+  void _stopWave() {
+    _waveTimer?.cancel();
+    if (mounted) {
+      setState(() {
+        _listening = false;
+        _wave = List.filled(28, 4);
+      });
+    }
+  }
+
+  /// Voice mode with the device's speech recogniser (Bahasa Indonesia). The transcript stays editable.
+  Future<void> _toggleMic() async {
+    if (backend == Backend.mock) return _toggleSimulatedMic();
+    if (_listening) {
+      await _speech.stop();
+      _stopWave();
+      return;
+    }
+    if (!_speechReady) {
+      _speechReady = await _speech.initialize(
+        onStatus: (s) {
+          if (s == SpeechToText.doneStatus || s == SpeechToText.notListeningStatus) _stopWave();
+        },
+        onError: (_) => _stopWave(),
+      );
+      if (!_speechReady) {
+        if (mounted) showToast(context, 'Pengenalan suara tidak tersedia atau izin mikrofon ditolak. Ketik jawabanmu.');
+        ref.read(appProvider.notifier).setVoiceMode(false);
+        return;
+      }
+    }
+    _answer.clear();
+    setState(() => _listening = true);
+    _startWave();
+    await _speech.listen(
+      onResult: (r) => _answer.text = r.recognizedWords,
+      listenOptions: SpeechListenOptions(
+        localeId: 'id_ID',
+        listenFor: const Duration(minutes: 2),
+        pauseFor: const Duration(seconds: 6),
+        partialResults: true,
+        listenMode: ListenMode.dictation,
+      ),
+    );
+  }
+
+  /// Mock builds: the transcript is filled with the demo answer on stop.
+  void _toggleSimulatedMic() {
     if (_listening) {
       _waveTimer?.cancel();
       setState(() {
@@ -64,22 +137,26 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
     } else {
       _answer.clear();
       setState(() => _listening = true);
-      _waveTimer = Timer.periodic(const Duration(milliseconds: 120), (_) {
-        setState(() => _wave = List.generate(28, (_) => 6 + _rnd.nextInt(43).toDouble()));
-      });
+      _startWave();
     }
   }
 
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
     setState(() => _evaluating = true);
-    await Future<void>.delayed(const Duration(milliseconds: 1100));
+    final answer = _answer.text.trim();
+    final AnswerScore fb;
+    if (backend == Backend.mock) {
+      await Future<void>.delayed(const Duration(milliseconds: 1100));
+      fb = gradeAnswer(answer);
+    } else {
+      fb = await ref.read(aiServiceProvider).gradeAnswer(job: _job, question: _questions[_q], answer: answer);
+    }
     if (!mounted) return;
-    final fb = gradeAnswer(_answer.text);
     setState(() {
       _evaluating = false;
       _fb = fb;
-      _results.add(AnsweredQuestion(_questions[_q], fb));
+      _results.add(AnsweredQuestion(_questions[_q], fb, answer: answer));
     });
   }
 
@@ -121,12 +198,18 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
       if (leave != true || !mounted) return;
     }
     _waveTimer?.cancel();
+    await _speech.cancel();
     if (mounted) context.back(Routes.coach);
   }
 
   @override
   Widget build(BuildContext context) {
     final voice = ref.watch(appProvider).voiceMode;
+    if (_loaded == null) {
+      return const CareerTheme(
+        child: Scaffold(body: Center(child: CircularProgressIndicator(color: CareerColors.teal))),
+      );
+    }
     final q = _questions[_q];
     final fb = _fb;
     final answering = fb == null && !_evaluating;
@@ -171,7 +254,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
               const SizedBox(height: 18),
               if (answering) ...[const _StarHelp(), const SizedBox(height: 16), if (voice) ..._voiceInput() else ..._typeInput(q.demo)],
               if (_evaluating) const _Evaluating(),
-              if (fb != null) _Feedback(fb: fb, better: q.better, showEx: _showEx, onToggleEx: () => setState(() => _showEx = !_showEx)),
+              if (fb != null) _Feedback(fb: fb, better: fb.better ?? q.better, showEx: _showEx, onToggleEx: () => setState(() => _showEx = !_showEx)),
             ],
           ),
           bottomNavigationBar: Container(
@@ -232,7 +315,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
           padding: const EdgeInsets.only(left: 4),
           child: Text(_words < 3 ? '$_words kata · minimal 3 kata' : '$_words kata', style: CareerText.small),
         ),
-        TextButton(onPressed: () => _answer.text = demo, child: const Text('Isi contoh (demo)')),
+        if (demo.isNotEmpty) TextButton(onPressed: () => _answer.text = demo, child: const Text('Isi contoh (demo)')),
       ],
     ),
   ];
@@ -247,11 +330,13 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
       ),
       child: Column(
         children: [
-          const Align(
-            alignment: Alignment.centerRight,
-            child: CareerPill('Simulasi', icon: Icons.science_outlined, background: CareerColors.background),
-          ),
-          const SizedBox(height: 8),
+          if (backend == Backend.mock) ...[
+            const Align(
+              alignment: Alignment.centerRight,
+              child: CareerPill('Simulasi', icon: Icons.science_outlined, background: CareerColors.background),
+            ),
+            const SizedBox(height: 8),
+          ],
           ExcludeSemantics(
             child: SizedBox(
               height: 52,
@@ -473,7 +558,14 @@ class _Feedback extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('UMPAN BALIK', style: CareerText.eyebrow.copyWith(color: color)),
+              Wrap(
+                spacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text('UMPAN BALIK', style: CareerText.eyebrow.copyWith(color: color)),
+                  if (fb.offline) Text('· dinilai offline karena AI tidak tersedia', style: CareerText.small.copyWith(color: color)),
+                ],
+              ),
               const SizedBox(height: 4),
               Wrap(
                 crossAxisAlignment: WrapCrossAlignment.end,

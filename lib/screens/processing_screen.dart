@@ -4,16 +4,21 @@ import 'package:go_router/go_router.dart';
 
 import '../data/models.dart';
 import '../router.dart';
+import '../services/ai/ai_parsing.dart';
 import '../state/app_state.dart';
 import '../theme/career_theme.dart';
 import '../widgets/career_widgets.dart';
 import '../widgets/common.dart';
 
-/// AI extraction status (simulated), then a result state that hands over to "Periksa profil".
-/// Production: upload to Cloud Storage → `extractProfile` Cloud Function → Gemini.
+/// AI extraction status, then a result state that hands over to "Periksa profil".
+/// With a picked CV (Firebase builds) Gemini reads it through Firebase AI Logic; otherwise (Q&A, mock builds) the
+/// steps are an animation over a profile that already exists.
 class ProcessingScreen extends ConsumerStatefulWidget {
-  const ProcessingScreen({super.key, required this.fromQa});
+  const ProcessingScreen({super.key, required this.fromQa, this.photo = false});
   final bool fromQa;
+
+  /// The CV is a photo (kind=photo), before any profile carries that source.
+  final bool photo;
 
   /// Simulated processing time.
   static const duration = Duration(milliseconds: 2400);
@@ -23,12 +28,49 @@ class ProcessingScreen extends ConsumerStatefulWidget {
 }
 
 class _ProcessingScreenState extends ConsumerState<ProcessingScreen> with SingleTickerProviderStateMixin {
+  /// A real CV is waiting to be read by AI.
+  late final bool _ai = !widget.fromQa && ref.read(appProvider.notifier).hasPendingCv;
   late final _c = AnimationController(vsync: this, duration: ProcessingScreen.duration)
     ..addStatusListener((s) {
       if (s == AnimationStatus.completed) setState(() => _done = true);
-    })
-    ..forward();
+    });
   bool _done = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _start();
+  }
+
+  /// The ring creeps towards 90% while Gemini works and only completes when the profile is ready.
+  void _start() {
+    if (!_ai) {
+      _c.forward();
+      return;
+    }
+    _c
+      ..value = 0
+      ..animateTo(.9, duration: const Duration(seconds: 14), curve: Curves.easeOutCubic);
+    ref
+        .read(appProvider.notifier)
+        .extractPendingCv()
+        .then(
+          (_) {
+            if (mounted) _c.animateTo(1, duration: const Duration(milliseconds: 400));
+          },
+          onError: (Object e) {
+            if (!mounted) return;
+            _c.stop();
+            setState(() => _error = e is AiFailure ? e.message : AiFailure.invalid.message);
+          },
+        );
+  }
+
+  void _retry() {
+    setState(() => _error = null);
+    _start();
+  }
 
   @override
   void dispose() {
@@ -54,12 +96,12 @@ class _ProcessingScreenState extends ConsumerState<ProcessingScreen> with Single
   @override
   Widget build(BuildContext context) {
     final profile = ref.watch(appProvider).profile;
-    final photo = profile.source == ProfileSource.cvPhoto;
+    final photo = widget.photo || profile.source == ProfileSource.cvPhoto;
     final steps = _steps(photo);
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
     return PopScope(
-      canPop: _done,
+      canPop: _done || _error != null,
       child: CareerTheme(
         child: Scaffold(
           body: SafeArea(
@@ -73,7 +115,9 @@ class _ProcessingScreenState extends ConsumerState<ProcessingScreen> with Single
                   child: child,
                 ),
               ),
-              child: _done
+              child: _error != null
+                  ? _Failed(key: const ValueKey('failed'), message: _error!, onRetry: _retry)
+                  : _done
                   ? _Result(key: const ValueKey('done'), profile: profile, fromQa: widget.fromQa)
                   : AnimatedBuilder(
                       key: const ValueKey('working'),
@@ -86,6 +130,7 @@ class _ProcessingScreenState extends ConsumerState<ProcessingScreen> with Single
                             ? 'Membaca foto CV dan menyusun profilmu'
                             : 'Membaca CV dan menyusun profilmu',
                         steps: steps,
+                        simulated: !_ai,
                       ),
                     ),
             ),
@@ -97,10 +142,11 @@ class _ProcessingScreenState extends ConsumerState<ProcessingScreen> with Single
 }
 
 class _Working extends StatelessWidget {
-  const _Working({required this.value, required this.title, required this.steps});
+  const _Working({required this.value, required this.title, required this.steps, required this.simulated});
   final double value;
   final String title;
   final List<String> steps;
+  final bool simulated;
 
   @override
   Widget build(BuildContext context) {
@@ -153,8 +199,8 @@ class _Working extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        const Text(
-          'Jangan tutup aplikasi selama proses berjalan. Pada demo ini, proses AI disimulasikan.',
+        Text(
+          'Jangan tutup aplikasi selama proses berjalan.${simulated ? ' Pada demo ini, proses AI disimulasikan.' : ''}',
           textAlign: TextAlign.center,
           style: CareerText.small,
         ),
@@ -316,4 +362,36 @@ class _Result extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Extraction failed: say why, and offer a retry or the paths that do not need the file.
+class _Failed extends StatelessWidget {
+  const _Failed({super.key, required this.message, required this.onRetry});
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) => ListView(
+    padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
+    children: [
+      Center(
+        child: Container(
+          width: 88,
+          height: 88,
+          decoration: const BoxDecoration(color: CareerColors.amberLight, shape: BoxShape.circle),
+          child: const Icon(Icons.description_outlined, color: CareerColors.amber, size: 44),
+        ),
+      ),
+      const SizedBox(height: 24),
+      const Text('CV belum terbaca', textAlign: TextAlign.center, style: CareerText.heading),
+      const SizedBox(height: 10),
+      Text(message, textAlign: TextAlign.center, style: CareerText.muted),
+      const SizedBox(height: 28),
+      CareerButton(label: 'Coba lagi', icon: Icons.refresh_rounded, onPressed: onRetry),
+      const SizedBox(height: 8),
+      OutlinedButton(onPressed: () => context.go(Routes.create), child: const Text('Pilih berkas lain')),
+      const SizedBox(height: 4),
+      TextButton(onPressed: () => context.go(Routes.qa), child: const Text('Isi lewat tanya-jawab')),
+    ],
+  );
 }
