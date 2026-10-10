@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../data/backend.dart';
 import '../data/models.dart';
 import '../logic/match_score.dart';
 import '../data/repositories/auth_repository.dart';
@@ -173,8 +174,9 @@ class ProfileScreen extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Data diproses sesuai UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi. Pada demo ini, notifikasi belum dikirim ke perangkat.',
+              Text(
+                'Data diproses sesuai UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi.'
+                '${backend == Backend.mock ? ' Pada demo ini, notifikasi belum dikirim ke perangkat.' : ''}',
                 style: CareerText.small,
                 textAlign: TextAlign.center,
               ),

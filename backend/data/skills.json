@@ -3,7 +3,12 @@
     "id": "akuntansi-dasar",
     "name": "Akuntansi Dasar",
     "synonyms": [],
-    "resource": null
+    "resource": {
+      "type": "modul",
+      "duration": "2 jam",
+      "title": "Akuntansi Dasar untuk Pemula",
+      "url": "https://www.youtube.com/results?search_query=Akuntansi+Dasar+untuk+Pemula"
+    }
   },
   {
     "id": "bahasa-inggris",
@@ -13,7 +18,7 @@
       "type": "modul",
       "duration": "10 jam",
       "title": "Bahasa Inggris untuk Dunia Kerja",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Bahasa+Inggris+untuk+Dunia+Kerja"
     }
   },
   {
@@ -24,7 +29,7 @@
       "type": "video",
       "duration": "1 jam",
       "title": "Desain Cepat dengan Canva",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Desain+Cepat+dengan+Canva"
     }
   },
   {
@@ -35,7 +40,7 @@
       "type": "kursus",
       "duration": "4 jam",
       "title": "Copywriting untuk Media Sosial",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Copywriting+untuk+Media+Sosial"
     }
   },
   {
@@ -46,7 +51,7 @@
       "type": "kursus",
       "duration": "4 jam",
       "title": "Editing Video Pendek dengan Ponsel",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Editing+Video+Pendek+dengan+Ponsel"
     }
   },
   {
@@ -57,7 +62,7 @@
       "type": "video",
       "duration": "90 mnt",
       "title": "Foto Produk dengan Ponsel",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Foto+Produk+dengan+Ponsel"
     }
   },
   {
@@ -68,7 +73,7 @@
       "type": "video",
       "duration": "2 jam",
       "title": "Git dan GitHub untuk Pemula",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Git+dan+GitHub+untuk+Pemula"
     }
   },
   {
@@ -79,7 +84,7 @@
       "type": "kursus",
       "duration": "8 jam",
       "title": "HTML & CSS untuk Pemula",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=HTML+%26+CSS+untuk+Pemula"
     }
   },
   {
@@ -90,7 +95,7 @@
       "type": "modul",
       "duration": "1 jam",
       "title": "Instalasi Sistem Operasi dan Aplikasi",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Instalasi+Sistem+Operasi+dan+Aplikasi"
     }
   },
   {
@@ -101,7 +106,7 @@
       "type": "kursus",
       "duration": "6 jam",
       "title": "Dasar Jaringan Komputer",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Dasar+Jaringan+Komputer"
     }
   },
   {
@@ -112,7 +117,7 @@
       "type": "kursus",
       "duration": "10 jam",
       "title": "JavaScript Dasar",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=JavaScript+Dasar"
     }
   },
   {
@@ -123,7 +128,7 @@
       "type": "modul",
       "duration": "1 jam",
       "title": "Teknik Cek Ganda Data Administrasi",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Teknik+Cek+Ganda+Data+Administrasi"
     }
   },
   {
@@ -134,7 +139,7 @@
       "type": "video",
       "duration": "2 jam",
       "title": "Komunikasi Efektif di Tempat Kerja",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Komunikasi+Efektif+di+Tempat+Kerja"
     }
   },
   {
@@ -145,7 +150,7 @@
       "type": "video",
       "duration": "2 jam",
       "title": "Konfigurasi Router dan Access Point",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Konfigurasi+Router+dan+Access+Point"
     }
   },
   {
@@ -156,7 +161,7 @@
       "type": "modul",
       "duration": "3 jam",
       "title": "Dasar Manajemen Persediaan",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Dasar+Manajemen+Persediaan"
     }
   },
   {
@@ -167,7 +172,7 @@
       "type": "kursus",
       "duration": "3 jam",
       "title": "Mengelola Toko di Marketplace",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Mengelola+Toko+di+Marketplace"
     }
   },
   {
@@ -178,7 +183,7 @@
       "type": "video",
       "duration": "1 jam",
       "title": "Manajemen Waktu di Tempat Kerja",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Manajemen+Waktu+di+Tempat+Kerja"
     }
   },
   {
@@ -189,7 +194,7 @@
       "type": "modul",
       "duration": "3 jam",
       "title": "Iklan Berbayar di Instagram & Facebook",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Iklan+Berbayar+di+Instagram+%26+Facebook"
     }
   },
   {
@@ -203,7 +208,7 @@
       "type": "kursus",
       "duration": "4 jam",
       "title": "Excel untuk Administrasi",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Excel+untuk+Administrasi"
     }
   },
   {
@@ -213,7 +218,12 @@
       "Word",
       "MS Word"
     ],
-    "resource": null
+    "resource": {
+      "type": "modul",
+      "duration": "2 jam",
+      "title": "Microsoft Word untuk Pemula",
+      "url": "https://www.youtube.com/results?search_query=Microsoft+Word+untuk+Pemula"
+    }
   },
   {
     "id": "pelaporan-keuangan",
@@ -223,7 +233,7 @@
       "type": "kursus",
       "duration": "3 jam",
       "title": "Dasar Menyusun Laporan Keuangan",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Dasar+Menyusun+Laporan+Keuangan"
     }
   },
   {
@@ -234,14 +244,19 @@
       "type": "video",
       "duration": "2 jam",
       "title": "Prinsip Pelayanan Prima",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Prinsip+Pelayanan+Prima"
     }
   },
   {
     "id": "pembukuan",
     "name": "Pembukuan",
     "synonyms": [],
-    "resource": null
+    "resource": {
+      "type": "modul",
+      "duration": "2 jam",
+      "title": "Pembukuan untuk Pemula",
+      "url": "https://www.youtube.com/results?search_query=Pembukuan+untuk+Pemula"
+    }
   },
   {
     "id": "pencatatan-stok",
@@ -251,7 +266,7 @@
       "type": "video",
       "duration": "90 mnt",
       "title": "Kartu Stok dan Stock Opname",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Kartu+Stok+dan+Stock+Opname"
     }
   },
   {
@@ -262,7 +277,7 @@
       "type": "modul",
       "duration": "2 jam",
       "title": "Manajemen Arsip Kantor",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Manajemen+Arsip+Kantor"
     }
   },
   {
@@ -273,7 +288,7 @@
       "type": "video",
       "duration": "90 mnt",
       "title": "Merakit PC Langkah demi Langkah",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Merakit+PC+Langkah+demi+Langkah"
     }
   },
   {
@@ -284,7 +299,7 @@
       "type": "kursus",
       "duration": "5 jam",
       "title": "PPh 21 dan Dasar Perpajakan",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=PPh+21+dan+Dasar+Perpajakan"
     }
   },
   {
@@ -295,7 +310,7 @@
       "type": "kursus",
       "duration": "8 jam",
       "title": "Python Dasar untuk Data",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Python+Dasar+untuk+Data"
     }
   },
   {
@@ -306,7 +321,7 @@
       "type": "modul",
       "duration": "3 jam",
       "title": "Dasar Proses Rekrutmen",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Dasar+Proses+Rekrutmen"
     }
   },
   {
@@ -317,7 +332,7 @@
       "type": "kursus",
       "duration": "6 jam",
       "title": "SQL Dasar untuk Analisis Data",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=SQL+Dasar+untuk+Analisis+Data"
     }
   },
   {
@@ -328,7 +343,7 @@
       "type": "video",
       "duration": "2 jam",
       "title": "Pengenalan Software Akuntansi untuk UMKM",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Pengenalan+Software+Akuntansi+untuk+UMKM"
     }
   },
   {
@@ -339,7 +354,7 @@
       "type": "modul",
       "duration": "5 jam",
       "title": "Statistik Deskriptif untuk Pemula",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Statistik+Deskriptif+untuk+Pemula"
     }
   },
   {
@@ -350,7 +365,7 @@
       "type": "modul",
       "duration": "3 jam",
       "title": "Diagnosis Kerusakan Komputer",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Diagnosis+Kerusakan+Komputer"
     }
   },
   {
@@ -361,7 +376,7 @@
       "type": "kursus",
       "duration": "4 jam",
       "title": "Visualisasi Data dengan Spreadsheet",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Visualisasi+Data+dengan+Spreadsheet"
     }
   },
   {
@@ -372,7 +387,7 @@
       "type": "video",
       "duration": "1 jam",
       "title": "Membuat e-Faktur Langkah demi Langkah",
-      "url": null
+      "url": "https://www.youtube.com/results?search_query=Membuat+e-Faktur+Langkah+demi+Langkah"
     }
   }
 ]

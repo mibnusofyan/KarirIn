@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:karirin/data/catalog_extra.dart';
 import 'package:karirin/data/mock_data.dart';
+import 'package:karirin/data/models.dart';
 
 void main() {
   const encoder = JsonEncoder.withIndent('  ');
@@ -17,6 +18,14 @@ void main() {
   final allJobs = [...jobs, ...extraJobs];
   write('jobs.json', [for (final j in allJobs) {'id': j.id, ...j.toMap()}]);
   write('skills.json', [
-    for (final s in buildSkillCatalog(allJobs, {...resources, ...extraResources})) {'id': s.id, ...s.toMap()},
+    for (final s in buildSkillCatalog(allJobs, {...resources, ...extraResources})) {'id': s.id, ...withMaterial(s).toMap()},
   ]);
+}
+
+/// Every skill gets learning material with a link. Until the team curates a course per skill, the link is a search
+/// for free videos on the material's title, which always resolves.
+Skill withMaterial(Skill s) {
+  final r = s.resource ?? LearningResource(ResourceType.modul, '2 jam', '${s.name} untuk Pemula');
+  final url = r.url ?? 'https://www.youtube.com/results?search_query=${Uri.encodeQueryComponent(r.title)}';
+  return Skill(name: s.name, synonyms: s.synonyms, resource: LearningResource(r.type, r.duration, r.title, url: url));
 }

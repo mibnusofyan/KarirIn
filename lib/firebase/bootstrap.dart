@@ -25,6 +25,10 @@ const remoteConfigDefaults = <String, Object>{
 const _useEmulator = bool.fromEnvironment('USE_EMULATOR');
 const _emulatorHost = String.fromEnvironment('EMULATOR_HOST', defaultValue: '10.0.2.2');
 
+/// Debug builds: `--dart-define=APP_CHECK_DEBUG_TOKEN=<uuid>` reuses a token already registered in the Firebase
+/// console (App Check → Manage debug tokens), so reinstalling or clearing app data does not need a new one.
+const _debugToken = String.fromEnvironment('APP_CHECK_DEBUG_TOKEN');
+
 /// Connects to Firebase before the first frame. Only called when built with `BACKEND=firebase`.
 Future<void> initFirebase() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -36,7 +40,9 @@ Future<void> initFirebase() async {
   // Play Integrity in release builds (configured for apps distributed outside Google Play); debug builds and
   // emulators use the debug provider, whose token is registered in the Firebase console.
   await FirebaseAppCheck.instance.activate(
-    providerAndroid: kReleaseMode ? const AndroidPlayIntegrityProvider() : const AndroidDebugProvider(),
+    providerAndroid: kReleaseMode
+        ? const AndroidPlayIntegrityProvider()
+        : AndroidDebugProvider(debugToken: _debugToken.isEmpty ? null : _debugToken),
   );
 
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;

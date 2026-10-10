@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../models.dart';
 import 'streams.dart';
 
@@ -39,4 +41,32 @@ class MockApplicationRepository implements ApplicationRepository {
     _apps[uid] = [...?_apps[uid]]..removeWhere((a) => a.id == applicationId);
     _changes.add(uid);
   }
+}
+
+class FirestoreApplicationRepository implements ApplicationRepository {
+  FirestoreApplicationRepository([FirebaseFirestore? db]) : _db = db ?? FirebaseFirestore.instance;
+  final FirebaseFirestore _db;
+
+  CollectionReference<Map<String, dynamic>> _col(String uid) => _db.collection('users').doc(uid).collection('applications');
+
+  static DateTime? _date(Object? v) => v is Timestamp ? v.toDate() : null;
+
+  @override
+  Stream<List<JobApplication>> watch(String uid) => _col(uid)
+      .orderBy('appliedAt', descending: true)
+      .snapshots()
+      .map((s) => [for (final d in s.docs) JobApplication.fromMap(d.id, d.data(), toDate: _date)]);
+
+  @override
+  Future<void> upsert(String uid, JobApplication a) => _col(uid).doc(a.id).set({
+    for (final e in a.toMap().entries) e.key: e.value is DateTime ? Timestamp.fromDate(e.value as DateTime) : e.value,
+    // History of every stage the user recorded, for the tracker and later evaluation.
+    'statusHistory': FieldValue.arrayUnion([
+      {'status': a.status.name, 'at': Timestamp.now()},
+    ]),
+    'updatedAt': FieldValue.serverTimestamp(),
+  }, SetOptions(merge: true));
+
+  @override
+  Future<void> delete(String uid, String applicationId) => _col(uid).doc(applicationId).delete();
 }

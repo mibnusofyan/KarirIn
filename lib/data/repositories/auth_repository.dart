@@ -42,6 +42,9 @@ abstract interface class AuthRepository {
   /// Firebase only deletes accounts that signed in within the last few minutes.
   bool get recentlySignedIn;
 
+  /// The signed-in user's id, or null.
+  String? get currentUid;
+
   /// Deletes the account itself; the caller removes the user's data first.
   Future<void> deleteAccount();
 }
@@ -78,6 +81,9 @@ class MockAuthRepository implements AuthRepository {
 
   @override
   bool get recentlySignedIn => true;
+
+  @override
+  String? get currentUid => _user?.uid;
 
   @override
   Future<void> deleteAccount() async => _set(null);
@@ -148,6 +154,9 @@ class FirebaseAuthRepository implements AuthRepository {
     await _auth.signOut();
     if (_googleReady != null) await GoogleSignIn.instance.signOut();
   }
+
+  @override
+  String? get currentUid => _auth.currentUser?.uid;
 
   @override
   bool get recentlySignedIn {
