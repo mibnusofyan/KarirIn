@@ -75,3 +75,19 @@ String? sessionRedirect(String location, {Backend? mode}) {
     SessionStatus.ready => location == Routes.auth || location == Routes.onboarding ? Routes.home : null,
   };
 }
+
+/// Opens what a tapped notification points to (`job:<id>` or `tracker`) once the user is signed in with a
+/// profile and the splash has moved on.
+Future<void> openFromNotification(String payload) async {
+  while (session.value != SessionStatus.ready) {
+    await _nextChange(session);
+  }
+  for (var i = 0; i < 50 && router.routerDelegate.currentConfiguration.uri.path == Routes.splash; i++) {
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+  }
+  if (payload.startsWith('job:')) {
+    router.push(Routes.job(payload.substring(4)));
+  } else {
+    router.go(Routes.tracker);
+  }
+}

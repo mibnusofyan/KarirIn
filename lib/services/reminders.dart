@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
@@ -13,8 +15,18 @@ const _demoMinutes = int.fromEnvironment('REMINDER_DEMO_MINUTES');
 DateTime followUpAt(DateTime now) =>
     _demoMinutes > 0 ? now.add(const Duration(minutes: _demoMinutes)) : DateTime(now.year, now.month, now.day + 7, 9);
 
-/// Follow-up reminders as notifications scheduled on the device (no server needed, works offline).
+/// Payloads of tapped notifications: `job:<id>` (new job) or `tracker` (follow-up reminder). The app routes them.
+final notificationTaps = StreamController<String>.broadcast();
+
+/// Follow-up reminders as notifications scheduled on the device (no server needed, works offline), plus showing
+/// push messages that arrive while the app is open.
 abstract interface class ReminderScheduler {
+  /// Creates the notification channels and reports a notification that launched the app. Safe to call repeatedly.
+  Future<void> init();
+
+  /// Shows a notification now (used for push messages received in the foreground).
+  Future<void> show({required String title, required String body, required String payload});
+
   /// Asks for the notification permission (Android 13+). Returns whether reminders can be shown.
   Future<bool> requestPermission();
 
@@ -26,6 +38,12 @@ abstract interface class ReminderScheduler {
 
 class NoopReminderScheduler implements ReminderScheduler {
   const NoopReminderScheduler();
+
+  @override
+  Future<void> init() async {}
+
+  @override
+  Future<void> show({required String title, required String body, required String payload}) async {}
 
   @override
   Future<bool> requestPermission() async => true;
@@ -54,10 +72,48 @@ class LocalReminderScheduler implements ReminderScheduler {
     ),
   );
 
+  static const _newJobs = NotificationDetails(
+    android: AndroidNotificationDetails(
+      'new_jobs',
+      'Lowongan baru yang cocok',
+      channelDescription: 'Lowongan baru dengan Match Score Sangat Cocok untuk profilmu',
+      importance: Importance.high,
+      priority: Priority.high,
+    ),
+  );
+
   Future<void> _init() => _ready ??= () async {
     tzdata.initializeTimeZones();
-    await _plugin.initialize(settings: const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher')));
+    await _plugin.initialize(
+      settings: const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher')),
+      onDidReceiveNotificationResponse: (r) {
+        if (r.payload != null) notificationTaps.add(r.payload!);
+      },
+    );
+    // Push messages arriving in the background use this channel (AndroidManifest default_notification_channel_id).
+    await _plugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(
+          const AndroidNotificationChannel(
+            'new_jobs',
+            'Lowongan baru yang cocok',
+            description: 'Lowongan baru dengan Match Score Sangat Cocok untuk profilmu',
+            importance: Importance.high,
+          ),
+        );
+    final launch = await _plugin.getNotificationAppLaunchDetails();
+    final payload = launch?.notificationResponse?.payload;
+    if ((launch?.didNotificationLaunchApp ?? false) && payload != null) notificationTaps.add(payload);
   }();
+
+  @override
+  Future<void> init() => _init();
+
+  @override
+  Future<void> show({required String title, required String body, required String payload}) async {
+    await _init();
+    await _plugin.show(id: payload.hashCode & 0x7fffffff, title: title, body: body, notificationDetails: _newJobs, payload: payload);
+  }
 
   /// Stable notification id per application.
   static int _id(String applicationId) => applicationId.hashCode & 0x7fffffff;
@@ -84,7 +140,7 @@ class LocalReminderScheduler implements ReminderScheduler {
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         title: a.remind,
         body: '${a.title} di ${a.company}. Buka KarirIn untuk memperbarui status lamaran.',
-        payload: a.id,
+        payload: 'tracker',
       );
     } catch (e) {
       debugPrint('Reminder: $e');

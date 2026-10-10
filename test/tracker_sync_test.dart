@@ -21,6 +21,12 @@ class _RecordingReminders implements ReminderScheduler {
   bool cleared = false;
 
   @override
+  Future<void> init() async {}
+
+  @override
+  Future<void> show({required String title, required String body, required String payload}) async {}
+
+  @override
   Future<bool> requestPermission() async {
     permissionRequests++;
     return true;

@@ -6,6 +6,7 @@ import 'application_repository.dart';
 import '../../services/ai/ai_service.dart';
 import '../../services/cv_storage.dart';
 import '../../services/network.dart';
+import '../../services/push.dart';
 import '../../services/reminders.dart';
 import 'activity_repository.dart';
 import 'auth_repository.dart';
@@ -63,4 +64,8 @@ final cvStorageProvider = Provider<CvStorage>((_) => const CvStorage());
 
 final networkStatusProvider = Provider<NetworkStatus>(
   (_) => _pick<NetworkStatus>(mock: () => const NoNetworkStatus(), firebase: DeviceNetworkStatus.new),
+);
+
+final pushServiceProvider = Provider<PushService>(
+  (ref) => _pick<PushService>(mock: () => const NoopPushService(), firebase: () => FcmPushService(ref.read(reminderSchedulerProvider))),
 );

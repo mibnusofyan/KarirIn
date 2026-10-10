@@ -1,0 +1,544 @@
+{
+  "profiles": {
+    "rani": {
+      "name": "Rani Lestari",
+      "level": "s1",
+      "major": "Manajemen",
+      "school": "Universitas Banyumas Raya",
+      "city": "Purwokerto",
+      "modes": [
+        "kantor",
+        "hybrid"
+      ],
+      "source": "cvPdf",
+      "skills": [
+        "Microsoft Excel",
+        "Akuntansi Dasar",
+        "Pembukuan",
+        "Komunikasi",
+        "Canva",
+        "Microsoft Word",
+        "Manajemen Waktu"
+      ],
+      "exps": [
+        {
+          "title": "Magang Staf Keuangan",
+          "org": "KSP Sejahtera Bersama",
+          "type": "magang",
+          "months": 6,
+          "field": "keuangan",
+          "desc": "membantu pencatatan transaksi harian dan menyusun rekap kas bulanan"
+        },
+        {
+          "title": "Bendahara Himpunan Mahasiswa",
+          "org": "HIMA Manajemen",
+          "type": "organisasi",
+          "months": 12,
+          "field": "keuangan",
+          "desc": "mengelola anggaran kegiatan dan laporan pertanggungjawaban"
+        }
+      ],
+      "interests": []
+    },
+    "rani-pelaporan": {
+      "name": "Rani Lestari",
+      "level": "s1",
+      "major": "Manajemen",
+      "school": "Universitas Banyumas Raya",
+      "city": "Purwokerto",
+      "modes": [
+        "kantor",
+        "hybrid"
+      ],
+      "source": "cvPdf",
+      "skills": [
+        "Microsoft Excel",
+        "Akuntansi Dasar",
+        "Pembukuan",
+        "Komunikasi",
+        "Canva",
+        "Microsoft Word",
+        "Manajemen Waktu",
+        "Pelaporan Keuangan"
+      ],
+      "exps": [
+        {
+          "title": "Magang Staf Keuangan",
+          "org": "KSP Sejahtera Bersama",
+          "type": "magang",
+          "months": 6,
+          "field": "keuangan",
+          "desc": "membantu pencatatan transaksi harian dan menyusun rekap kas bulanan"
+        },
+        {
+          "title": "Bendahara Himpunan Mahasiswa",
+          "org": "HIMA Manajemen",
+          "type": "organisasi",
+          "months": 12,
+          "field": "keuangan",
+          "desc": "mengelola anggaran kegiatan dan laporan pertanggungjawaban"
+        }
+      ],
+      "interests": []
+    },
+    "bayu": {
+      "name": "Bayu Pratama",
+      "level": "smaSmk",
+      "major": "Teknik Komputer dan Jaringan",
+      "school": "-",
+      "city": "Purwokerto",
+      "modes": [
+        "kantor"
+      ],
+      "source": "qa",
+      "skills": [
+        "Jaringan Komputer",
+        "Perakitan PC",
+        "Microsoft Excel"
+      ],
+      "exps": [
+        {
+          "title": "Praktik Kerja Lapangan",
+          "org": "Tempat PKL",
+          "type": "magang",
+          "months": 3,
+          "field": "teknologi",
+          "desc": ""
+        }
+      ],
+      "interests": []
+    },
+    "sinta": {
+      "name": "Sinta Ayu Wardani",
+      "level": "d3",
+      "major": "Statistika",
+      "school": "-",
+      "city": "Yogyakarta",
+      "modes": [
+        "remote",
+        "hybrid"
+      ],
+      "source": "cvPdf",
+      "skills": [
+        "Microsoft Excel",
+        "SQL",
+        "Visualisasi Data",
+        "Komunikasi",
+        "Ketelitian Data"
+      ],
+      "exps": [
+        {
+          "title": "Staf Administrasi",
+          "org": "PT Graha Niaga",
+          "type": "kerja",
+          "months": 24,
+          "field": "data",
+          "desc": ""
+        }
+      ],
+      "interests": []
+    }
+  },
+  "cases": [
+    {
+      "profile": "rani",
+      "jobId": "j1",
+      "total": 80.0
+    },
+    {
+      "profile": "rani",
+      "jobId": "j2",
+      "total": 59.1667
+    },
+    {
+      "profile": "rani",
+      "jobId": "j3",
+      "total": 32.5
+    },
+    {
+      "profile": "rani",
+      "jobId": "j4",
+      "total": 75.8333
+    },
+    {
+      "profile": "rani",
+      "jobId": "j5",
+      "total": 57.5
+    },
+    {
+      "profile": "rani",
+      "jobId": "j6",
+      "total": 54.1667
+    },
+    {
+      "profile": "rani",
+      "jobId": "j7",
+      "total": 35.0
+    },
+    {
+      "profile": "rani",
+      "jobId": "j8",
+      "total": 35.0
+    },
+    {
+      "profile": "rani",
+      "jobId": "j9",
+      "total": 66.6667
+    },
+    {
+      "profile": "rani",
+      "jobId": "j10",
+      "total": 83.3333
+    },
+    {
+      "profile": "rani",
+      "jobId": "j11",
+      "total": 51.6667
+    },
+    {
+      "profile": "rani",
+      "jobId": "j12",
+      "total": 45.0
+    },
+    {
+      "profile": "rani",
+      "jobId": "j13",
+      "total": 70.0
+    },
+    {
+      "profile": "rani",
+      "jobId": "j14",
+      "total": 46.6667
+    },
+    {
+      "profile": "rani",
+      "jobId": "j15",
+      "total": 45.0
+    },
+    {
+      "profile": "rani",
+      "jobId": "j16",
+      "total": 59.1667
+    },
+    {
+      "profile": "rani",
+      "jobId": "j17",
+      "total": 30.0
+    },
+    {
+      "profile": "rani",
+      "jobId": "j18",
+      "total": 59.1667
+    },
+    {
+      "profile": "rani",
+      "jobId": "j19",
+      "total": 75.8333
+    },
+    {
+      "profile": "rani",
+      "jobId": "j20",
+      "total": 54.1667
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j1",
+      "total": 92.5
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j2",
+      "total": 59.1667
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j3",
+      "total": 32.5
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j4",
+      "total": 75.8333
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j5",
+      "total": 57.5
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j6",
+      "total": 54.1667
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j7",
+      "total": 35.0
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j8",
+      "total": 35.0
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j9",
+      "total": 66.6667
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j10",
+      "total": 83.3333
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j11",
+      "total": 51.6667
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j12",
+      "total": 57.5
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j13",
+      "total": 70.0
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j14",
+      "total": 46.6667
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j15",
+      "total": 45.0
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j16",
+      "total": 59.1667
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j17",
+      "total": 30.0
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j18",
+      "total": 59.1667
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j19",
+      "total": 75.8333
+    },
+    {
+      "profile": "rani-pelaporan",
+      "jobId": "j20",
+      "total": 54.1667
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j1",
+      "total": 32.5
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j2",
+      "total": 22.5
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j3",
+      "total": 17.5
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j4",
+      "total": 44.1667
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j5",
+      "total": 17.5
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j6",
+      "total": 46.6667
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j7",
+      "total": 59.1667
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j8",
+      "total": 59.1667
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j9",
+      "total": 50.0
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j10",
+      "total": 44.1667
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j11",
+      "total": 30.0
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j12",
+      "total": 17.5
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j13",
+      "total": 55.0
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j14",
+      "total": 22.5
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j15",
+      "total": 37.5
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j16",
+      "total": 46.6667
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j17",
+      "total": 22.5
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j18",
+      "total": 35.0
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j19",
+      "total": 36.6667
+    },
+    {
+      "profile": "bayu",
+      "jobId": "j20",
+      "total": 34.1667
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j1",
+      "total": 30.0
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j2",
+      "total": 37.5
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j3",
+      "total": 72.5
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j4",
+      "total": 58.3333
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j5",
+      "total": 12.5
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j6",
+      "total": 56.6667
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j7",
+      "total": 25.0
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j8",
+      "total": 25.0
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j9",
+      "total": 73.3333
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j10",
+      "total": 49.1667
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j11",
+      "total": 30.0
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j12",
+      "total": 12.5
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j13",
+      "total": 85.0
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j14",
+      "total": 51.6667
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j15",
+      "total": 40.0
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j16",
+      "total": 46.6667
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j17",
+      "total": 42.5
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j18",
+      "total": 65.8333
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j19",
+      "total": 43.3333
+    },
+    {
+      "profile": "sinta",
+      "jobId": "j20",
+      "total": 95.0
+    }
+  ]
+}
