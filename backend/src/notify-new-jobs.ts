@@ -4,6 +4,7 @@
 //
 //   npm run notify -- j21 j22            → notify for these job ids
 //   npm run notify -- j21 --dry-run      → only print who would be notified
+//   npm run notify -- j21 --uid=<uid>    → only this user (for testing on a real account)
 //
 // Re-running is safe: a user is notified about a job at most once (document id job-<jobId>).
 // Credentials as for seed.ts (backend/.env); FIRESTORE_EMULATOR_HOST reads users from the emulator while push
@@ -22,9 +23,10 @@ try {
 const THRESHOLD = 75;
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
+const onlyUid = args.find((a) => a.startsWith('--uid='))?.slice('--uid='.length);
 const jobIds = args.filter((a) => !a.startsWith('--'));
 if (jobIds.length === 0) {
-  console.log('Pakai: npm run notify -- <jobId> [jobId ...] [--dry-run]');
+  console.log('Pakai: npm run notify -- <jobId> [jobId ...] [--dry-run] [--uid=<uid>]');
   process.exit(1);
 }
 
@@ -52,10 +54,12 @@ const deadToken = new Set(['messaging/registration-token-not-registered', 'messa
 
 let notified = 0;
 let pushed = 0;
-const profiles = await db.collection('profiles').get();
+const profiles = onlyUid
+  ? { docs: [await db.collection('profiles').doc(onlyUid).get()].filter((d) => d.exists) }
+  : await db.collection('profiles').get();
 for (const profileDoc of profiles.docs) {
   const uid = profileDoc.id;
-  const profile = profileDoc.data() as Profile;
+  const profile = profileDoc.data() as unknown as Profile;
   const userRef = db.collection('users').doc(uid);
   const user = (await userRef.get()).data() ?? {};
   if (user.settings?.notifyNewJobs === false) continue;
