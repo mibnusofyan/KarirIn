@@ -47,6 +47,16 @@ flutter run --dart-define=USE_EMULATOR=true  # Auth + Firestore emulator lokal (
 
 Opsi build debug lain: `--dart-define=APP_CHECK_DEBUG_TOKEN=<uuid>` memakai token debug App Check yang sudah didaftarkan di konsol (tanpa itu, tiap instal baru mencetak token baru di log dan panggilan Gemini ditolak sampai token itu didaftarkan), dan `--dart-define=REMINDER_DEMO_MINUTES=1` membuat pengingat lamaran muncul 1 menit setelah dicatat (untuk demo/uji), bukan H+7 pukul 09.00.
 
+Rilis untuk pengumpulan (APK ditandatangani keystore rilis, disalin ke `release/` yang tidak masuk git):
+
+```bash
+flutter clean
+flutter build apk --release                           # KarirIn-v1.0.apk (Firebase)
+flutter build apk --release --dart-define=BACKEND=mock   # KarirIn-v1.0-demo-offline.apk (cadangan tanpa server)
+```
+
+Build rilis dikecilkan R8; `android/app/proguard-rules.pro` menjaga kelas yang dibutuhkan pengingat terjadwal. Remote Config produksi berasal dari `remoteconfig.template.json` (`firebase deploy --only remoteconfig`), misalnya untuk mengganti model Gemini atau mematikan AI (`ai_enabled`) tanpa APK baru. Skenario uji ada di `docs/pengujian-black-box.md`.
+
 Bila APK debug tidak memuat perubahan Dart terbaru (pernah terjadi: Gradle menganggap kompilasi Flutter sudah mutakhir), jalankan `flutter clean` lalu build ulang.
 
 Pada mode `firebase`: login email/kata sandi dan Google (Firebase Auth), redirect otomatis (belum login → Masuk, belum punya profil → Buat profil, sudah → Beranda), profil disimpan ke `profiles/{uid}` setelah dikonfirmasi lalu setiap perubahan ikut tersimpan, simpanan lowongan dan pengaturan notifikasi di `users/{uid}`, katalog 20 lowongan dan 35 skill dibaca dari Firestore, Keluar, dan Hapus akun (menghapus data lalu akun).
