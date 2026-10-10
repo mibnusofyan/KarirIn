@@ -13,6 +13,8 @@ import '../data/repositories/providers.dart';
 import '../firebase/bootstrap.dart' show remoteConfigDefaults;
 import '../logic/interview.dart';
 import '../logic/match_score.dart';
+import '../services/ai/ai_parsing.dart';
+import '../services/ai/ai_service.dart';
 import 'session.dart';
 
 /// Set with `--dart-define=SIMULATE_OFFLINE=true` to demo black-box scenario 11 (koneksi terputus).
@@ -236,6 +238,26 @@ class AppNotifier extends Notifier<AppState> {
   });
 
   /// Profile extracted from an uploaded CV (simulated: Rani's CV).
+  /// The CV picked on Buat Profil, held in memory until Processing reads it.
+  CvFile? _pendingCv;
+
+  /// Whether a picked CV is waiting to be read (Processing shows the AI flow only then).
+  bool get hasPendingCv => _pendingCv != null;
+
+  void setPendingCv(CvFile cv) => _pendingCv = cv;
+
+  /// Reads the picked CV with AI into a profile for the user to review, then keeps a copy of the file on the device
+  /// only. Throws [AiFailure]; the picked file stays available for a retry.
+  Future<void> extractPendingCv() async {
+    final cv = _pendingCv;
+    if (cv == null) throw AiFailure.unreadable;
+    final p = await ref.read(aiServiceProvider).extractProfile(cv, catalog: state.skills);
+    state = state.copyWith(cvDeleted: false);
+    _setProfile(p.name.isEmpty && state.signupName.trim().isNotEmpty ? p.copyWith(name: state.signupName.trim()) : p, learned: []);
+    _pendingCv = null;
+    unawaited(ref.read(cvStorageProvider).save(cv.bytes, cv.extension).catchError(_report));
+  }
+
   void useCvProfile(ProfileSource source) {
     state = state.copyWith(cvDeleted: false);
     _setProfile(raniProfile.copyWith(source: source), learned: []);
@@ -346,10 +368,19 @@ class AppNotifier extends Notifier<AppState> {
     );
   }
 
-  void saveInterviewResults(List<AnsweredQuestion> r) => state = state.copyWith(interviewResults: r);
+  /// Shows the finished session on Hasil Latihan and stores it in `users/{uid}/interviews`.
+  void saveInterviewResults(List<AnsweredQuestion> r) {
+    state = state.copyWith(interviewResults: r);
+    final job = state.job(state.coachJobId);
+    final voice = state.voiceMode;
+    _write((uid) => ref.read(interviewRepositoryProvider).saveSession(uid, job: job, voice: voice, results: r));
+  }
 
   /// Hapus berkas CV: removes the stored file but keeps the confirmed profile.
-  void deleteCv() => state = state.copyWith(cvDeleted: true);
+  void deleteCv() {
+    state = state.copyWith(cvDeleted: true);
+    if (_firebase) unawaited(ref.read(cvStorageProvider).delete().catchError(_report));
+  }
 
   void setOffline(bool v) => state = state.copyWith(offline: v);
 
@@ -389,6 +420,7 @@ class AppNotifier extends Notifier<AppState> {
         throw authFailureFor('network-request-failed');
       }
       await auth.deleteAccount();
+      await ref.read(cvStorageProvider).delete().catchError(_report);
       return;
     }
     state = AppState.initial().copyWith(offline: state.offline);

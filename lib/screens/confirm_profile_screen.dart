@@ -65,6 +65,8 @@ class _ConfirmProfileScreenState extends ConsumerState<ConfirmProfileScreen> {
         ? 'Tambahkan minimal satu keterampilan.'
         : p.modes.isEmpty
         ? 'Pilih minimal satu mode kerja.'
+        : p.city.trim().isEmpty || p.name.trim().isEmpty
+        ? 'Lengkapi nama dan kota lewat tombol Ubah.'
         : null;
 
     return CareerTheme(

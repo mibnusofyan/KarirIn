@@ -319,4 +319,14 @@ class InterviewQuestion {
   final String better;
 
   InterviewQuestion withText(String t) => InterviewQuestion(type: type, text: t, demo: demo, better: better);
+
+  /// A question from `jobs/{id}/questionSets` (written by `backend/src/generate-questions.ts`).
+  factory InterviewQuestion.fromMap(Map<String, Object?> m) => InterviewQuestion(
+    type: m['type'] == 'Teknis' ? 'Teknis' : 'Perilaku',
+    text: m['text'] as String,
+    demo: (m['demo'] as String?) ?? '',
+    better: (m['better'] as String?) ?? '',
+  );
+
+  Map<String, Object?> toMap() => {'type': type, 'text': text, 'demo': demo, 'better': better};
 }

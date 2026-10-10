@@ -10,11 +10,33 @@ class AnswerScore {
     required this.bukti,
     required this.good,
     required this.improve,
+    this.better,
+    this.offline = false,
   });
 
   final int relevansi, struktur, kejelasan, bukti;
   final String good;
   final String improve;
+
+  /// The user's own answer rewritten by AI; null when the question's model answer is shown instead.
+  final String? better;
+
+  /// Graded by the local heuristic because the AI was unavailable (shown to the user).
+  final bool offline;
+
+  Map<String, Object?> toMap() => {
+    'relevansi': relevansi,
+    'struktur': struktur,
+    'kejelasan': kejelasan,
+    'bukti': bukti,
+    'good': good,
+    'improve': improve,
+    'better': better,
+    'gradedBy': offline ? 'offline' : 'ai',
+  };
+
+  AnswerScore asOffline() =>
+      AnswerScore(relevansi: relevansi, struktur: struktur, kejelasan: kejelasan, bukti: bukti, good: good, improve: improve, offline: true);
 
   int get total => relevansi + struktur + kejelasan + bukti;
 
@@ -27,9 +49,17 @@ class AnswerScore {
 }
 
 class AnsweredQuestion {
-  const AnsweredQuestion(this.question, this.score);
+  const AnsweredQuestion(this.question, this.score, {this.answer = ''});
   final InterviewQuestion question;
   final AnswerScore score;
+
+  /// What the user typed or said.
+  final String answer;
+
+  /// The better answer to show: the AI rewrite of this answer, else the question's model answer.
+  String get better => score.better ?? question.better;
+
+  Map<String, Object?> toMap() => {'type': question.type, 'question': question.text, 'answer': answer, ...score.toMap()};
 }
 
 const _improve = {

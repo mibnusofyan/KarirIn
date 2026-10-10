@@ -16,7 +16,7 @@ const remoteConfigDefaults = <String, Object>{
   'ai_model_extract': 'gemini-3.8-flash',
   'ai_model_fast': 'gemini-3.5-flash-lite',
   'ai_enabled': true,
-  'consent_version': '2026-10-v1',
+  'consent_version': '2026-10-v2',
   'max_cv_mb': 5,
 };
 

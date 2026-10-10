@@ -53,7 +53,7 @@ final router = GoRouter(
     GoRoute(path: Routes.qa, builder: (_, _) => const QaScreen()),
     GoRoute(
       path: Routes.processing,
-      builder: (_, s) => ProcessingScreen(fromQa: s.uri.queryParameters['kind'] == 'qa'),
+      builder: (_, s) => ProcessingScreen(fromQa: s.uri.queryParameters['kind'] == 'qa', photo: s.uri.queryParameters['kind'] == 'photo'),
     ),
     GoRoute(
       path: Routes.confirm,

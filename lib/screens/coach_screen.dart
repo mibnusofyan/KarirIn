@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../data/backend.dart';
+
 import '../router.dart';
 import '../state/app_state.dart';
 import '../theme/career_theme.dart';
@@ -77,7 +79,12 @@ class CoachScreen extends ConsumerWidget {
                       ),
                     if (st.voiceMode) ...[
                       const SizedBox(height: 10),
-                      const Text('Pada demo ini, rekaman suara masih simulasi. Transkrip tetap bisa kamu edit.', style: CareerText.small),
+                      Text(
+                        backend == Backend.mock
+                            ? 'Pada demo ini, rekaman suara masih simulasi. Transkrip tetap bisa kamu edit.'
+                            : 'Butuh izin mikrofon. Transkrip tetap bisa kamu periksa dan edit sebelum dikirim.',
+                        style: CareerText.small,
+                      ),
                     ],
                     const SizedBox(height: 24),
                     const Text('Sesi ini', style: CareerText.label),

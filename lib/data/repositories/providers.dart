@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../backend.dart';
 import '../mock_data.dart';
 import 'application_repository.dart';
+import '../../services/ai/ai_service.dart';
+import '../../services/cv_storage.dart';
 import 'auth_repository.dart';
+import 'interview_repository.dart';
 import 'job_repository.dart';
 import 'profile_repository.dart';
 import 'user_repository.dart';
@@ -36,3 +39,14 @@ final applicationRepositoryProvider = Provider<ApplicationRepository>(
     firebase: () => throw UnimplementedError('Repository lamaran Firebase dibuat pada Tahap B3.'),
   ),
 );
+
+final interviewRepositoryProvider = Provider<InterviewRepository>(
+  (_) => _pick(mock: MockInterviewRepository.new, firebase: FirestoreInterviewRepository.new),
+);
+
+/// Gemini (with the local logic as fallback) on Firebase builds; the prototype's local logic on mock builds.
+final aiServiceProvider = Provider<AiService>(
+  (_) => _pick<AiService>(mock: () => const OfflineAiService(), firebase: () => ResilientAiService(GeminiAiService())),
+);
+
+final cvStorageProvider = Provider<CvStorage>((_) => const CvStorage());
