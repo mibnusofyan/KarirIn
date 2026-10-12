@@ -57,6 +57,7 @@ dependencies:
   timezone: ^0.10.1
   connectivity_plus: ^7.3.1
   firebase_messaging: ^16.7.0
+  flutter_svg: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -83,6 +84,7 @@ flutter:
   assets:
     - assets/fonts/plus_jakarta_sans/OFL.txt
     - assets/images/onboarding/
+    - assets/images/logos/
 
   fonts:
     - family: PlusJakartaSans

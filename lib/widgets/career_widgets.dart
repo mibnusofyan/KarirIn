@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../logic/match_score.dart';
 import '../theme/career_theme.dart';
@@ -35,6 +36,25 @@ class CareerSheetHeader extends StatelessWidget {
 }
 
 /// Deterministic monogram fallback until real company assets are available.
+/// Logo files in assets/images/logos/ (made by tool/make_company_logos.py) for the curated companies.
+const companyLogos = <String, String>{
+  'PT Sinar Mandiri Abadi': 'sinar-mandiri-abadi',
+  'Kopi Lereng Slamet': 'kopi-lereng-slamet',
+  'Tani Digital Nusantara': 'tani-digital-nusantara',
+  'BPR Artha Sejahtera': 'bpr-artha-sejahtera',
+  'KAP Wijaya & Rekan': 'kap-wijaya-rekan',
+  'CV Berkah Logistik': 'berkah-logistik',
+  'PT Banyumas Net Media': 'banyumas-net-media',
+  'CV Mitra Komputindo': 'mitra-komputindo',
+  'Toko Swalayan Mitra': 'toko-swalayan-mitra',
+  'PT Graha Niaga': 'graha-niaga',
+  'Batik Lumbon Banyumas': 'batik-lumbon-banyumas',
+  'PT Agro Serayu Lestari': 'agro-serayu-lestari',
+  'Lapak Kriya Nusantara': 'lapak-kriya-nusantara',
+  'PT Serayu Logistik Mandiri': 'serayu-logistik-mandiri',
+};
+
+/// The company's logo, or its initials on a tinted tile for a company without one.
 class CompanyAvatar extends StatelessWidget {
   const CompanyAvatar({super.key, required this.company, this.size = 44});
   final String company;
@@ -42,6 +62,16 @@ class CompanyAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(size * .3);
+    final logo = companyLogos[company];
+    if (logo != null) {
+      return ExcludeSemantics(
+        child: ClipRRect(
+          borderRadius: radius,
+          child: SvgPicture.asset('assets/images/logos/$logo.svg', width: size, height: size),
+        ),
+      );
+    }
     final words = company.split(' ').where((w) => !['PT', 'CV', 'BPR', 'KAP', '&'].contains(w) && w.isNotEmpty);
     final initials = words.take(2).map((w) => w[0]).join();
     const palettes = [
@@ -56,7 +86,7 @@ class CompanyAvatar extends StatelessWidget {
         width: size,
         height: size,
         alignment: Alignment.center,
-        decoration: BoxDecoration(color: palette.$1, borderRadius: BorderRadius.circular(size * .3)),
+        decoration: BoxDecoration(color: palette.$1, borderRadius: radius),
         child: Text(
           initials,
           textScaler: TextScaler.noScaling,
