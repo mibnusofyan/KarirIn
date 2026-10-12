@@ -4,8 +4,8 @@
     "name": "Akuntansi Dasar",
     "synonyms": [],
     "resource": {
-      "type": "modul",
-      "duration": "2 jam",
+      "type": "kursus",
+      "duration": "5 jam",
       "title": "Akuntansi Dasar untuk Pemula",
       "url": "https://www.youtube.com/results?search_query=Akuntansi+Dasar+untuk+Pemula"
     }
@@ -44,17 +44,6 @@
     }
   },
   {
-    "id": "editing-video",
-    "name": "Editing Video",
-    "synonyms": [],
-    "resource": {
-      "type": "kursus",
-      "duration": "4 jam",
-      "title": "Editing Video Pendek dengan Ponsel",
-      "url": "https://www.youtube.com/results?search_query=Editing+Video+Pendek+dengan+Ponsel"
-    }
-  },
-  {
     "id": "fotografi-produk",
     "name": "Fotografi Produk",
     "synonyms": [],
@@ -63,28 +52,6 @@
       "duration": "90 mnt",
       "title": "Foto Produk dengan Ponsel",
       "url": "https://www.youtube.com/results?search_query=Foto+Produk+dengan+Ponsel"
-    }
-  },
-  {
-    "id": "git",
-    "name": "Git",
-    "synonyms": [],
-    "resource": {
-      "type": "video",
-      "duration": "2 jam",
-      "title": "Git dan GitHub untuk Pemula",
-      "url": "https://www.youtube.com/results?search_query=Git+dan+GitHub+untuk+Pemula"
-    }
-  },
-  {
-    "id": "html-css",
-    "name": "HTML & CSS",
-    "synonyms": [],
-    "resource": {
-      "type": "kursus",
-      "duration": "8 jam",
-      "title": "HTML & CSS untuk Pemula",
-      "url": "https://www.youtube.com/results?search_query=HTML+%26+CSS+untuk+Pemula"
     }
   },
   {
@@ -110,14 +77,14 @@
     }
   },
   {
-    "id": "javascript",
-    "name": "JavaScript",
+    "id": "kepemimpinan",
+    "name": "Kepemimpinan",
     "synonyms": [],
     "resource": {
-      "type": "kursus",
-      "duration": "10 jam",
-      "title": "JavaScript Dasar",
-      "url": "https://www.youtube.com/results?search_query=JavaScript+Dasar"
+      "type": "modul",
+      "duration": "2 jam",
+      "title": "Dasar Kepemimpinan Tim",
+      "url": "https://www.youtube.com/results?search_query=Dasar+Kepemimpinan+Tim"
     }
   },
   {
@@ -143,17 +110,6 @@
     }
   },
   {
-    "id": "konfigurasi-router",
-    "name": "Konfigurasi Router",
-    "synonyms": [],
-    "resource": {
-      "type": "video",
-      "duration": "2 jam",
-      "title": "Konfigurasi Router dan Access Point",
-      "url": "https://www.youtube.com/results?search_query=Konfigurasi+Router+dan+Access+Point"
-    }
-  },
-  {
     "id": "manajemen-inventaris",
     "name": "Manajemen Inventaris",
     "synonyms": [],
@@ -162,17 +118,6 @@
       "duration": "3 jam",
       "title": "Dasar Manajemen Persediaan",
       "url": "https://www.youtube.com/results?search_query=Dasar+Manajemen+Persediaan"
-    }
-  },
-  {
-    "id": "manajemen-marketplace",
-    "name": "Manajemen Marketplace",
-    "synonyms": [],
-    "resource": {
-      "type": "kursus",
-      "duration": "3 jam",
-      "title": "Mengelola Toko di Marketplace",
-      "url": "https://www.youtube.com/results?search_query=Mengelola+Toko+di+Marketplace"
     }
   },
   {
@@ -219,10 +164,21 @@
       "MS Word"
     ],
     "resource": {
-      "type": "modul",
+      "type": "video",
       "duration": "2 jam",
-      "title": "Microsoft Word untuk Pemula",
-      "url": "https://www.youtube.com/results?search_query=Microsoft+Word+untuk+Pemula"
+      "title": "Microsoft Word untuk Dokumen Kantor",
+      "url": "https://www.youtube.com/results?search_query=Microsoft+Word+untuk+Dokumen+Kantor"
+    }
+  },
+  {
+    "id": "negosiasi",
+    "name": "Negosiasi",
+    "synonyms": [],
+    "resource": {
+      "type": "video",
+      "duration": "90 mnt",
+      "title": "Teknik Negosiasi untuk Pemula",
+      "url": "https://www.youtube.com/results?search_query=Teknik+Negosiasi+untuk+Pemula"
     }
   },
   {
@@ -270,25 +226,14 @@
     }
   },
   {
-    "id": "pengarsipan",
-    "name": "Pengarsipan",
-    "synonyms": [],
-    "resource": {
-      "type": "modul",
-      "duration": "2 jam",
-      "title": "Manajemen Arsip Kantor",
-      "url": "https://www.youtube.com/results?search_query=Manajemen+Arsip+Kantor"
-    }
-  },
-  {
     "id": "perakitan-pc",
     "name": "Perakitan PC",
     "synonyms": [],
     "resource": {
-      "type": "video",
-      "duration": "90 mnt",
-      "title": "Merakit PC Langkah demi Langkah",
-      "url": "https://www.youtube.com/results?search_query=Merakit+PC+Langkah+demi+Langkah"
+      "type": "modul",
+      "duration": "2 jam",
+      "title": "Perakitan PC untuk Pemula",
+      "url": "https://www.youtube.com/results?search_query=Perakitan+PC+untuk+Pemula"
     }
   },
   {
@@ -311,17 +256,6 @@
       "duration": "8 jam",
       "title": "Python Dasar untuk Data",
       "url": "https://www.youtube.com/results?search_query=Python+Dasar+untuk+Data"
-    }
-  },
-  {
-    "id": "rekrutmen",
-    "name": "Rekrutmen",
-    "synonyms": [],
-    "resource": {
-      "type": "modul",
-      "duration": "3 jam",
-      "title": "Dasar Proses Rekrutmen",
-      "url": "https://www.youtube.com/results?search_query=Dasar+Proses+Rekrutmen"
     }
   },
   {
