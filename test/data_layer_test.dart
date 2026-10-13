@@ -1,6 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:karirin/data/backend.dart';
-import 'package:karirin/data/catalog_extra.dart';
+import 'package:karirin/data/catalog_real.dart';
 import 'package:karirin/data/mock_data.dart';
 import 'package:karirin/data/models.dart';
 import 'package:karirin/data/repositories/application_repository.dart';
@@ -47,17 +49,28 @@ void main() {
     });
   });
 
-  test('katalog tambahan: id unik, skill tercatat, ada lowongan TKJ untuk Bayu', () {
-    final all = [...jobs, ...extraJobs];
+  test('katalog perusahaan nyata: id unik, skill tercatat, tautan resmi, sumber, logo', () {
+    final all = [...jobs, ...realJobs];
     expect({for (final j in all) j.id}, hasLength(all.length));
-    final names = {for (final s in buildSkillCatalog(all, {...resources, ...extraResources})) s.name};
-    for (final j in extraJobs) {
+    final names = {for (final s in buildSkillCatalog(realJobs, {...resources, ...realResources})) s.name};
+    for (final j in realJobs) {
+      expect(Uri.parse(j.applyUrl!).scheme, 'https', reason: j.id);
+      expect(j.desc, contains('Sumber: '), reason: j.id);
+      expect(companyLogos.keys, contains(j.company), reason: j.id);
+      expect(File(companyLogos[j.company]!).existsSync(), isTrue, reason: j.company);
       expect(names.containsAll([...j.wajib, ...j.tambahan]), isTrue, reason: j.id);
       expect(j.wajib, isNotEmpty);
       expect(j.tambahan, isNotEmpty, reason: 'St dibagi jumlah skill tambahan');
       expect(Job.fromMap(j.id, j.toMap()).toMap(), j.toMap());
     }
-    expect(extraJobs.where((j) => j.eduFields.contains('Teknik Komputer dan Jaringan') || j.wajib.contains('Perakitan PC')), isNotEmpty);
+    expect(realJobs.where((j) => j.eduFields.contains('Teknik Komputer dan Jaringan') || j.wajib.contains('Perakitan PC')), isNotEmpty);
+  });
+
+  test('lowongan "Seluruh Indonesia" cocok dengan kota domisili mana pun', () {
+    final job = realJobs.firstWhere((j) => j.city == anyCity && j.mode == WorkMode.kantor);
+    final r = computeMatch(job, raniProfile);
+    expect(r.cityOk, isTrue);
+    expect(computeMatch(job, raniProfile.copyWith(city: 'Kota Lain')).total, r.total);
   });
 
   group('repository mock', () {

@@ -29,6 +29,9 @@ enum WorkMode {
   final String label;
 }
 
+/// Job city for programmes that place hires anywhere in the country; counts as a location match for everyone.
+const anyCity = 'Seluruh Indonesia';
+
 class Job {
   const Job({
     required this.id,

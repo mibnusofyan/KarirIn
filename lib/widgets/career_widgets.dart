@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/catalog_real.dart';
 import '../logic/match_score.dart';
 import '../theme/career_theme.dart';
 import 'common.dart';
@@ -51,17 +52,31 @@ class CompanyAvatar extends StatelessWidget {
       (Color(0xFFF1E8E0), Color(0xFF79563D)),
     ];
     final palette = palettes[company.codeUnits.fold(0, (sum, n) => sum + n) % palettes.length];
+    final initialsTile = Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(color: palette.$1, borderRadius: BorderRadius.circular(size * .3)),
+      child: Text(
+        initials,
+        textScaler: TextScaler.noScaling,
+        style: CareerText.title.copyWith(fontSize: size * .34, color: palette.$2),
+      ),
+    );
+    final logo = companyLogos[company];
+    if (logo == null) return ExcludeSemantics(child: initialsTile);
+    // Official logo on a white tile; most are wide wordmarks, so they are fitted inside with a small inset.
     return ExcludeSemantics(
       child: Container(
         width: size,
         height: size,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(color: palette.$1, borderRadius: BorderRadius.circular(size * .3)),
-        child: Text(
-          initials,
-          textScaler: TextScaler.noScaling,
-          style: CareerText.title.copyWith(fontSize: size * .34, color: palette.$2),
+        padding: EdgeInsets.all(size * .1),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(size * .3),
+          border: Border.all(color: CareerColors.line),
         ),
+        child: Image.asset(logo, fit: BoxFit.contain, errorBuilder: (_, _, _) => initialsTile),
       ),
     );
   }

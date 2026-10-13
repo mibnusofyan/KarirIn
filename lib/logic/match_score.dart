@@ -98,7 +98,8 @@ MatchResult computeMatch(Job job, Profile p) {
     se = (rel / (job.expYears * 12)).clamp(0.0, 1.0);
   }
 
-  final cityOk = job.mode == WorkMode.remote || job.city == p.city;
+  // "Seluruh Indonesia": the programme places hires nationwide, so any home city matches.
+  final cityOk = job.mode == WorkMode.remote || job.city == anyCity || job.city == p.city;
   final modeOk = p.modes.contains(job.mode);
   final sl = cityOk && modeOk
       ? 1.0

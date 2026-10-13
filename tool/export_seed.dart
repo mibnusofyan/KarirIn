@@ -1,9 +1,10 @@
-// Writes the curated prototype data to backend/data/*.json for `npm --prefix backend run seed`.
+// Writes the real-company catalogue (lib/data/catalog_real.dart) to backend/data/*.json for `npm --prefix backend run seed`.
+// The fictional prototype jobs stay in the mock build only; the seed marks them inactive in Firestore.
 // Run from the project root: dart run tool/export_seed.dart
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:karirin/data/catalog_extra.dart';
+import 'package:karirin/data/catalog_real.dart';
 import 'package:karirin/data/mock_data.dart';
 import 'package:karirin/data/models.dart';
 
@@ -15,10 +16,9 @@ void main() {
     stdout.writeln('${file.path}: ${(data as List).length} item');
   }
 
-  final allJobs = [...jobs, ...extraJobs];
-  write('jobs.json', [for (final j in allJobs) {'id': j.id, ...j.toMap()}]);
+  write('jobs.json', [for (final j in realJobs) {'id': j.id, ...j.toMap()}]);
   write('skills.json', [
-    for (final s in buildSkillCatalog(allJobs, {...resources, ...extraResources})) {'id': s.id, ...withMaterial(s).toMap()},
+    for (final s in buildSkillCatalog(realJobs, {...resources, ...realResources})) {'id': s.id, ...withMaterial(s).toMap()},
   ]);
 }
 

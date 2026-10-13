@@ -1,5 +1,5 @@
-// Shared Match Score fixtures (test/fixtures/match_cases.json): profiles × the full catalogue with the score the
-// Dart code computes. backend/test/match-score.test.ts checks the TypeScript port used by notify-new-jobs against
+// Shared Match Score fixtures (test/fixtures/match_cases.json): the jobs (prototype and real catalogue), profiles,
+// and the score the Dart code computes for every pair. backend/test/match-score.test.ts checks the TypeScript port used by notify-new-jobs against
 // the same file, so the two implementations cannot drift apart.
 //
 // After changing Persamaan (1), regenerate: flutter test test/match_fixtures_test.dart --dart-define=UPDATE_FIXTURES=true
@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:karirin/data/catalog_extra.dart';
+import 'package:karirin/data/catalog_real.dart';
 import 'package:karirin/data/mock_data.dart';
 import 'package:karirin/data/models.dart';
 import 'package:karirin/logic/match_score.dart';
@@ -48,11 +48,13 @@ Map<String, Object?> _build() {
     'bayu': _bayu,
     'sinta': _sinta,
   };
+  final allJobs = [...jobs, ...realJobs];
   return {
+    'jobs': {for (final j in allJobs) j.id: j.toMap()},
     'profiles': {for (final e in profiles.entries) e.key: e.value.toMap()},
     'cases': [
       for (final MapEntry(key: name, value: p) in profiles.entries)
-        for (final j in [...jobs, ...extraJobs])
+        for (final j in allJobs)
           {'profile': name, 'jobId': j.id, 'total': double.parse(computeMatch(j, p).total.toStringAsFixed(4))},
     ],
   };

@@ -1,349 +1,44 @@
 [
   {
-    "id": "j1",
-    "title": "Staf Administrasi Keuangan",
-    "company": "PT Sinar Mandiri Abadi",
-    "city": "Purwokerto",
-    "mode": "kantor",
-    "field": "keuangan",
-    "salaryText": "Rp4,2–5 jt / bulan",
-    "wajib": [
-      "Microsoft Excel",
-      "Akuntansi Dasar",
-      "Pembukuan",
-      "Pelaporan Keuangan"
-    ],
-    "tambahan": [
-      "Komunikasi",
-      "Software Akuntansi"
-    ],
-    "eduMin": "s1",
-    "eduFields": [
-      "Akuntansi",
-      "Manajemen"
-    ],
-    "expYears": 0,
-    "desc": "Mencatat transaksi harian, melakukan rekonsiliasi kas, dan menyusun laporan keuangan bulanan untuk kantor cabang Purwokerto. Terbuka untuk lulusan baru.",
-    "applyUrl": null
-  },
-  {
-    "id": "j2",
-    "title": "Admin Media Sosial",
-    "company": "Kopi Lereng Slamet",
-    "city": "Purwokerto",
-    "mode": "hybrid",
-    "field": "pemasaran",
-    "salaryText": "Rp3–3,8 jt / bulan",
-    "wajib": [
-      "Canva",
-      "Copywriting",
-      "Meta Ads"
-    ],
-    "tambahan": [
-      "Komunikasi",
-      "Fotografi Produk"
-    ],
-    "eduMin": "d3",
-    "eduFields": [
-      "Semua"
-    ],
-    "expYears": 0,
-    "desc": "Mengelola konten Instagram dan TikTok, membuat jadwal unggahan, dan menjalankan iklan berbayar untuk UMKM kopi lokal.",
-    "applyUrl": null
-  },
-  {
-    "id": "j3",
-    "title": "Junior Data Analyst",
-    "company": "Tani Digital Nusantara",
-    "city": "Yogyakarta",
-    "mode": "remote",
-    "field": "data",
-    "salaryText": "Rp5–6,5 jt / bulan",
-    "wajib": [
-      "Microsoft Excel",
-      "SQL",
-      "Visualisasi Data",
-      "Statistik Dasar"
-    ],
-    "tambahan": [
-      "Python",
-      "Komunikasi"
-    ],
-    "eduMin": "s1",
-    "eduFields": [
-      "Statistika",
-      "Informatika",
-      "Matematika"
-    ],
-    "expYears": 1,
-    "desc": "Mengolah data transaksi petani mitra, membuat dasbor mingguan, dan menyajikan temuan kepada tim produk.",
-    "applyUrl": null
-  },
-  {
-    "id": "j4",
-    "title": "Customer Service Officer",
-    "company": "BPR Artha Sejahtera",
-    "city": "Purwokerto",
+    "id": "bca-magang-bakti-frontliner",
+    "title": "Magang Bakti Frontliner (Customer Service & Teller)",
+    "company": "Bank BCA",
+    "city": "Seluruh Indonesia",
     "mode": "kantor",
     "field": "layanan",
-    "salaryText": "Rp3,5–4,2 jt / bulan",
+    "salaryText": "Uang saku, besaran tidak dicantumkan",
     "wajib": [
-      "Komunikasi",
-      "Microsoft Excel",
-      "Pelayanan Pelanggan"
-    ],
-    "tambahan": [
-      "Bahasa Inggris",
-      "Microsoft Word"
-    ],
-    "eduMin": "d3",
-    "eduFields": [
-      "Semua"
-    ],
-    "expYears": 0,
-    "desc": "Melayani nasabah di kantor, menjelaskan produk tabungan dan kredit, serta mencatat keluhan dan tindak lanjutnya.",
-    "applyUrl": null
-  },
-  {
-    "id": "j5",
-    "title": "Staf Pajak & Pembukuan",
-    "company": "KAP Wijaya & Rekan",
-    "city": "Banyumas",
-    "mode": "kantor",
-    "field": "keuangan",
-    "salaryText": "Rp4–4,8 jt / bulan",
-    "wajib": [
-      "Pembukuan",
-      "Akuntansi Dasar",
-      "Perpajakan",
-      "Microsoft Excel"
-    ],
-    "tambahan": [
-      "Software Akuntansi",
-      "e-Faktur"
-    ],
-    "eduMin": "s1",
-    "eduFields": [
-      "Akuntansi"
-    ],
-    "expYears": 1,
-    "desc": "Menyiapkan pembukuan klien UMKM, menghitung PPh 21, dan membantu pelaporan SPT Masa.",
-    "applyUrl": null
-  },
-  {
-    "id": "j6",
-    "title": "Admin Gudang",
-    "company": "CV Berkah Logistik",
-    "city": "Cilacap",
-    "mode": "kantor",
-    "field": "logistik",
-    "salaryText": "Rp3,2–3,6 jt / bulan",
-    "wajib": [
-      "Microsoft Excel",
-      "Manajemen Inventaris",
-      "Pencatatan Stok"
-    ],
-    "tambahan": [
+      "Pelayanan Pelanggan",
       "Komunikasi",
       "Ketelitian Data"
     ],
-    "eduMin": "smaSmk",
-    "eduFields": [
-      "Semua"
-    ],
-    "expYears": 0,
-    "desc": "Mencatat barang masuk dan keluar, menyusun laporan stok harian, dan membantu stock opname bulanan.",
-    "applyUrl": null
-  },
-  {
-    "id": "j7",
-    "title": "Teknisi Jaringan",
-    "company": "PT Banyumas Net Media",
-    "city": "Purwokerto",
-    "mode": "kantor",
-    "field": "teknologi",
-    "salaryText": "Rp3–3,6 jt / bulan",
-    "wajib": [
-      "Jaringan Komputer",
-      "Konfigurasi Router",
-      "Troubleshooting Hardware"
-    ],
     "tambahan": [
-      "Perakitan PC",
-      "Komunikasi"
-    ],
-    "eduMin": "smaSmk",
-    "eduFields": [
-      "Teknik Komputer dan Jaringan",
-      "Teknik Elektronika",
-      "Informatika"
-    ],
-    "expYears": 0,
-    "desc": "Memasang dan merawat jaringan pelanggan rumah serta UMKM, menangani gangguan koneksi, dan mencatat laporan pekerjaan harian.",
-    "applyUrl": null
-  },
-  {
-    "id": "j8",
-    "title": "IT Support",
-    "company": "CV Mitra Komputindo",
-    "city": "Purwokerto",
-    "mode": "kantor",
-    "field": "teknologi",
-    "salaryText": "Rp3,2–3,8 jt / bulan",
-    "wajib": [
-      "Perakitan PC",
-      "Troubleshooting Hardware",
-      "Instalasi Software"
-    ],
-    "tambahan": [
-      "Jaringan Komputer",
-      "Pelayanan Pelanggan"
+      "Microsoft Excel",
+      "Bahasa Inggris"
     ],
     "eduMin": "smaSmk",
     "eduFields": [
       "Semua"
     ],
     "expYears": 0,
-    "desc": "Merakit dan memperbaiki komputer klien kantor, memasang perangkat lunak, dan membantu pengguna yang mengalami kendala teknis.",
-    "applyUrl": null
+    "desc": "Program magang BCA untuk posisi Customer Service dan Teller di kantor cabang kota tempat seleksi. Syarat: usia 18–24 tahun, SMA/SMK nilai rata-rata minimal 70 atau D1–S1 IPK minimal 2,50. Pendaftaran dibuka hingga 31 Desember 2026. Sumber: karir.bca.co.id (dicek 13 Okt 2026).",
+    "applyUrl": "https://karir.bca.co.id"
   },
   {
-    "id": "j9",
-    "title": "Kasir",
-    "company": "Toko Swalayan Mitra",
-    "city": "Purwokerto",
+    "id": "bca-magang-bakti-cs-online",
+    "title": "Magang Bakti CS Pembukaan Rekening Online",
+    "company": "Bank BCA",
+    "city": "Semarang",
     "mode": "kantor",
     "field": "layanan",
-    "salaryText": "Rp2,6–3 jt / bulan",
+    "salaryText": "Uang saku, besaran tidak dicantumkan",
     "wajib": [
       "Pelayanan Pelanggan",
+      "Komunikasi",
+      "Microsoft Excel"
+    ],
+    "tambahan": [
       "Ketelitian Data",
-      "Komunikasi"
-    ],
-    "tambahan": [
-      "Microsoft Excel"
-    ],
-    "eduMin": "smaSmk",
-    "eduFields": [
-      "Semua"
-    ],
-    "expYears": 0,
-    "desc": "Melayani transaksi pembayaran, menghitung kas akhir shift, dan menjaga kerapian area kasir.",
-    "applyUrl": null
-  },
-  {
-    "id": "j10",
-    "title": "Staf Administrasi Umum",
-    "company": "PT Graha Niaga",
-    "city": "Purwokerto",
-    "mode": "kantor",
-    "field": "administrasi",
-    "salaryText": "Rp3,4–4 jt / bulan",
-    "wajib": [
-      "Microsoft Word",
-      "Microsoft Excel",
-      "Pengarsipan"
-    ],
-    "tambahan": [
-      "Komunikasi",
-      "Manajemen Waktu"
-    ],
-    "eduMin": "d3",
-    "eduFields": [
-      "Semua"
-    ],
-    "expYears": 0,
-    "desc": "Menyusun surat dan dokumen kantor, mengelola arsip fisik dan digital, serta membantu penjadwalan rapat.",
-    "applyUrl": null
-  },
-  {
-    "id": "j11",
-    "title": "Content Creator",
-    "company": "Batik Lumbon Banyumas",
-    "city": "Purwokerto",
-    "mode": "hybrid",
-    "field": "pemasaran",
-    "salaryText": "Rp3–3,5 jt / bulan",
-    "wajib": [
-      "Canva",
-      "Copywriting",
-      "Editing Video"
-    ],
-    "tambahan": [
-      "Fotografi Produk",
-      "Meta Ads"
-    ],
-    "eduMin": "smaSmk",
-    "eduFields": [
-      "Semua"
-    ],
-    "expYears": 0,
-    "desc": "Membuat konten video pendek dan foto produk batik, menulis keterangan unggahan, dan memantau respons pengikut.",
-    "applyUrl": null
-  },
-  {
-    "id": "j12",
-    "title": "Junior Accountant",
-    "company": "PT Agro Serayu Lestari",
-    "city": "Cilacap",
-    "mode": "kantor",
-    "field": "keuangan",
-    "salaryText": "Rp4,5–5,5 jt / bulan",
-    "wajib": [
-      "Akuntansi Dasar",
-      "Pelaporan Keuangan",
-      "Microsoft Excel",
-      "Perpajakan"
-    ],
-    "tambahan": [
-      "Software Akuntansi"
-    ],
-    "eduMin": "s1",
-    "eduFields": [
-      "Akuntansi"
-    ],
-    "expYears": 1,
-    "desc": "Menyusun jurnal dan laporan keuangan bulanan unit usaha perkebunan serta membantu persiapan audit tahunan.",
-    "applyUrl": null
-  },
-  {
-    "id": "j13",
-    "title": "Staf Data Entry",
-    "company": "Tani Digital Nusantara",
-    "city": "Yogyakarta",
-    "mode": "remote",
-    "field": "data",
-    "salaryText": "Rp2,8–3,2 jt / bulan",
-    "wajib": [
-      "Microsoft Excel",
-      "Ketelitian Data"
-    ],
-    "tambahan": [
-      "Microsoft Word",
-      "Manajemen Waktu"
-    ],
-    "eduMin": "smaSmk",
-    "eduFields": [
-      "Semua"
-    ],
-    "expYears": 0,
-    "desc": "Memasukkan data panen dan transaksi petani mitra ke spreadsheet, lalu memeriksa ulang kelengkapannya.",
-    "applyUrl": null
-  },
-  {
-    "id": "j14",
-    "title": "Customer Support Online",
-    "company": "Lapak Kriya Nusantara",
-    "city": "Yogyakarta",
-    "mode": "remote",
-    "field": "layanan",
-    "salaryText": "Rp3–3,6 jt / bulan",
-    "wajib": [
-      "Komunikasi",
-      "Pelayanan Pelanggan",
-      "Copywriting"
-    ],
-    "tambahan": [
       "Bahasa Inggris"
     ],
     "eduMin": "d3",
@@ -351,159 +46,234 @@
       "Semua"
     ],
     "expYears": 0,
-    "desc": "Menjawab pertanyaan pembeli lewat chat dan email, menangani komplain pengiriman, dan menyusun template balasan.",
-    "applyUrl": null
+    "desc": "Melayani nasabah yang membuka rekening secara online lewat panggilan video, dengan sistem kerja shift. Penempatan Semarang atau Serpong (Tangerang). Syarat: usia 18–24 tahun, D3–S1 IPK minimal 2,50. Sumber: karir.bca.co.id (dicek 13 Okt 2026).",
+    "applyUrl": "https://karir.bca.co.id"
   },
   {
-    "id": "j15",
-    "title": "Staf Gudang & Pengiriman",
-    "company": "PT Serayu Logistik Mandiri",
-    "city": "Banyumas",
+    "id": "bri-bbap-mantri",
+    "title": "Junior Associate Mantri (BRI Banking Academy Program)",
+    "company": "Bank BRI",
+    "city": "Seluruh Indonesia",
     "mode": "kantor",
-    "field": "logistik",
-    "salaryText": "Rp2,9–3,3 jt / bulan",
+    "field": "keuangan",
+    "salaryText": "Tidak dicantumkan",
     "wajib": [
-      "Pencatatan Stok",
-      "Manajemen Inventaris"
+      "Komunikasi",
+      "Pelayanan Pelanggan",
+      "Akuntansi Dasar"
+    ],
+    "tambahan": [
+      "Negosiasi",
+      "Microsoft Excel"
+    ],
+    "eduMin": "d3",
+    "eduFields": [
+      "Semua"
+    ],
+    "expYears": 0,
+    "desc": "Program pendidikan Mantri BRI yang menyalurkan dan memantau kredit mikro bagi pelaku usaha di unit kerja BRI. Syarat: D3 IPK minimal 2,75, usia maksimal 25 tahun, memiliki SIM C dan SKCK. Sumber: e-recruitment.bri.co.id (dicek 13 Okt 2026).",
+    "applyUrl": "https://e-recruitment.bri.co.id"
+  },
+  {
+    "id": "mandiri-odp",
+    "title": "Officer Development Program (ODP)",
+    "company": "Bank Mandiri",
+    "city": "Seluruh Indonesia",
+    "mode": "kantor",
+    "field": "keuangan",
+    "salaryText": "Tidak dicantumkan",
+    "wajib": [
+      "Komunikasi",
+      "Microsoft Excel",
+      "Pelaporan Keuangan"
+    ],
+    "tambahan": [
+      "Bahasa Inggris",
+      "Statistik Dasar"
+    ],
+    "eduMin": "s1",
+    "eduFields": [
+      "Semua"
+    ],
+    "expYears": 0,
+    "desc": "Program pengembangan calon pemimpin Bank Mandiri lewat pendidikan dan rotasi kerja. Syarat pada pembukaan Okt–Des 2025: S1 IPK minimal 3,00, usia maksimal 24 tahun. Program dibuka berkala, pantau jadwalnya di situs resmi. Sumber: bankmandiri.co.id/mandiri-career (dicek 13 Okt 2026).",
+    "applyUrl": "https://www.bankmandiri.co.id/mandiri-career"
+  },
+  {
+    "id": "mandiri-banking-staff",
+    "title": "Banking Staff",
+    "company": "Bank Mandiri",
+    "city": "Seluruh Indonesia",
+    "mode": "kantor",
+    "field": "layanan",
+    "salaryText": "Tidak dicantumkan",
+    "wajib": [
+      "Pelayanan Pelanggan",
+      "Komunikasi",
+      "Ketelitian Data"
     ],
     "tambahan": [
       "Microsoft Excel",
-      "Komunikasi"
+      "Bahasa Inggris"
     ],
-    "eduMin": "smaSmk",
+    "eduMin": "s1",
     "eduFields": [
       "Semua"
     ],
     "expYears": 0,
-    "desc": "Menyiapkan pesanan, mencocokkan barang keluar dengan surat jalan, dan memperbarui kartu stok setiap hari.",
-    "applyUrl": null
+    "desc": "Melayani nasabah dan transaksi perbankan di kantor cabang Bank Mandiri. Syarat pada pembukaan Okt–Des 2025: S1 IPK minimal 3,00, usia maksimal 24 tahun. Program dibuka berkala. Sumber: bankmandiri.co.id/mandiri-career (dicek 13 Okt 2026).",
+    "applyUrl": "https://www.bankmandiri.co.id/mandiri-career"
   },
   {
-    "id": "j16",
-    "title": "Admin Marketplace",
-    "company": "Kopi Lereng Slamet",
-    "city": "Purwokerto",
-    "mode": "hybrid",
-    "field": "pemasaran",
-    "salaryText": "Rp2,8–3,4 jt / bulan",
-    "wajib": [
-      "Manajemen Marketplace",
-      "Copywriting",
-      "Microsoft Excel"
-    ],
-    "tambahan": [
-      "Canva",
-      "Fotografi Produk"
-    ],
-    "eduMin": "smaSmk",
-    "eduFields": [
-      "Semua"
-    ],
-    "expYears": 0,
-    "desc": "Mengelola etalase toko di marketplace, memproses pesanan, dan merekap penjualan mingguan.",
-    "applyUrl": null
-  },
-  {
-    "id": "j17",
-    "title": "Junior Web Developer",
-    "company": "Tani Digital Nusantara",
-    "city": "Yogyakarta",
-    "mode": "remote",
+    "id": "telkom-magang-fresh-graduate",
+    "title": "Magang Fresh Graduate",
+    "company": "Telkom Indonesia",
+    "city": "Seluruh Indonesia",
+    "mode": "kantor",
     "field": "teknologi",
-    "salaryText": "Rp4,5–6 jt / bulan",
+    "salaryText": "Uang saku setara upah minimum",
     "wajib": [
-      "HTML & CSS",
-      "JavaScript",
-      "Git"
+      "Komunikasi",
+      "Microsoft Excel",
+      "Microsoft Word"
     ],
     "tambahan": [
-      "SQL",
-      "Komunikasi"
+      "Visualisasi Data",
+      "Bahasa Inggris"
     ],
     "eduMin": "d3",
+    "eduFields": [
+      "Semua"
+    ],
+    "expYears": 0,
+    "desc": "Magang 6 bulan bagi lulusan baru di unit kerja Telkom, bekerja sama dengan program magang Kemnaker (pembukaan Okt 2025), dengan uang saku setara upah minimum. Sumber: rekrutmen.telkom.co.id (dicek 13 Okt 2026).",
+    "applyUrl": "https://rekrutmen.telkom.co.id"
+  },
+  {
+    "id": "indomaret-mdp",
+    "title": "Management Development Program (MDP)",
+    "company": "Indomaret Group",
+    "city": "Seluruh Indonesia",
+    "mode": "kantor",
+    "field": "administrasi",
+    "salaryText": "Tidak dicantumkan",
+    "wajib": [
+      "Komunikasi",
+      "Microsoft Excel",
+      "Manajemen Inventaris"
+    ],
+    "tambahan": [
+      "Kepemimpinan",
+      "Manajemen Waktu"
+    ],
+    "eduMin": "s1",
+    "eduFields": [
+      "Semua"
+    ],
+    "expYears": 0,
+    "desc": "Program pengembangan calon manajer di kantor cabang Indomaret Group: operasional toko, persediaan, dan pengelolaan tim. Syarat: S1 IPK minimal 3,00. Sumber: career.indomaretgroup.com (lowongan Juli 2026, dicek 13 Okt 2026).",
+    "applyUrl": "https://career.indomaretgroup.com"
+  },
+  {
+    "id": "indomaret-it-specialist",
+    "title": "IT Specialist",
+    "company": "Indomaret Group",
+    "city": "Seluruh Indonesia",
+    "mode": "kantor",
+    "field": "teknologi",
+    "salaryText": "Tidak dicantumkan",
+    "wajib": [
+      "Jaringan Komputer",
+      "Troubleshooting Hardware",
+      "SQL"
+    ],
+    "tambahan": [
+      "Instalasi Software",
+      "Komunikasi"
+    ],
+    "eduMin": "s1",
     "eduFields": [
       "Informatika",
       "Sistem Informasi",
       "Teknik Komputer dan Jaringan"
     ],
     "expYears": 0,
-    "desc": "Membangun halaman web internal untuk tim lapangan dan memperbaiki tampilan dasbor bersama developer senior.",
-    "applyUrl": null
+    "desc": "Mendukung sistem dan perangkat IT toko serta kantor cabang Indomaret Group: jaringan, perangkat keras, dan aplikasi. Syarat: S1 IPK minimal 3,00. Sumber: career.indomaretgroup.com (lowongan Juli 2026, dicek 13 Okt 2026).",
+    "applyUrl": "https://career.indomaretgroup.com"
   },
   {
-    "id": "j18",
-    "title": "Teller",
-    "company": "BPR Artha Sejahtera",
-    "city": "Purwokerto",
+    "id": "indomaret-sdp",
+    "title": "Supervisor Development Program (SDP)",
+    "company": "Indomaret Group",
+    "city": "Seluruh Indonesia",
+    "mode": "kantor",
+    "field": "logistik",
+    "salaryText": "Tidak dicantumkan",
+    "wajib": [
+      "Manajemen Inventaris",
+      "Pencatatan Stok",
+      "Komunikasi"
+    ],
+    "tambahan": [
+      "Kepemimpinan",
+      "Microsoft Excel"
+    ],
+    "eduMin": "s1",
+    "eduFields": [
+      "Semua"
+    ],
+    "expYears": 0,
+    "desc": "Program calon supervisor yang mengawasi operasional toko atau gudang Indomaret Group, termasuk stok dan tim kerja. Syarat: S1 IPK minimal 3,00. Sumber: career.indomaretgroup.com (lowongan Juli 2026, dicek 13 Okt 2026).",
+    "applyUrl": "https://career.indomaretgroup.com"
+  },
+  {
+    "id": "alfamart-store-crew",
+    "title": "Store Crew (Kasir & Pramuniaga)",
+    "company": "Alfamart",
+    "city": "Seluruh Indonesia",
     "mode": "kantor",
     "field": "layanan",
-    "salaryText": "Rp3,5–4 jt / bulan",
+    "salaryText": "Tidak dicantumkan",
     "wajib": [
       "Pelayanan Pelanggan",
       "Komunikasi",
       "Ketelitian Data"
     ],
     "tambahan": [
-      "Microsoft Excel",
-      "Bahasa Inggris"
+      "Pencatatan Stok",
+      "Manajemen Waktu"
     ],
-    "eduMin": "d3",
+    "eduMin": "smaSmk",
     "eduFields": [
       "Semua"
     ],
     "expYears": 0,
-    "desc": "Melayani setoran dan penarikan nasabah, memeriksa keaslian uang, dan menyusun laporan kas harian.",
-    "applyUrl": null
+    "desc": "Melayani pembeli di kasir, menata barang di rak, dan membantu pengecekan stok toko dengan sistem kerja shift. Syarat: SMA/SMK semua jurusan, usia 18–24 tahun. Sumber: alfakarir.alfamart.co.id (dicek 13 Okt 2026).",
+    "applyUrl": "https://alfakarir.alfamart.co.id"
   },
   {
-    "id": "j19",
-    "title": "Staf HRD",
-    "company": "PT Sinar Mandiri Abadi",
-    "city": "Purwokerto",
-    "mode": "kantor",
-    "field": "administrasi",
-    "salaryText": "Rp4–4,8 jt / bulan",
-    "wajib": [
-      "Rekrutmen",
-      "Microsoft Excel",
-      "Komunikasi"
-    ],
-    "tambahan": [
-      "Pengarsipan",
-      "Microsoft Word"
-    ],
-    "eduMin": "s1",
-    "eduFields": [
-      "Manajemen",
-      "Psikologi"
-    ],
-    "expYears": 0,
-    "desc": "Menyaring lamaran, menjadwalkan wawancara, dan mengelola data kehadiran serta kontrak karyawan.",
-    "applyUrl": null
-  },
-  {
-    "id": "j20",
-    "title": "Staf Data Penjualan",
-    "company": "CV Berkah Logistik",
-    "city": "Cilacap",
+    "id": "bps-mitra-statistik",
+    "title": "Mitra Statistik (Petugas Survei)",
+    "company": "Badan Pusat Statistik",
+    "city": "Seluruh Indonesia",
     "mode": "hybrid",
     "field": "data",
-    "salaryText": "Rp3,5–4,2 jt / bulan",
+    "salaryText": "Rp3–5 jt per kegiatan",
     "wajib": [
-      "Microsoft Excel",
-      "Visualisasi Data",
-      "Ketelitian Data"
+      "Komunikasi",
+      "Ketelitian Data",
+      "Manajemen Waktu"
     ],
     "tambahan": [
-      "SQL",
-      "Komunikasi"
+      "Microsoft Excel",
+      "Statistik Dasar"
     ],
-    "eduMin": "d3",
+    "eduMin": "smaSmk",
     "eduFields": [
       "Semua"
     ],
     "expYears": 0,
-    "desc": "Merekap data pengiriman dan penjualan, membuat grafik mingguan, dan menandai selisih data untuk ditindaklanjuti.",
-    "applyUrl": null
+    "desc": "Mitra BPS mendata rumah tangga dan usaha untuk survei atau sensus di kabupaten/kota domisili, dibayar per kegiatan. Syarat minimal SMA/sederajat. Rekrutmen dibuka berkala (putaran Mei 2026 sudah ditutup). Sumber: mitra.bps.go.id (dicek 13 Okt 2026).",
+    "applyUrl": "https://mitra.bps.go.id"
   }
 ]

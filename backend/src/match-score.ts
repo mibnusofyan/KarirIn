@@ -32,6 +32,9 @@ export interface Profile {
   exps: Experience[];
 }
 
+/** Job city for programmes that place hires nationwide; matches every home city (same as the app). */
+export const ANY_CITY = 'Seluruh Indonesia';
+
 const rank: Record<EduLevel, number> = { smaSmk: 1, d3: 2, s1: 3 };
 
 export function matchScore(job: Job, p: Profile): number {
@@ -52,7 +55,8 @@ export function matchScore(job: Job, p: Profile): number {
     se = Math.min(Math.max(relevant / (job.expYears * 12), 0), 1);
   }
 
-  const cityOk = job.mode === 'remote' || job.city === p.city;
+  // "Seluruh Indonesia": the programme places hires nationwide, so any home city matches.
+  const cityOk = job.mode === 'remote' || job.city === ANY_CITY || job.city === p.city;
   const modeOk = p.modes.includes(job.mode);
   const sl = cityOk && modeOk ? 1 : cityOk || modeOk ? 0.5 : 0;
 
