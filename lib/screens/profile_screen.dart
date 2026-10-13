@@ -11,6 +11,7 @@ import '../state/app_state.dart';
 import '../theme/career_theme.dart';
 import '../widgets/career_widgets.dart';
 import '../widgets/common.dart';
+import '../widgets/profile_photo.dart';
 
 /// Profil & Pengaturan: identity and skills first, account settings grouped below (UU No. 27/2022).
 class ProfileScreen extends ConsumerWidget {
@@ -213,15 +214,7 @@ class _IdentityHero extends StatelessWidget {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundColor: CareerColors.yellow,
-                child: Text(
-                  p.initials,
-                  textScaler: TextScaler.noScaling,
-                  style: CareerText.title.copyWith(fontSize: 20, color: CareerColors.navy),
-                ),
-              ),
+              const ProfilePhotoButton(radius: 30),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(

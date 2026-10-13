@@ -32,6 +32,15 @@ service cloud.firestore {
         && request.resource.data.skills.size() <= 60;
     }
 
+    // Profile photo as image bytes (no Cloud Storage on the Spark plan); the app resizes it before upload.
+    match /profilePhotos/{uid} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['image', 'updatedAt'])
+        && request.resource.data.image is bytes
+        && request.resource.data.image.size() <= 600 * 1024;
+    }
+
     match /users/{uid} {
       allow read, create, update, delete: if isOwner(uid);
 

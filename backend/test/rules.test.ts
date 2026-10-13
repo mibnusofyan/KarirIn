@@ -7,7 +7,7 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing';
-import { deleteDoc, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { Bytes, deleteDoc, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { afterAll, beforeAll, beforeEach, describe, test } from 'vitest';
 
 let env: RulesTestEnvironment;
@@ -50,6 +50,25 @@ beforeEach(async () => {
 
 const alice = () => env.authenticatedContext('alice').firestore();
 const guest = () => env.unauthenticatedContext().firestore();
+
+describe('foto profil', () => {
+  const image = (size: number) => Bytes.fromUint8Array(new Uint8Array(size));
+  test('pemilik dapat menyimpan, membaca, dan menghapus fotonya', async () => {
+    await assertSucceeds(setDoc(doc(alice(), 'profilePhotos/alice'), { image: image(40 * 1024) }));
+    await assertSucceeds(getDoc(doc(alice(), 'profilePhotos/alice')));
+    await assertSucceeds(deleteDoc(doc(alice(), 'profilePhotos/alice')));
+  });
+  test('foto pengguna lain tidak dapat dibaca atau ditulis', async () => {
+    await assertFails(getDoc(doc(alice(), 'profilePhotos/bob')));
+    await assertFails(setDoc(doc(alice(), 'profilePhotos/bob'), { image: image(1024) }));
+    await assertFails(getDoc(doc(guest(), 'profilePhotos/alice')));
+  });
+  test('foto harus berupa bytes, maksimal 600 KB, tanpa field lain', async () => {
+    await assertFails(setDoc(doc(alice(), 'profilePhotos/alice'), { image: image(601 * 1024) }));
+    await assertFails(setDoc(doc(alice(), 'profilePhotos/alice'), { image: 'data:image/png;base64,AAAA' }));
+    await assertFails(setDoc(doc(alice(), 'profilePhotos/alice'), { image: image(1024), name: 'x' }));
+  });
+});
 
 describe('katalog', () => {
   test('pengguna login dapat membaca lowongan dan skill', async () => {

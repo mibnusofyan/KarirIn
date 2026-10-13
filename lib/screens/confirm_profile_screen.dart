@@ -9,6 +9,7 @@ import '../state/app_state.dart';
 import '../theme/career_theme.dart';
 import '../widgets/career_widgets.dart';
 import '../widgets/common.dart';
+import '../widgets/profile_photo.dart';
 
 /// "Periksa profil": the user reviews and corrects AI extraction before scores are computed.
 class ConfirmProfileScreen extends ConsumerStatefulWidget {
@@ -280,15 +281,7 @@ class _IdentityCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 26,
-            backgroundColor: CareerColors.yellow,
-            child: Text(
-              p.initials,
-              textScaler: TextScaler.noScaling,
-              style: CareerText.title.copyWith(fontSize: 18, color: CareerColors.navy),
-            ),
-          ),
+          const ProfilePhotoButton(radius: 26),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
