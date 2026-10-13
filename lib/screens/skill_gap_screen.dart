@@ -5,12 +5,14 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../data/backend.dart';
 import '../data/models.dart';
+import '../data/repositories/providers.dart';
 import '../logic/match_score.dart';
 import '../router.dart';
 import '../state/app_state.dart';
 import '../theme/career_theme.dart';
 import '../widgets/career_widgets.dart';
 import '../widgets/common.dart';
+import 'video_lesson_screen.dart';
 
 /// Skill Gap & Jalur Belajar: turns a low score into a measurable action plan.
 class SkillGapScreen extends ConsumerWidget {
@@ -389,6 +391,9 @@ class _ResourceSheet extends ConsumerWidget {
       SkillGapScreen.master(messenger, notifier, item.skill);
     }
 
+    final videoId = backend == Backend.mock ? null : res.youtubeId;
+
+    // Videos play inside KarirIn; any other link opens in an in-app browser tab.
     Future<void> openMaterial() async {
       final u = Uri.tryParse(res.url?.trim() ?? '');
       final url = u != null && u.scheme.startsWith('http') && u.host.isNotEmpty ? u : null;
@@ -396,7 +401,13 @@ class _ResourceSheet extends ConsumerWidget {
         showToast(context, 'Demo: tautan materi belum tersambung ke penyedia');
         return;
       }
-      if (!await launchUrl(url, mode: LaunchMode.externalApplication) && context.mounted) {
+      if (await ref.read(networkStatusProvider).isOffline()) {
+        if (context.mounted) showToast(context, 'Tidak ada koneksi internet. Video butuh internet untuk diputar.');
+        return;
+      }
+      if (!context.mounted) return;
+      if (videoId != null) return VideoLessonScreen.open(context, skill: item.skill, resource: res);
+      if (!await launchUrl(url, mode: LaunchMode.inAppBrowserView) && context.mounted) {
         showToast(context, 'Tautan materi tidak dapat dibuka.');
       }
     }
@@ -413,21 +424,23 @@ class _ResourceSheet extends ConsumerWidget {
         CareerSheetHeader(res.title),
         Text('${res.type.label} · ${res.duration} · Gratis'.toUpperCase(), style: CareerText.eyebrow),
         const SizedBox(height: 16),
-        for (final (i, (title, duration)) in _modules.indexed) ...[
-          if (i > 0) const Divider(),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Row(
-              children: [
-                Text('${i + 1}', style: CareerText.label.copyWith(color: CareerColors.teal)),
-                const SizedBox(width: 14),
-                Expanded(child: Text(title, style: CareerText.body)),
-                const SizedBox(width: 8),
-                Text(duration, style: CareerText.small),
-              ],
+        if (videoId != null) _VideoPreview(videoId: videoId, provider: res.provider, onTap: openMaterial),
+        if (videoId == null)
+          for (final (i, (title, duration)) in _modules.indexed) ...[
+            if (i > 0) const Divider(),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Row(
+                children: [
+                  Text('${i + 1}', style: CareerText.label.copyWith(color: CareerColors.teal)),
+                  const SizedBox(width: 14),
+                  Expanded(child: Text(title, style: CareerText.body)),
+                  const SizedBox(width: 8),
+                  Text(duration, style: CareerText.small),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(14),
@@ -445,19 +458,67 @@ class _ResourceSheet extends ConsumerWidget {
           children: [
             TextButton.icon(
               onPressed: openMaterial,
-              icon: const Icon(Icons.open_in_new_rounded, size: 17),
-              label: const Text('Buka materi'),
+              icon: Icon(videoId != null ? Icons.play_circle_outline_rounded : Icons.open_in_new_rounded, size: 17),
+              label: Text(videoId != null ? 'Putar video' : 'Buka materi'),
             ),
-            TextButton.icon(
-              onPressed: addProof,
-              icon: const Icon(Icons.upload_rounded, size: 17),
-              label: const Text('Unggah bukti'),
-            ),
+            TextButton.icon(onPressed: addProof, icon: const Icon(Icons.upload_rounded, size: 17), label: const Text('Unggah bukti')),
           ],
         ),
       ],
     );
   }
+}
+
+/// Thumbnail of the lesson video with a play button; tapping opens the in-app player.
+class _VideoPreview extends StatelessWidget {
+  const _VideoPreview({required this.videoId, required this.provider, required this.onTap});
+  final String videoId;
+  final String? provider;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: 'Putar video materi',
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Material(
+              color: CareerColors.navy,
+              child: InkWell(
+                onTap: onTap,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.network(
+                      'https://i.ytimg.com/vi/$videoId/hqdefault.jpg',
+                      fit: BoxFit.cover,
+                      excludeFromSemantics: true,
+                      errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                    ),
+                    const ColoredBox(color: Color(0x33000000)),
+                    Center(
+                      child: Container(
+                        width: 56,
+                        height: 56,
+                        decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                        child: const Icon(Icons.play_arrow_rounded, size: 34, color: CareerColors.navy),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (provider != null) ...[const SizedBox(height: 8), Text('Video oleh $provider · diputar di KarirIn', style: CareerText.small)],
+      ],
+    ),
+  );
 }
 
 /// Proof of learning: a certificate link or a short note on what was learned.

@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:karirin/data/backend.dart';
 import 'package:karirin/data/catalog_real.dart';
+import 'package:karirin/data/learning_videos.dart';
 import 'package:karirin/data/mock_data.dart';
 import 'package:karirin/data/models.dart';
 import 'package:karirin/data/repositories/application_repository.dart';
@@ -71,6 +73,39 @@ void main() {
     final r = computeMatch(job, raniProfile);
     expect(r.cityOk, isTrue);
     expect(computeMatch(job, raniProfile.copyWith(city: 'Kota Lain')).total, r.total);
+  });
+
+  test('setiap skill di katalog punya video belajar yang bisa diputar di aplikasi', () {
+    final skills = buildSkillCatalog(realJobs, {...resources, ...realResources});
+    for (final s in skills) {
+      final v = learningVideos[s.name];
+      expect(v, isNotNull, reason: s.name);
+      expect(youtubeVideoId(v!.url), v.id, reason: s.name);
+      expect(v.seconds, greaterThan(60), reason: s.name);
+    }
+    expect({for (final v in learningVideos.values) v.id}, hasLength(learningVideos.length), reason: 'satu video per skill');
+    final seeded = jsonDecode(File('backend/data/skills.json').readAsStringSync()) as List;
+    for (final m in seeded.cast<Map<String, Object?>>()) {
+      final r = LearningResource.fromMap((m['resource']! as Map).cast<String, Object?>());
+      expect(r.youtubeId, learningVideos[m['name']]!.id, reason: 'jalankan ulang tool/export_seed.dart');
+      expect(r.provider, isNotEmpty);
+    }
+  });
+
+  test('youtubeVideoId mengenali tautan video, bukan halaman pencarian', () {
+    expect(youtubeVideoId('https://www.youtube.com/watch?v=jQ2vOo_lPdA&t=10'), 'jQ2vOo_lPdA');
+    expect(youtubeVideoId('https://youtu.be/jQ2vOo_lPdA'), 'jQ2vOo_lPdA');
+    expect(youtubeVideoId('https://m.youtube.com/watch?v=jQ2vOo_lPdA'), 'jQ2vOo_lPdA');
+    expect(youtubeVideoId('https://www.youtube.com/embed/jQ2vOo_lPdA'), 'jQ2vOo_lPdA');
+    expect(youtubeVideoId('https://www.youtube.com/shorts/jQ2vOo_lPdA'), 'jQ2vOo_lPdA');
+    expect(youtubeVideoId('https://www.youtube.com/results?search_query=excel'), isNull);
+    expect(youtubeVideoId('https://www.dicoding.com/academies/123'), isNull);
+    expect(youtubeVideoId(''), isNull);
+    expect(youtubeVideoId(null), isNull);
+    const r = LearningResource(ResourceType.video, '25 mnt', 'Akuntansi', url: 'https://youtu.be/jQ2vOo_lPdA', provider: 'William Basri');
+    expect(LearningResource.fromMap(r.toMap()).provider, 'William Basri');
+    expect(const LearningVideo('x', 'c', 4075).durationLabel, '1 jam 8 mnt');
+    expect(const LearningVideo('x', 'c', 237).durationLabel, '4 mnt');
   });
 
   group('repository mock', () {

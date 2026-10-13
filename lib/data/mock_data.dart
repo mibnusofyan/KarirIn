@@ -143,7 +143,7 @@ const resources = <String, LearningResource>{
   'e-Faktur': LearningResource(ResourceType.video, '1 jam', 'Membuat e-Faktur Langkah demi Langkah'),
   'Manajemen Inventaris': LearningResource(ResourceType.modul, '3 jam', 'Dasar Manajemen Persediaan'),
   'Pencatatan Stok': LearningResource(ResourceType.video, '90 mnt', 'Kartu Stok dan Stock Opname'),
-  'Ketelitian Data': LearningResource(ResourceType.modul, '1 jam', 'Teknik Cek Ganda Data Administrasi'),
+  'Ketelitian Data': LearningResource(ResourceType.modul, '1 jam', 'Validasi Data agar Tidak Salah Input'),
   'Microsoft Excel': LearningResource(ResourceType.kursus, '4 jam', 'Excel untuk Administrasi'),
   'Komunikasi': LearningResource(ResourceType.video, '2 jam', 'Komunikasi Efektif di Tempat Kerja'),
   'Canva': LearningResource(ResourceType.video, '1 jam', 'Desain Cepat dengan Canva'),

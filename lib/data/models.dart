@@ -222,7 +222,7 @@ enum ResourceType {
 }
 
 class LearningResource {
-  const LearningResource(this.type, this.duration, this.title, {this.url});
+  const LearningResource(this.type, this.duration, this.title, {this.url, this.provider});
   final ResourceType type;
   final String duration;
   final String title;
@@ -230,14 +230,37 @@ class LearningResource {
   /// Free learning material; null until the team curates a link.
   final String? url;
 
-  Map<String, Object?> toMap() => {'type': type.name, 'duration': duration, 'title': title, 'url': url};
+  /// Who made the material (the YouTube channel), credited next to the player.
+  final String? provider;
+
+  /// The YouTube video in [url], played inside the app; null for other links.
+  String? get youtubeId => youtubeVideoId(url);
+
+  Map<String, Object?> toMap() => {'type': type.name, 'duration': duration, 'title': title, 'url': url, 'provider': provider};
 
   factory LearningResource.fromMap(Map<String, Object?> m) => LearningResource(
     _byName(ResourceType.values, m['type'], ResourceType.modul),
     (m['duration'] as String?) ?? '',
     m['title'] as String,
     url: m['url'] as String?,
+    provider: m['provider'] as String?,
   );
+}
+
+/// Video id of a YouTube watch, youtu.be, embed or shorts link; null for anything else (search pages included).
+String? youtubeVideoId(String? url) {
+  final u = Uri.tryParse(url?.trim() ?? '');
+  if (u == null || !u.scheme.startsWith('http')) return null;
+  final host = u.host.replaceFirst(RegExp(r'^(www|m)\.'), '');
+  final String? id = switch (host) {
+    'youtu.be' => u.pathSegments.firstOrNull,
+    'youtube.com' || 'youtube-nocookie.com' =>
+      u.path == '/watch'
+          ? u.queryParameters['v']
+          : (u.pathSegments.length == 2 && ['embed', 'shorts', 'live'].contains(u.pathSegments.first) ? u.pathSegments[1] : null),
+    _ => null,
+  };
+  return id != null && RegExp(r'^[A-Za-z0-9_-]{11}$').hasMatch(id) ? id : null;
 }
 
 /// A canonical skill with its spelling variants (Firestore `skills`).
