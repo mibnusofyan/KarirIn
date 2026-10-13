@@ -1,4 +1,6 @@
 // The Firebase sync in AppNotifier, run against in-memory repositories (no network, no Firebase).
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:karirin/data/backend.dart';
@@ -160,6 +162,35 @@ void main() {
     expect(b.state.savedJobIds, isEmpty);
   });
 
+  test('foto profil tersimpan per akun, dimuat saat masuk, dan dapat dihapus', () async {
+    final b = _Backend();
+    addTearDown(b.container.dispose);
+    await b.profiles.save('demo', raniProfile);
+    await b.auth.signIn(email: 'rani@contoh.id', password: 'rahasia123');
+    await pumpEventQueue();
+    expect(b.state.photo, isNull);
+
+    final image = Uint8List.fromList(List.generate(64, (i) => i));
+    b.n.setPhoto(image);
+    await pumpEventQueue();
+    expect(b.state.photo, image);
+    expect(await b.profiles.fetchPhoto('demo'), image);
+
+    // Saving the profile must not touch the photo, and the photo comes back on the next sign-in.
+    b.n.master('SQL');
+    await b.n.signOut();
+    await pumpEventQueue();
+    expect(b.state.photo, isNull);
+    await b.auth.signIn(email: 'rani@contoh.id', password: 'rahasia123');
+    await pumpEventQueue();
+    expect(b.state.photo, image);
+
+    b.n.removePhoto();
+    await pumpEventQueue();
+    expect(b.state.photo, isNull);
+    expect(await b.profiles.fetchPhoto('demo'), isNull);
+  });
+
   test('hapus akun menghapus profil dan dokumen pengguna', () async {
     final b = _Backend();
     addTearDown(b.container.dispose);
@@ -167,10 +198,13 @@ void main() {
     await b.auth.signIn(email: 'rani@contoh.id', password: 'rahasia123');
     await pumpEventQueue();
     await b.users.setSavedJobs('demo', {'j1'});
+    b.n.setPhoto(Uint8List.fromList([1, 2, 3]));
+    await pumpEventQueue();
 
     await b.n.deleteAccount();
     await pumpEventQueue();
     expect(await b.profiles.fetch('demo'), isNull);
+    expect(await b.profiles.fetchPhoto('demo'), isNull);
     final fresh = await b.users.ensure(const AuthUser(uid: 'demo', email: '', displayName: '', provider: 'password'));
     expect(fresh.savedJobIds, isEmpty);
     expect(session.value, SessionStatus.signedOut);

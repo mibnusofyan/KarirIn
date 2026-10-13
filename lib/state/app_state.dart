@@ -39,6 +39,7 @@ class AppState {
     this.skills = const [],
     this.learningProofs = const {},
     this.cvDeleted = false,
+    this.photo,
   });
 
   /// Mock builds start with Rani's demo data; Firebase builds start empty and load the signed-in user's data.
@@ -86,6 +87,9 @@ class AppState {
   /// The uploaded CV file was deleted from Pengaturan; the extracted profile stays.
   final bool cvDeleted;
 
+  /// Profile photo (resized image bytes); null shows the name's initials.
+  final Uint8List? photo;
+
   /// Whether a CV file is stored for this profile.
   bool get hasCv => profile.source != ProfileSource.qa && !cvDeleted;
 
@@ -114,6 +118,7 @@ class AppState {
     List<Skill>? skills,
     Map<String, String>? learningProofs,
     bool? cvDeleted,
+    Uint8List? Function()? photo,
   }) => AppState(
     profile: profile ?? this.profile,
     learned: learned ?? this.learned,
@@ -131,6 +136,7 @@ class AppState {
     skills: skills ?? this.skills,
     learningProofs: learningProofs ?? this.learningProofs,
     cvDeleted: cvDeleted ?? this.cvDeleted,
+    photo: photo == null ? this.photo : photo(),
   );
 }
 
@@ -199,9 +205,19 @@ class AppNotifier extends Notifier<AppState> {
     // Right after registering, the auth event can arrive before the display name is set; use the typed name.
     final name = user.displayName.isNotEmpty ? user.displayName : state.signupName.trim();
     final named = AuthUser(uid: user.uid, email: user.email, displayName: name, provider: user.provider);
-    final (userData, stored, jobs, skills) = await (
+    final profiles = ref.read(profileRepositoryProvider);
+    final (userData, stored, photo, jobs, skills) = await (
       ref.read(userRepositoryProvider).ensure(named),
-      ref.read(profileRepositoryProvider).fetch(user.uid),
+      profiles.fetch(user.uid),
+      profiles
+          .fetchPhoto(user.uid)
+          .then<Uint8List?>(
+            (p) => p,
+            onError: (Object e, StackTrace s) {
+              _report(e, s);
+              return null;
+            },
+          ),
       jobsRepo.fetchJobs().catchError((Object _) => mock.jobs),
       jobsRepo.fetchSkills().catchError((Object _) => mock.skillCatalog),
     ).wait;
@@ -214,6 +230,7 @@ class AppNotifier extends Notifier<AppState> {
       profile: stored?.profile,
       learned: stored?.learned,
       learningProofs: stored?.proofs,
+      photo: () => photo,
       savedJobIds: userData.savedJobIds,
       notifyNewJobs: userData.notifyNewJobs,
       notifyReminders: userData.notifyReminders,
@@ -398,6 +415,17 @@ class AppNotifier extends Notifier<AppState> {
     final np = p.copyWith(skills: [...p.skills, skill]);
     _setProfile(np, learned: [...state.learned, skill]);
     return (before: before, after: computeMatch(job, np).total, jobTitle: job.title);
+  }
+
+  /// Sets the profile photo (already resized by the picker) and stores it for this account.
+  void setPhoto(Uint8List image) {
+    state = state.copyWith(photo: () => image);
+    _write((uid) => ref.read(profileRepositoryProvider).savePhoto(uid, image));
+  }
+
+  void removePhoto() {
+    state = state.copyWith(photo: () => null);
+    _write((uid) => ref.read(profileRepositoryProvider).deletePhoto(uid));
   }
 
   /// "Unggah bukti": keeps a certificate link or note for a mastered skill.
