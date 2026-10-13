@@ -4,10 +4,11 @@
     "name": "Akuntansi Dasar",
     "synonyms": [],
     "resource": {
-      "type": "kursus",
-      "duration": "5 jam",
+      "type": "video",
+      "duration": "25 mnt",
       "title": "Akuntansi Dasar untuk Pemula",
-      "url": "https://www.youtube.com/results?search_query=Akuntansi+Dasar+untuk+Pemula"
+      "url": "https://www.youtube.com/watch?v=jQ2vOo_lPdA",
+      "provider": "William Basri"
     }
   },
   {
@@ -15,10 +16,11 @@
     "name": "Bahasa Inggris",
     "synonyms": [],
     "resource": {
-      "type": "modul",
-      "duration": "10 jam",
+      "type": "video",
+      "duration": "12 mnt",
       "title": "Bahasa Inggris untuk Dunia Kerja",
-      "url": "https://www.youtube.com/results?search_query=Bahasa+Inggris+untuk+Dunia+Kerja"
+      "url": "https://www.youtube.com/watch?v=ue8xB1oxXdE",
+      "provider": "Elearning Media"
     }
   },
   {
@@ -27,9 +29,10 @@
     "synonyms": [],
     "resource": {
       "type": "video",
-      "duration": "1 jam",
+      "duration": "32 mnt",
       "title": "Desain Cepat dengan Canva",
-      "url": "https://www.youtube.com/results?search_query=Desain+Cepat+dengan+Canva"
+      "url": "https://www.youtube.com/watch?v=ynwUuEELPYw",
+      "provider": "Schoolpedia"
     }
   },
   {
@@ -37,10 +40,11 @@
     "name": "Copywriting",
     "synonyms": [],
     "resource": {
-      "type": "kursus",
-      "duration": "4 jam",
+      "type": "video",
+      "duration": "7 mnt",
       "title": "Copywriting untuk Media Sosial",
-      "url": "https://www.youtube.com/results?search_query=Copywriting+untuk+Media+Sosial"
+      "url": "https://www.youtube.com/watch?v=w7drAXsN8xA",
+      "provider": "Upgraded"
     }
   },
   {
@@ -49,9 +53,10 @@
     "synonyms": [],
     "resource": {
       "type": "video",
-      "duration": "90 mnt",
+      "duration": "16 mnt",
       "title": "Foto Produk dengan Ponsel",
-      "url": "https://www.youtube.com/results?search_query=Foto+Produk+dengan+Ponsel"
+      "url": "https://www.youtube.com/watch?v=99mynr-NWSs",
+      "provider": "Glenn Prasetya"
     }
   },
   {
@@ -59,10 +64,11 @@
     "name": "Instalasi Software",
     "synonyms": [],
     "resource": {
-      "type": "modul",
-      "duration": "1 jam",
+      "type": "video",
+      "duration": "18 mnt",
       "title": "Instalasi Sistem Operasi dan Aplikasi",
-      "url": "https://www.youtube.com/results?search_query=Instalasi+Sistem+Operasi+dan+Aplikasi"
+      "url": "https://www.youtube.com/watch?v=SOxURzYOhns",
+      "provider": "Levelup iD"
     }
   },
   {
@@ -70,10 +76,11 @@
     "name": "Jaringan Komputer",
     "synonyms": [],
     "resource": {
-      "type": "kursus",
-      "duration": "6 jam",
+      "type": "video",
+      "duration": "12 mnt",
       "title": "Dasar Jaringan Komputer",
-      "url": "https://www.youtube.com/results?search_query=Dasar+Jaringan+Komputer"
+      "url": "https://www.youtube.com/watch?v=CMlqR70Nk9Y",
+      "provider": "ID-Networkers (IDN.ID)"
     }
   },
   {
@@ -81,10 +88,11 @@
     "name": "Kepemimpinan",
     "synonyms": [],
     "resource": {
-      "type": "modul",
-      "duration": "2 jam",
+      "type": "video",
+      "duration": "20 mnt",
       "title": "Dasar Kepemimpinan Tim",
-      "url": "https://www.youtube.com/results?search_query=Dasar+Kepemimpinan+Tim"
+      "url": "https://www.youtube.com/watch?v=Xn0byI5PDVc",
+      "provider": "Fanny Winara"
     }
   },
   {
@@ -92,10 +100,11 @@
     "name": "Ketelitian Data",
     "synonyms": [],
     "resource": {
-      "type": "modul",
-      "duration": "1 jam",
-      "title": "Teknik Cek Ganda Data Administrasi",
-      "url": "https://www.youtube.com/results?search_query=Teknik+Cek+Ganda+Data+Administrasi"
+      "type": "video",
+      "duration": "8 mnt",
+      "title": "Validasi Data agar Tidak Salah Input",
+      "url": "https://www.youtube.com/watch?v=euq7Af56c58",
+      "provider": "Budi Tutorials"
     }
   },
   {
@@ -104,9 +113,10 @@
     "synonyms": [],
     "resource": {
       "type": "video",
-      "duration": "2 jam",
+      "duration": "8 mnt",
       "title": "Komunikasi Efektif di Tempat Kerja",
-      "url": "https://www.youtube.com/results?search_query=Komunikasi+Efektif+di+Tempat+Kerja"
+      "url": "https://www.youtube.com/watch?v=QKmhxs56PAg",
+      "provider": "Satu Persen - Indonesian Life School"
     }
   },
   {
@@ -114,10 +124,11 @@
     "name": "Manajemen Inventaris",
     "synonyms": [],
     "resource": {
-      "type": "modul",
-      "duration": "3 jam",
+      "type": "video",
+      "duration": "37 mnt",
       "title": "Dasar Manajemen Persediaan",
-      "url": "https://www.youtube.com/results?search_query=Dasar+Manajemen+Persediaan"
+      "url": "https://www.youtube.com/watch?v=LtGOmbDchG0",
+      "provider": "Belajar Manajemen Ekonomi Bisnis"
     }
   },
   {
@@ -126,9 +137,10 @@
     "synonyms": [],
     "resource": {
       "type": "video",
-      "duration": "1 jam",
+      "duration": "17 mnt",
       "title": "Manajemen Waktu di Tempat Kerja",
-      "url": "https://www.youtube.com/results?search_query=Manajemen+Waktu+di+Tempat+Kerja"
+      "url": "https://www.youtube.com/watch?v=P-CS6RVU7ic",
+      "provider": "Satu Persen - Indonesian Life School"
     }
   },
   {
@@ -136,10 +148,11 @@
     "name": "Meta Ads",
     "synonyms": [],
     "resource": {
-      "type": "modul",
-      "duration": "3 jam",
+      "type": "video",
+      "duration": "58 mnt",
       "title": "Iklan Berbayar di Instagram & Facebook",
-      "url": "https://www.youtube.com/results?search_query=Iklan+Berbayar+di+Instagram+%26+Facebook"
+      "url": "https://www.youtube.com/watch?v=NHd7EVbWwk4",
+      "provider": "Akuira"
     }
   },
   {
@@ -150,10 +163,11 @@
       "MS Excel"
     ],
     "resource": {
-      "type": "kursus",
-      "duration": "4 jam",
+      "type": "video",
+      "duration": "16 mnt",
       "title": "Excel untuk Administrasi",
-      "url": "https://www.youtube.com/results?search_query=Excel+untuk+Administrasi"
+      "url": "https://www.youtube.com/watch?v=0ttAfGBNruE",
+      "provider": "Felly Tutorial"
     }
   },
   {
@@ -165,9 +179,10 @@
     ],
     "resource": {
       "type": "video",
-      "duration": "2 jam",
+      "duration": "22 mnt",
       "title": "Microsoft Word untuk Dokumen Kantor",
-      "url": "https://www.youtube.com/results?search_query=Microsoft+Word+untuk+Dokumen+Kantor"
+      "url": "https://www.youtube.com/watch?v=Ua2ws-LcLxE",
+      "provider": "Ignasius Ryan"
     }
   },
   {
@@ -176,9 +191,10 @@
     "synonyms": [],
     "resource": {
       "type": "video",
-      "duration": "90 mnt",
+      "duration": "14 mnt",
       "title": "Teknik Negosiasi untuk Pemula",
-      "url": "https://www.youtube.com/results?search_query=Teknik+Negosiasi+untuk+Pemula"
+      "url": "https://www.youtube.com/watch?v=Q6t3tkAIfZk",
+      "provider": "Raymond Chin"
     }
   },
   {
@@ -186,10 +202,11 @@
     "name": "Pelaporan Keuangan",
     "synonyms": [],
     "resource": {
-      "type": "kursus",
-      "duration": "3 jam",
+      "type": "video",
+      "duration": "15 mnt",
       "title": "Dasar Menyusun Laporan Keuangan",
-      "url": "https://www.youtube.com/results?search_query=Dasar+Menyusun+Laporan+Keuangan"
+      "url": "https://www.youtube.com/watch?v=5BzbPBKjqGg",
+      "provider": "Felly Tutorial"
     }
   },
   {
@@ -198,9 +215,10 @@
     "synonyms": [],
     "resource": {
       "type": "video",
-      "duration": "2 jam",
+      "duration": "8 mnt",
       "title": "Prinsip Pelayanan Prima",
-      "url": "https://www.youtube.com/results?search_query=Prinsip+Pelayanan+Prima"
+      "url": "https://www.youtube.com/watch?v=R5jUms6wAtU",
+      "provider": "Marketeers TV"
     }
   },
   {
@@ -208,10 +226,11 @@
     "name": "Pembukuan",
     "synonyms": [],
     "resource": {
-      "type": "modul",
-      "duration": "2 jam",
+      "type": "video",
+      "duration": "13 mnt",
       "title": "Pembukuan untuk Pemula",
-      "url": "https://www.youtube.com/results?search_query=Pembukuan+untuk+Pemula"
+      "url": "https://www.youtube.com/watch?v=Gpxd-zSthGg",
+      "provider": "Kelly Patricia"
     }
   },
   {
@@ -220,9 +239,10 @@
     "synonyms": [],
     "resource": {
       "type": "video",
-      "duration": "90 mnt",
+      "duration": "4 mnt",
       "title": "Kartu Stok dan Stock Opname",
-      "url": "https://www.youtube.com/results?search_query=Kartu+Stok+dan+Stock+Opname"
+      "url": "https://www.youtube.com/watch?v=ODquNYzuNaQ",
+      "provider": "Empat Klip"
     }
   },
   {
@@ -230,10 +250,11 @@
     "name": "Perakitan PC",
     "synonyms": [],
     "resource": {
-      "type": "modul",
-      "duration": "2 jam",
+      "type": "video",
+      "duration": "13 mnt",
       "title": "Perakitan PC untuk Pemula",
-      "url": "https://www.youtube.com/results?search_query=Perakitan+PC+untuk+Pemula"
+      "url": "https://www.youtube.com/watch?v=yx7n_MsHqF0",
+      "provider": "LKP Sembiring Official"
     }
   },
   {
@@ -241,10 +262,11 @@
     "name": "Perpajakan",
     "synonyms": [],
     "resource": {
-      "type": "kursus",
-      "duration": "5 jam",
+      "type": "video",
+      "duration": "21 mnt",
       "title": "PPh 21 dan Dasar Perpajakan",
-      "url": "https://www.youtube.com/results?search_query=PPh+21+dan+Dasar+Perpajakan"
+      "url": "https://www.youtube.com/watch?v=HIVpdqCeMdQ",
+      "provider": "RajaPPN"
     }
   },
   {
@@ -252,10 +274,11 @@
     "name": "Python",
     "synonyms": [],
     "resource": {
-      "type": "kursus",
-      "duration": "8 jam",
+      "type": "video",
+      "duration": "1 jam 8 mnt",
       "title": "Python Dasar untuk Data",
-      "url": "https://www.youtube.com/results?search_query=Python+Dasar+untuk+Data"
+      "url": "https://www.youtube.com/watch?v=poZtdyC24P4",
+      "provider": "Dea Afrizal"
     }
   },
   {
@@ -263,10 +286,11 @@
     "name": "SQL",
     "synonyms": [],
     "resource": {
-      "type": "kursus",
-      "duration": "6 jam",
+      "type": "video",
+      "duration": "6 mnt",
       "title": "SQL Dasar untuk Analisis Data",
-      "url": "https://www.youtube.com/results?search_query=SQL+Dasar+untuk+Analisis+Data"
+      "url": "https://www.youtube.com/watch?v=7WH4mKdYKZQ",
+      "provider": "SUHU TV"
     }
   },
   {
@@ -275,9 +299,10 @@
     "synonyms": [],
     "resource": {
       "type": "video",
-      "duration": "2 jam",
+      "duration": "7 mnt",
       "title": "Pengenalan Software Akuntansi untuk UMKM",
-      "url": "https://www.youtube.com/results?search_query=Pengenalan+Software+Akuntansi+untuk+UMKM"
+      "url": "https://www.youtube.com/watch?v=2o3wkwvGHDs",
+      "provider": "Dedy Sidarta"
     }
   },
   {
@@ -285,10 +310,11 @@
     "name": "Statistik Dasar",
     "synonyms": [],
     "resource": {
-      "type": "modul",
-      "duration": "5 jam",
+      "type": "video",
+      "duration": "13 mnt",
       "title": "Statistik Deskriptif untuk Pemula",
-      "url": "https://www.youtube.com/results?search_query=Statistik+Deskriptif+untuk+Pemula"
+      "url": "https://www.youtube.com/watch?v=el7Ezn9PpWU",
+      "provider": "Indonesia Belajar"
     }
   },
   {
@@ -296,10 +322,11 @@
     "name": "Troubleshooting Hardware",
     "synonyms": [],
     "resource": {
-      "type": "modul",
-      "duration": "3 jam",
+      "type": "video",
+      "duration": "6 mnt",
       "title": "Diagnosis Kerusakan Komputer",
-      "url": "https://www.youtube.com/results?search_query=Diagnosis+Kerusakan+Komputer"
+      "url": "https://www.youtube.com/watch?v=at-NL8_XT_w",
+      "provider": "Timon Adiyoso"
     }
   },
   {
@@ -307,10 +334,11 @@
     "name": "Visualisasi Data",
     "synonyms": [],
     "resource": {
-      "type": "kursus",
-      "duration": "4 jam",
+      "type": "video",
+      "duration": "9 mnt",
       "title": "Visualisasi Data dengan Spreadsheet",
-      "url": "https://www.youtube.com/results?search_query=Visualisasi+Data+dengan+Spreadsheet"
+      "url": "https://www.youtube.com/watch?v=6vH3HGrhMfw",
+      "provider": "EduFlix"
     }
   },
   {
@@ -319,9 +347,10 @@
     "synonyms": [],
     "resource": {
       "type": "video",
-      "duration": "1 jam",
+      "duration": "6 mnt",
       "title": "Membuat e-Faktur Langkah demi Langkah",
-      "url": "https://www.youtube.com/results?search_query=Membuat+e-Faktur+Langkah+demi+Langkah"
+      "url": "https://www.youtube.com/watch?v=KS40I1LcKZ0",
+      "provider": "Direktorat Jenderal Pajak"
     }
   }
 ]

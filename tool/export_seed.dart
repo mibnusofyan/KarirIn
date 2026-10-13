@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:karirin/data/catalog_real.dart';
+import 'package:karirin/data/learning_videos.dart';
 import 'package:karirin/data/mock_data.dart';
 import 'package:karirin/data/models.dart';
 
@@ -16,16 +17,22 @@ void main() {
     stdout.writeln('${file.path}: ${(data as List).length} item');
   }
 
-  write('jobs.json', [for (final j in realJobs) {'id': j.id, ...j.toMap()}]);
+  write('jobs.json', [
+    for (final j in realJobs) {'id': j.id, ...j.toMap()},
+  ]);
   write('skills.json', [
     for (final s in buildSkillCatalog(realJobs, {...resources, ...realResources})) {'id': s.id, ...withMaterial(s).toMap()},
   ]);
 }
 
-/// Every skill gets learning material with a link. Until the team curates a course per skill, the link is a search
-/// for free videos on the material's title, which always resolves.
+/// Every skill's material is its curated video (lib/data/learning_videos.dart), played inside the app.
 Skill withMaterial(Skill s) {
-  final r = s.resource ?? LearningResource(ResourceType.modul, '2 jam', '${s.name} untuk Pemula');
-  final url = r.url ?? 'https://www.youtube.com/results?search_query=${Uri.encodeQueryComponent(r.title)}';
-  return Skill(name: s.name, synonyms: s.synonyms, resource: LearningResource(r.type, r.duration, r.title, url: url));
+  final v = learningVideos[s.name];
+  if (v == null) throw StateError('Belum ada video belajar untuk skill "${s.name}" di lib/data/learning_videos.dart');
+  final title = s.resource?.title ?? '${s.name} untuk Pemula';
+  return Skill(
+    name: s.name,
+    synonyms: s.synonyms,
+    resource: LearningResource(ResourceType.video, v.durationLabel, title, url: v.url, provider: v.channel),
+  );
 }
