@@ -95,7 +95,8 @@ class LocalReminderScheduler implements ReminderScheduler {
   Future<void> _init() => _ready ??= () async {
     tzdata.initializeTimeZones();
     await _plugin.initialize(
-      settings: const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher')),
+      // White K on transparent (tool/make_app_icons.py); also FCM's default_notification_icon in AndroidManifest.
+      settings: const InitializationSettings(android: AndroidInitializationSettings('@drawable/ic_stat_karirin')),
       onDidReceiveNotificationResponse: (r) {
         if (r.payload != null) notificationTaps.add(r.payload!);
       },
