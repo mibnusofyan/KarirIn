@@ -60,7 +60,7 @@ final aiServiceProvider = Provider<AiService>(
   (_) => _pick<AiService>(mock: () => const OfflineAiService(), firebase: () => ResilientAiService(GeminiAiService())),
 );
 
-final cvStorageProvider = Provider<CvStorage>((_) => const CvStorage());
+final cvStorageProvider = Provider<CvStorage>((_) => _pick<CvStorage>(mock: DemoCvStorage.new, firebase: () => const CvStorage()));
 
 final networkStatusProvider = Provider<NetworkStatus>(
   (_) => _pick<NetworkStatus>(mock: () => const NoNetworkStatus(), firebase: DeviceNetworkStatus.new),

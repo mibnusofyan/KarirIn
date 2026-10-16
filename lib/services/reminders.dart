@@ -72,6 +72,16 @@ class LocalReminderScheduler implements ReminderScheduler {
     ),
   );
 
+  static const _status = NotificationDetails(
+    android: AndroidNotificationDetails(
+      'application_status',
+      'Status lamaran',
+      channelDescription: 'Perubahan status Lamar cepat dari perusahaan',
+      importance: Importance.high,
+      priority: Priority.high,
+    ),
+  );
+
   static const _newJobs = NotificationDetails(
     android: AndroidNotificationDetails(
       'new_jobs',
@@ -90,17 +100,25 @@ class LocalReminderScheduler implements ReminderScheduler {
         if (r.payload != null) notificationTaps.add(r.payload!);
       },
     );
-    // Push messages arriving in the background use this channel (AndroidManifest default_notification_channel_id).
-    await _plugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(
-          const AndroidNotificationChannel(
-            'new_jobs',
-            'Lowongan baru yang cocok',
-            description: 'Lowongan baru dengan Match Score Sangat Cocok untuk profilmu',
-            importance: Importance.high,
-          ),
-        );
+    // Push messages arriving in the background use these channels (new_jobs is also the AndroidManifest
+    // default_notification_channel_id; the recruiter script names application_status).
+    final android = _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    await android?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        'new_jobs',
+        'Lowongan baru yang cocok',
+        description: 'Lowongan baru dengan Match Score Sangat Cocok untuk profilmu',
+        importance: Importance.high,
+      ),
+    );
+    await android?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        'application_status',
+        'Status lamaran',
+        description: 'Perubahan status Lamar cepat dari perusahaan',
+        importance: Importance.high,
+      ),
+    );
     final launch = await _plugin.getNotificationAppLaunchDetails();
     final payload = launch?.notificationResponse?.payload;
     if ((launch?.didNotificationLaunchApp ?? false) && payload != null) notificationTaps.add(payload);
@@ -112,7 +130,13 @@ class LocalReminderScheduler implements ReminderScheduler {
   @override
   Future<void> show({required String title, required String body, required String payload}) async {
     await _init();
-    await _plugin.show(id: payload.hashCode & 0x7fffffff, title: title, body: body, notificationDetails: _newJobs, payload: payload);
+    await _plugin.show(
+      id: payload.hashCode & 0x7fffffff,
+      title: title,
+      body: body,
+      notificationDetails: payload == 'tracker' ? _status : _newJobs,
+      payload: payload,
+    );
   }
 
   /// Stable notification id per application.

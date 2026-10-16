@@ -104,6 +104,15 @@ class CareerPill extends StatelessWidget {
   );
 }
 
+/// Marks a Lamar cepat job from a KarirIn partner, so nobody mistakes the demo company for a real employer.
+class PartnerPill extends StatelessWidget {
+  const PartnerPill({super.key});
+
+  @override
+  Widget build(BuildContext context) =>
+      const CareerPill('Lamar cepat · Mitra demo', icon: Icons.bolt_rounded, color: CareerColors.teal, background: CareerColors.mint);
+}
+
 class MatchBadge extends StatelessWidget {
   const MatchBadge({super.key, required this.result});
   final MatchResult result;

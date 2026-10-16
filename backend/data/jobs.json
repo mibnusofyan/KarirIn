@@ -275,5 +275,85 @@
     "expYears": 0,
     "desc": "Mitra BPS mendata rumah tangga dan usaha untuk survei atau sensus di kabupaten/kota domisili, dibayar per kegiatan. Syarat minimal SMA/sederajat. Rekrutmen dibuka berkala (putaran Mei 2026 sudah ditutup). Sumber: mitra.bps.go.id (dicek 13 Okt 2026).",
     "applyUrl": "https://mitra.bps.go.id"
+  },
+  {
+    "id": "mitra-sinar-mandiri-admin-keuangan",
+    "title": "Staf Administrasi Keuangan",
+    "company": "PT Sinar Mandiri Abadi",
+    "city": "Purwokerto",
+    "mode": "kantor",
+    "field": "keuangan",
+    "salaryText": "Rp4,2–5 jt / bulan",
+    "wajib": [
+      "Microsoft Excel",
+      "Akuntansi Dasar",
+      "Pembukuan",
+      "Pelaporan Keuangan"
+    ],
+    "tambahan": [
+      "Komunikasi",
+      "Software Akuntansi"
+    ],
+    "eduMin": "s1",
+    "eduFields": [
+      "Akuntansi",
+      "Manajemen"
+    ],
+    "expYears": 0,
+    "desc": "Mencatat transaksi harian, melakukan rekonsiliasi kas, dan menyusun laporan keuangan bulanan. Terbuka untuk lulusan baru. Lowongan demo dari mitra fiktif KarirIn untuk mencoba Lamar cepat: lamaran dikirim di dalam aplikasi dan statusnya diperbarui tim KarirIn sebagai rekruter.",
+    "applyUrl": null,
+    "quickApply": true
+  },
+  {
+    "id": "mitra-lereng-slamet-admin-sosmed",
+    "title": "Admin Media Sosial",
+    "company": "Kopi Lereng Slamet",
+    "city": "Purwokerto",
+    "mode": "hybrid",
+    "field": "pemasaran",
+    "salaryText": "Rp3–3,8 jt / bulan",
+    "wajib": [
+      "Canva",
+      "Copywriting",
+      "Meta Ads"
+    ],
+    "tambahan": [
+      "Komunikasi",
+      "Fotografi Produk"
+    ],
+    "eduMin": "smaSmk",
+    "eduFields": [
+      "Semua"
+    ],
+    "expYears": 0,
+    "desc": "Mengelola konten Instagram dan TikTok, membuat jadwal unggahan, dan menjalankan iklan berbayar untuk UMKM kopi lokal. Lowongan demo dari mitra fiktif KarirIn untuk mencoba Lamar cepat: lamaran dikirim di dalam aplikasi dan statusnya diperbarui tim KarirIn sebagai rekruter.",
+    "applyUrl": null,
+    "quickApply": true
+  },
+  {
+    "id": "mitra-berkah-logistik-admin-gudang",
+    "title": "Admin Gudang",
+    "company": "CV Berkah Logistik",
+    "city": "Cilacap",
+    "mode": "kantor",
+    "field": "logistik",
+    "salaryText": "Rp3,2–3,6 jt / bulan",
+    "wajib": [
+      "Microsoft Excel",
+      "Manajemen Inventaris",
+      "Pencatatan Stok"
+    ],
+    "tambahan": [
+      "Komunikasi",
+      "Ketelitian Data"
+    ],
+    "eduMin": "smaSmk",
+    "eduFields": [
+      "Semua"
+    ],
+    "expYears": 0,
+    "desc": "Mencatat barang masuk dan keluar, menyusun laporan stok harian, dan membantu stock opname bulanan. Lowongan demo dari mitra fiktif KarirIn untuk mencoba Lamar cepat: lamaran dikirim di dalam aplikasi dan statusnya diperbarui tim KarirIn sebagai rekruter.",
+    "applyUrl": null,
+    "quickApply": true
   }
 ]

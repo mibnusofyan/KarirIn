@@ -168,7 +168,7 @@ void main() {
         ).total,
         92.5,
       );
-      expect(find.text('Lamar di situs resmi'), findsOneWidget);
+      expect(find.text('Lamar cepat'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );

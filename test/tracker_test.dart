@@ -151,7 +151,7 @@ void main() {
     for (final scale in [1.0, 1.3, 2.0]) {
       testWidgets('tracker has no overflow at width $width, text scale $scale', (tester) async {
         await mount(tester, width: width, scale: scale);
-        await reveal(tester, find.textContaining('KarirIn tidak mengirim lamaran'));
+        await reveal(tester, find.textContaining('KarirIn tidak melamar atas namamu'));
         expect(tester.takeException(), isNull);
         final change = find.bySemanticsLabel('Ubah status Staf Administrasi');
         await reveal(tester, change);

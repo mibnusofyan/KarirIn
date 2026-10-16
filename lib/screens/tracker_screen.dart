@@ -40,7 +40,7 @@ enum _Filter {
     icon: Icons.send_outlined,
     fg: CareerColors.navy,
     bg: const Color(0xFFE8ECF6),
-    description: 'Lamaran terkirim lewat kanal resmi',
+    description: 'Lamaran sudah terkirim',
   ),
   AppStage.tes => (
     icon: Icons.edit_note_rounded,
@@ -88,7 +88,10 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
               const SizedBox(height: 6),
               Text('Pantau setiap\nlangkahmu.', style: CareerText.heading.copyWith(fontSize: 26)),
               const SizedBox(height: 8),
-              const Text('Catat status dari kanal resmi perusahaan. KarirIn membantu mengingat tindak lanjutnya.', style: CareerText.muted),
+              const Text(
+                'Status Lamar cepat diperbarui perusahaan. Lamaran di situs perusahaan kamu catat sendiri, KarirIn mengingatkan tindak lanjutnya.',
+                style: CareerText.muted,
+              ),
               const SizedBox(height: 20),
               _Summary(apps: apps),
               if (agenda.isNotEmpty) ...[
@@ -151,9 +154,8 @@ class _TrackerScreenState extends ConsumerState<TrackerScreen> {
                 ),
               const SizedBox(height: 12),
               Text(
-                backend == Backend.mock
-                    ? 'KarirIn tidak mengirim lamaran atas namamu. Pada demo ini, pengingat disimpan di aplikasi dan belum dikirim sebagai notifikasi.'
-                    : 'KarirIn tidak mengirim lamaran atas namamu. Pengingat muncul sebagai notifikasi di perangkat ini pukul 09.00.',
+                'KarirIn tidak melamar atas namamu: Lamar cepat hanya terkirim setelah kamu menyetujuinya. '
+                '${backend == Backend.mock ? 'Pada demo ini, pengingat disimpan di aplikasi dan belum dikirim sebagai notifikasi.' : 'Pengingat muncul sebagai notifikasi di perangkat ini pukul 09.00.'}',
                 style: CareerText.small,
                 textAlign: TextAlign.center,
               ),
@@ -298,12 +300,16 @@ class _ApplicationCard extends StatelessWidget {
   final JobApplication app;
 
   String get _nextStep => switch (app.status) {
+    AppStage.dikirim when app.quick => 'Tunggu kabar dari perusahaan; perubahan status muncul di sini',
     AppStage.dikirim => 'Tunggu kabar, lalu kirim email tindak lanjut bila perlu',
     AppStage.tes => 'Siapkan diri untuk tes',
     AppStage.wawancara => 'Latih jawabanmu sebelum wawancara',
     AppStage.diterima => 'Pelajari detail tawaran sebelum menjawab',
     AppStage.ditolak => 'Lanjutkan ke peluang lain yang cocok',
   };
+
+  void _open(BuildContext context) =>
+      showCareerSheet<void>(context, (_) => app.quick ? _QuickStatusSheet(app: app) : _StatusSheet(app: app));
 
   @override
   Widget build(BuildContext context) => Material(
@@ -314,7 +320,7 @@ class _ApplicationCard extends StatelessWidget {
     ),
     clipBehavior: Clip.antiAlias,
     child: InkWell(
-      onTap: () => showCareerSheet<void>(context, (_) => _StatusSheet(app: app)),
+      onTap: () => _open(context),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
         child: Column(
@@ -338,8 +344,21 @@ class _ApplicationCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            StatusChip(app.status),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                StatusChip(app.status),
+                if (app.quick) const CareerPill('Lamar cepat', icon: Icons.bolt_rounded, color: CareerColors.teal, background: CareerColors.mint),
+              ],
+            ),
             const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider()),
+            if (app.note != null) ...[
+              Text('PESAN PERUSAHAAN', style: CareerText.eyebrow),
+              const SizedBox(height: 4),
+              Text(app.note!, style: CareerText.body),
+              const SizedBox(height: 12),
+            ],
             Text('LANGKAH BERIKUTNYA', style: CareerText.eyebrow),
             const SizedBox(height: 4),
             Text(_nextStep, style: CareerText.body),
@@ -350,8 +369,10 @@ class _ApplicationCard extends StatelessWidget {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
-                onPressed: () => showCareerSheet<void>(context, (_) => _StatusSheet(app: app)),
-                child: Text('Ubah status', semanticsLabel: 'Ubah status ${app.title}'),
+                onPressed: () => _open(context),
+                child: app.quick
+                    ? Text('Lihat detail', semanticsLabel: 'Lihat detail ${app.title}')
+                    : Text('Ubah status', semanticsLabel: 'Ubah status ${app.title}'),
               ),
             ),
           ],
@@ -359,6 +380,101 @@ class _ApplicationCard extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// A Lamar cepat application: the company sets the status, so the user can only read it or withdraw.
+class _QuickStatusSheet extends ConsumerWidget {
+  const _QuickStatusSheet({required this.app});
+  final JobApplication app;
+
+  Future<void> _withdraw(BuildContext context, WidgetRef ref) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Tarik lamaran?'),
+        content: Text('Lamaranmu ke ${app.company} dibatalkan dan salinan CV yang dikirim ikut dihapus. Tindakan ini tidak bisa dibatalkan.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Batal')),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Tarik lamaran')),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    ref.read(appProvider.notifier).withdrawApplication(app.id);
+    final messenger = ScaffoldMessenger.of(context);
+    Navigator.pop(context);
+    toastVia(messenger, 'Lamaran ke ${app.company} ditarik');
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = stageStyle(app.status);
+    final job = jobFor(app, ref.watch(appProvider).jobs);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const CareerSheetHeader('Status lamaran'),
+        Text('${app.title} · ${app.company}', style: CareerText.muted),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            StatusChip(app.status),
+            const SizedBox(width: 10),
+            Expanded(child: Text(s.description, style: CareerText.small)),
+          ],
+        ),
+        if (app.note != null) ...[
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(color: CareerColors.background, borderRadius: BorderRadius.circular(14)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Pesan dari ${app.company}', style: CareerText.label),
+                const SizedBox(height: 4),
+                Text(app.note!, style: CareerText.body),
+              ],
+            ),
+          ),
+        ],
+        if (app.status == AppStage.wawancara && job != null)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () {
+                Navigator.pop(context);
+                ref.read(appProvider.notifier).selectCoachJob(job.id);
+                context.go(Routes.coach);
+              },
+              icon: const Icon(Icons.record_voice_over_outlined, size: 17),
+              label: const Text('Latihan wawancara'),
+            ),
+          ),
+        if (app.history.isNotEmpty) ...[
+          const SizedBox(height: 18),
+          const Text('Riwayat', style: CareerText.label),
+          const SizedBox(height: 8),
+          for (final h in app.history.reversed)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: CareerMeta(stageStyle(h.status).icon, '${h.status.label} · ${formatShortDateId(h.at)}', style: CareerText.body),
+            ),
+        ],
+        const SizedBox(height: 12),
+        Text(
+          'Status diperbarui oleh ${app.company}.${app.cvSize == null ? '' : ' CV terkirim: PDF, ${formatFileSize(app.cvSize!)}.'}',
+          style: CareerText.small,
+        ),
+        const SizedBox(height: 16),
+        TextButton(
+          onPressed: () => _withdraw(context, ref),
+          style: TextButton.styleFrom(foregroundColor: CareerColors.error),
+          child: const Text('Tarik lamaran'),
+        ),
+      ],
+    );
+  }
 }
 
 class _StatusSheet extends ConsumerStatefulWidget {

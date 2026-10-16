@@ -24,7 +24,8 @@
       ],
       "expYears": 0,
       "desc": "Mencatat transaksi harian, melakukan rekonsiliasi kas, dan menyusun laporan keuangan bulanan untuk kantor cabang Purwokerto. Terbuka untuk lulusan baru.",
-      "applyUrl": null
+      "applyUrl": null,
+      "quickApply": true
     },
     "j2": {
       "title": "Admin Media Sosial",
@@ -148,7 +149,8 @@
       ],
       "expYears": 0,
       "desc": "Mencatat barang masuk dan keluar, menyusun laporan stok harian, dan membantu stock opname bulanan.",
-      "applyUrl": null
+      "applyUrl": null,
+      "quickApply": true
     },
     "bca-magang-bakti-frontliner": {
       "title": "Magang Bakti Frontliner (Customer Service & Teller)",

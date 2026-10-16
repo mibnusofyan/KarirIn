@@ -56,6 +56,8 @@ KarirIn Mobile App Design-handoff
 service-account*.json
 /backend/.env
 /backend/node_modules/
+# Lamar cepat applications downloaded by backend/src/recruiter.ts (applicants' personal data)
+/backend/inbox/
 
 # Firebase CLI and emulators
 firebase-debug.log
