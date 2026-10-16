@@ -93,11 +93,16 @@ class FirestoreUserRepository implements UserRepository {
   @override
   Future<void> delete(String uid) async {
     for (final sub in const ['applications', 'interviews', 'matches', 'notifications']) {
-      final docs = (await _doc(uid).collection(sub).get()).docs;
-      for (var i = 0; i < docs.length; i += 400) {
+      final refs = <DocumentReference<Map<String, dynamic>>>[];
+      for (final d in (await _doc(uid).collection(sub).get()).docs) {
+        // Lamar cepat applications keep the CV copy in parts one level deeper.
+        if (sub == 'applications') refs.addAll((await d.reference.collection('cv').get()).docs.map((p) => p.reference));
+        refs.add(d.reference);
+      }
+      for (var i = 0; i < refs.length; i += 400) {
         final batch = _db.batch();
-        for (final d in docs.skip(i).take(400)) {
-          batch.delete(d.reference);
+        for (final r in refs.skip(i).take(400)) {
+          batch.delete(r);
         }
         await batch.commit();
       }

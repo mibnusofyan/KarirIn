@@ -1,9 +1,11 @@
-// Writes the real-company catalogue (lib/data/catalog_real.dart) to backend/data/*.json for `npm --prefix backend run seed`.
+// Writes the real-company catalogue (lib/data/catalog_real.dart) and the Lamar cepat partner jobs
+// (lib/data/catalog_partner.dart) to backend/data/*.json for `npm --prefix backend run seed`.
 // The fictional prototype jobs stay in the mock build only; the seed marks them inactive in Firestore.
 // Run from the project root: dart run tool/export_seed.dart
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:karirin/data/catalog_partner.dart';
 import 'package:karirin/data/catalog_real.dart';
 import 'package:karirin/data/learning_videos.dart';
 import 'package:karirin/data/mock_data.dart';
@@ -17,11 +19,12 @@ void main() {
     stdout.writeln('${file.path}: ${(data as List).length} item');
   }
 
+  const catalogue = [...realJobs, ...partnerJobs];
   write('jobs.json', [
-    for (final j in realJobs) {'id': j.id, ...j.toMap()},
+    for (final j in catalogue) {'id': j.id, ...j.toMap()},
   ]);
   write('skills.json', [
-    for (final s in buildSkillCatalog(realJobs, {...resources, ...realResources})) {'id': s.id, ...withMaterial(s).toMap()},
+    for (final s in buildSkillCatalog(catalogue, {...resources, ...realResources})) {'id': s.id, ...withMaterial(s).toMap()},
   ]);
 }
 

@@ -566,7 +566,8 @@ class _Notification extends StatelessWidget {
   );
 }
 
-/// Firebase builds: notifications from the team's notify-new-jobs script plus the upcoming follow-up reminders.
+/// Firebase builds: notifications from the team's scripts (new jobs, Lamar cepat status) plus the upcoming follow-up
+/// reminders.
 class _NotificationList extends ConsumerStatefulWidget {
   const _NotificationList();
 
@@ -598,15 +599,20 @@ class _NotificationListState extends ConsumerState<_NotificationList> {
         final items = <Widget>[
           for (final n in snap.data ?? const <AppNotification>[])
             _Notification(
-              icon: Icons.work_outline_rounded,
+              icon: n.applicationId != null ? Icons.assignment_turned_in_outlined : Icons.work_outline_rounded,
               label: '${n.title}${n.createdAt == null ? '' : ' · ${formatShortDateId(n.createdAt!)}'}',
               text: n.body,
-              onTap: n.jobId == null
-                  ? null
-                  : () {
+              onTap: n.jobId != null
+                  ? () {
                       Navigator.pop(context);
                       context.push(Routes.job(n.jobId!));
-                    },
+                    }
+                  : n.applicationId != null
+                  ? () {
+                      Navigator.pop(context);
+                      context.go(Routes.tracker);
+                    }
+                  : null,
             ),
           for (final a in reminders)
             _Notification(
@@ -632,7 +638,7 @@ class _NotificationListState extends ConsumerState<_NotificationList> {
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 24),
                 child: Text(
-                  'Belum ada notifikasi. Lowongan baru yang cocok dan pengingat lamaranmu akan muncul di sini.',
+                  'Belum ada notifikasi. Lowongan baru yang cocok, kabar Lamar cepat, dan pengingat lamaranmu akan muncul di sini.',
                   style: CareerText.muted,
                   textAlign: TextAlign.center,
                 ),

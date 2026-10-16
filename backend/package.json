@@ -2,7 +2,7 @@
   "name": "karirin-backend",
   "private": true,
   "type": "module",
-  "description": "KarirIn team scripts: seed the Firestore catalogue (later: interview questions, new-job notifications).",
+  "description": "KarirIn team scripts: seed the Firestore catalogue, interview questions, new-job notifications and the Lamar cepat recruiter.",
   "scripts": {
     "export-data": "cd .. && dart run tool/export_seed.dart",
     "seed": "tsx src/seed.ts",
@@ -11,7 +11,8 @@
     "test": "vitest run test/match-score.test.ts",
     "test:rules": "cd .. && firebase emulators:exec --project demo-karirin --only firestore \"npm --prefix backend exec vitest run test/rules.test.ts\"",
     "questions": "tsx src/generate-questions.ts",
-    "notify": "tsx src/notify-new-jobs.ts"
+    "notify": "tsx src/notify-new-jobs.ts",
+    "recruiter": "tsx src/recruiter.ts"
   },
   "engines": {
     "node": ">=20"

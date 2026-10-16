@@ -63,19 +63,35 @@ Pada mode `firebase`: login email/kata sandi dan Google (Firebase Auth), redirec
 
 Fitur AI (Tahap B2) memakai Gemini lewat Firebase AI Logic (nama model di Remote Config `ai_model_extract` dan `ai_model_fast`, sakelar `ai_enabled`):
 
-- **Ekstraksi CV**: PDF (maks. 5 MB) atau foto kamera dibaca Gemini menjadi profil, divalidasi (`lib/services/ai/ai_parsing.dart`), lalu diperiksa pengguna. Berkas tidak disimpan di server; salinannya hanya di penyimpanan privat perangkat.
+- **Ekstraksi CV**: PDF (maks. 5 MB) atau foto kamera dibaca Gemini menjadi profil, divalidasi (`lib/services/ai/ai_parsing.dart`), lalu diperiksa pengguna. Berkas disimpan di penyimpanan privat perangkat; salinannya hanya dikirim ke server bersama Lamar cepat yang disetujui pengguna.
 - **Penilaian wawancara**: rubrik 4 aspek + contoh jawaban yang dipersonalisasi; sesi tersimpan di `users/{uid}/interviews`. Mode suara memakai pengenalan suara perangkat (`id_ID`).
 - **Surat lamaran**: nada formal/ringkas, buat ulang, salin, dan bagikan.
 - Bila AI gagal (kuota, jaringan, keluaran tidak valid), penilaian dan surat memakai logika lokal dengan label "offline"; ekstraksi CV menampilkan galat dengan pilihan coba lagi atau tanya-jawab.
 
 Pelacak lamaran (Tahap B3):
 
-- Lamaran tersimpan di `users/{uid}/applications` (tanggal nyata dan riwayat status) dan tersinkron langsung, termasuk perubahan saat offline. "Lamar sekarang" membuka tautan resmi lowongan bila ada, lalu mencatatnya.
+- Lamaran tersimpan di `users/{uid}/applications` (tanggal nyata dan riwayat status) dan tersinkron langsung, termasuk perubahan saat offline.
+- "Lamar di situs perusahaan" (lowongan perusahaan nyata) membuka halaman resmi di dalam aplikasi (Custom Tabs). Saat pengguna kembali ke KarirIn, aplikasi menanyakan apakah lamaran sudah terkirim sebelum mencatatnya. "Simpan salinan CV untuk diunggah" membagikan CV dari perangkat ke File/Drive, karena pemilih berkas portal tidak bisa membuka penyimpanan privat aplikasi.
 - Pengingat tindak lanjut adalah notifikasi lokal terjadwal (H+7 pukul 09.00), dibatalkan saat lamaran selesai atau toggle dimatikan, dan dijadwalkan ulang saat masuk di perangkat baru. Izin notifikasi Android 13+ diminta saat pertama kali dibutuhkan.
 - Rencana Belajar: "Buka materi" membuka tautan materi dari koleksi `skills`; "Unggah bukti" menyimpan tautan sertifikat atau catatan di profil.
 - Snapshot Match Score per lowongan di `users/{uid}/matches` diperbarui setiap profil berubah, untuk validasi skor (subbab 3.2.3).
 - Beranda menampilkan kartu offline saat perangkat tidak terhubung, dan sheet notifikasi berisi notifikasi dari Firestore serta pengingat yang akan datang.
 - Hapus akun menghapus semua subkoleksi pengguna, salinan CV, dan pengingat terjadwal.
+
+Lamar cepat (lowongan mitra demo):
+
+- Lowongan dari mitra fiktif (`lib/data/catalog_partner.dart`, berlabel "Lamar cepat · Mitra demo") dilamar di dalam aplikasi: CV PDF dari perangkat (atau dipilih saat melamar, maks. 5 MB), surat lamaran opsional (bisa dibuat dari profil), dan persetujuan berbagi data per lamaran. Lowongan perusahaan nyata tetap lewat situs perusahaan.
+- Lamaran disimpan di `users/{uid}/applications/{id}` dengan `quick: true`, salinan profil (`applicant`), `letter`, dan `consent`. Karena paket Spark tidak punya Cloud Storage, CV disimpan sebagai bytes di `applications/{id}/cv/0..5`, maksimal 900 KB per potongan. Rules mewajibkan status awal `dikirim`, melarang pengguna mengubah statusnya, dan melarang potongan CV diganti.
+- Pelacak menampilkan status dari perusahaan, pesan rekruter, dan riwayat. "Tarik lamaran" menghapus lamaran beserta salinan CV.
+- Sisi rekruter (dashboard web di luar cakupan lomba Mobile Development) dijalankan tim lewat skrip:
+
+```bash
+npm --prefix backend run recruiter -- inbox
+npm --prefix backend run recruiter -- status <id> wawancara --note "Senin 27 Okt, 10.00 via Zoom."
+npm --prefix backend run recruiter -- status <id> ditolak --dry-run
+```
+
+`inbox` menyimpan CV (PDF utuh) dan ringkasan pelamar di `backend/inbox/`. Folder ini masuk `.gitignore` karena berisi data pribadi, jadi hapus setelah demo. `status` mengubah status dan riwayat, menyimpan notifikasi, lalu mengirim push lewat kanal `application_status`; Pelacak di HP pelamar langsung berubah.
 
 Tautan materi belajar saat ini adalah pencarian video gratis berdasarkan judul materi (`tool/export_seed.dart`); ganti dengan kursus pilihan tim di `lib/data/mock_data.dart`/`catalog_extra.dart` (`LearningResource.url`), lalu jalankan export dan seed.
 
@@ -85,7 +101,9 @@ Tautan materi belajar saat ini adalah pencarian video gratis berdasarkan judul m
 | `lib/firebase_options.dart`, `android/app/google-services.json` | Hasil `flutterfire configure` (bukan rahasia) |
 | `firestore.rules` | Security rules: pengguna hanya mengakses datanya sendiri; katalog hanya ditulis skrip |
 | `lib/data/catalog_extra.dart` | 14 lowongan tambahan (j7–j20, termasuk TKJ) yang hanya masuk Firestore; mode mock tetap 6 lowongan |
-| `tool/export_seed.dart` | Mengekspor lowongan dan skill (`mock_data.dart` + `catalog_extra.dart`) ke `backend/data/*.json` |
+| `lib/data/catalog_partner.dart` | Lowongan mitra demo untuk Lamar cepat (hanya Firestore) |
+| `tool/export_seed.dart` | Mengekspor lowongan dan skill (`catalog_real.dart` + `catalog_partner.dart`) ke `backend/data/*.json` |
+| `backend/src/recruiter.ts` | Sisi rekruter Lamar cepat: unduh lamaran dan CV, ubah status, kirim push |
 | `backend/test/rules.test.ts` | Uji security rules di emulator: `npm --prefix backend run test:rules` |
 | `backend/src/seed.ts` | Mengimpor katalog ke Firestore (merge; lowongan yang dihapus dari JSON dinonaktifkan) |
 | `backend/src/generate-questions.ts` | Draf 5 pertanyaan wawancara per lowongan dari Gemini → ditinjau tim (`reviewedBy`) → diterbitkan ke `jobs/{id}/questionSets` |
@@ -123,6 +141,7 @@ Pada build mock (`--dart-define=BACKEND=mock`, juga dipakai `flutter test` dan p
 - **Penilaian wawancara & surat lamaran**: heuristik lokal dengan bentuk keluaran yang sama dengan JSON dari Gemini; juga menjadi cadangan build Firebase saat AI tidak tersedia.
 - **Mode suara**: animasi rekam; transkrip diisi jawaban contoh.
 - **Autentikasi**: alur UI saja.
+- **Lamar cepat**: lowongan j1 dan j6 berlaku sebagai mitra; CV contoh Rani dipakai dan lamaran hanya tersimpan di memori.
 
 Notifikasi lowongan baru (Tahap B5): setiap perangkat menyimpan token FCM di `users/{uid}.fcmTokens` (izin notifikasi diminta setelah profil pertama disimpan). Setelah lowongan baru ditambahkan ke `catalog_extra.dart` dan diekspor, jalankan:
 

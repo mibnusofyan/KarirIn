@@ -2,13 +2,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../logic/match_score.dart';
 
-/// A notification written by the team's notify-new-jobs script (`users/{uid}/notifications`).
+/// A notification written by the team's notify-new-jobs or recruiter script (`users/{uid}/notifications`).
 class AppNotification {
-  const AppNotification({required this.id, required this.title, required this.body, this.jobId, this.createdAt, this.read = false});
+  const AppNotification({
+    required this.id,
+    required this.title,
+    required this.body,
+    this.jobId,
+    this.applicationId,
+    this.createdAt,
+    this.read = false,
+  });
   final String id;
   final String title;
   final String body;
   final String? jobId;
+
+  /// A Lamar cepat application whose status the company changed.
+  final String? applicationId;
   final DateTime? createdAt;
   final bool read;
 }
@@ -73,6 +84,7 @@ class FirestoreActivityRepository implements ActivityRepository {
           title: (d.data()['title'] as String?) ?? '',
           body: (d.data()['body'] as String?) ?? '',
           jobId: d.data()['jobId'] as String?,
+          applicationId: d.data()['applicationId'] as String?,
           createdAt: (d.data()['createdAt'] as Timestamp?)?.toDate(),
           read: (d.data()['read'] as bool?) ?? false,
         ),

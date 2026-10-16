@@ -12,6 +12,7 @@ import 'screens/onboarding_screen.dart';
 import 'screens/processing_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/qa_screen.dart';
+import 'screens/quick_apply_screen.dart';
 import 'screens/result_screen.dart';
 import 'screens/session_screen.dart';
 import 'screens/skill_gap_screen.dart';
@@ -37,6 +38,7 @@ abstract final class Routes {
   static const result = '/result';
   static const letter = '/letter';
   static String job(String id) => '/job/$id';
+  static String quickApply(String jobId) => '/apply/$jobId';
 }
 
 Page<void> _noAnim(Widget child, GoRouterState s) => NoTransitionPage(key: s.pageKey, child: child);
@@ -72,6 +74,10 @@ final router = GoRouter(
     GoRoute(
       path: '/job/:id',
       builder: (_, s) => JobDetailScreen(jobId: s.pathParameters['id']!),
+    ),
+    GoRoute(
+      path: '/apply/:id',
+      builder: (_, s) => QuickApplyScreen(jobId: s.pathParameters['id']!),
     ),
     GoRoute(path: Routes.session, builder: (_, _) => const SessionScreen()),
     GoRoute(path: Routes.result, builder: (_, _) => const ResultScreen()),

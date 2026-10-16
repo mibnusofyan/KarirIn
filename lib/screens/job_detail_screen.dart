@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../data/backend.dart';
 import '../data/models.dart';
+import '../data/repositories/providers.dart';
 import '../logic/match_score.dart';
 import '../router.dart';
 import '../state/app_state.dart';
@@ -16,9 +20,12 @@ class JobDetailScreen extends ConsumerWidget {
   const JobDetailScreen({super.key, required this.jobId});
   final String jobId;
 
-  Future<void> _apply(BuildContext context, WidgetRef ref, Job job) async {
+  /// Lamar di situs perusahaan: opens the official page inside KarirIn (Custom Tabs) and, once the user is back, asks
+  /// whether the application was sent before logging it.
+  Future<void> _applyOnSite(BuildContext context, WidgetRef ref, Job job) async {
     final demo = backend == Backend.mock;
     final url = demo ? null : _httpUrl(job.applyUrl);
+    final canShareCv = url != null && ref.read(appProvider).hasCv;
     final ok = await showCareerSheet<bool>(
       context,
       (ctx) => Column(
@@ -27,7 +34,7 @@ class JobDetailScreen extends ConsumerWidget {
           const CareerSheetHeader('Siap mengambil langkah?'),
           const SizedBox(height: 12),
           Text(
-            'Lamaran untuk ${job.title} di ${job.company} dikirim melalui kanal resmi perusahaan.',
+            'Lamaran untuk ${job.title} di ${job.company} dikirim lewat situs resmi perusahaan.',
             style: CareerText.body,
           ),
           const SizedBox(height: 12),
@@ -35,16 +42,27 @@ class JobDetailScreen extends ConsumerWidget {
             demo
                 ? 'Pada demo ini, KarirIn mencatat lamaran ke pelacak. Belum ada lamaran yang dikirim atau situs perusahaan yang dibuka.'
                 : url != null
-                ? 'KarirIn membuka halaman lamaran resmi, lalu mencatatnya di pelacak beserta pengingat tindak lanjut.'
+                ? 'Situs perusahaan terbuka di dalam KarirIn. Setelah selesai, tutup halamannya; KarirIn akan menanyakan apakah lamaranmu sudah terkirim.'
                 : 'Tautan resmi lowongan ini belum tersedia. Lamar lewat kanal resmi perusahaan, lalu catat di pelacak agar KarirIn mengingatkan tindak lanjutnya.',
             style: CareerText.muted,
           ),
+          if (canShareCv) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => _shareCv(ctx, ref),
+                icon: const Icon(Icons.save_alt_rounded, size: 18),
+                label: const Text('Simpan salinan CV untuk diunggah'),
+              ),
+            ),
+          ],
           const SizedBox(height: 24),
           CareerButton(
             label: demo
                 ? 'Catat lamaran (demo)'
                 : url != null
-                ? 'Buka kanal resmi & catat'
+                ? 'Buka situs perusahaan'
                 : 'Catat lamaran',
             icon: url != null ? Icons.open_in_new_rounded : Icons.check_rounded,
             onPressed: () => Navigator.pop(ctx, true),
@@ -57,11 +75,48 @@ class JobDetailScreen extends ConsumerWidget {
       ),
     );
     if (ok != true || !context.mounted) return;
-    if (url != null) await launchUrl(url, mode: LaunchMode.externalApplication);
-    if (!context.mounted) return;
+    if (url != null) {
+      if (!await _openAndWait(url)) {
+        if (context.mounted) showToast(context, 'Situs perusahaan tidak dapat dibuka. Coba lagi nanti.');
+        return;
+      }
+      if (!context.mounted) return;
+      final sent = await showCareerSheet<bool>(
+        context,
+        (ctx) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const CareerSheetHeader('Sudah mengirim lamaran?'),
+            const SizedBox(height: 12),
+            Text(
+              'Catat lamaranmu ke ${job.company} agar KarirIn mengingatkan tindak lanjutnya. Kalau belum terkirim, lowongan ini tetap bisa kamu lamar nanti.',
+              style: CareerText.muted,
+            ),
+            const SizedBox(height: 24),
+            CareerButton(label: 'Sudah, catat lamaran', icon: Icons.check_rounded, onPressed: () => Navigator.pop(ctx, true)),
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Belum')),
+          ],
+        ),
+      );
+      if (sent != true || !context.mounted) return;
+    }
     ref.read(appProvider.notifier).recordApplication(job);
     context.go(Routes.tracker);
     showToast(context, 'Lamaran dicatat di pelacak');
+  }
+
+  /// Company portals ask for the CV, but their file picker cannot reach KarirIn's private storage: save a copy to
+  /// Files or Drive first.
+  Future<void> _shareCv(BuildContext context, WidgetRef ref) async {
+    final cv = await ref.read(cvStorageProvider).load().catchError((Object _) => null);
+    if (cv == null) {
+      if (context.mounted) showToast(context, 'CV tidak ditemukan di perangkat ini.');
+      return;
+    }
+    final name = 'CV-${ref.read(appProvider).profile.name.trim().replaceAll(RegExp(r'\s+'), '-')}.${cv.extension}';
+    await SharePlus.instance.share(
+      ShareParams(files: [XFile.fromData(cv.bytes, mimeType: cv.mimeType, name: name)], fileNameOverrides: [name]),
+    );
   }
 
   void _prepare(BuildContext context, WidgetRef ref, Job job) {
@@ -116,6 +171,7 @@ class JobDetailScreen extends ConsumerWidget {
     final job = state.job(jobId);
     final result = computeMatch(job, state.profile);
     final saved = state.savedJobIds.contains(jobId);
+    final applied = state.applicationFor(job);
     final missing = result.missingWajib;
     final gain = missing.isEmpty
         ? 0.0
@@ -131,6 +187,8 @@ class JobDetailScreen extends ConsumerWidget {
       ref.read(appProvider.notifier).selectGapJob(jobId);
       context.go(Routes.gap);
     }
+
+    void apply(BuildContext ctx) => job.quickApply ? context.push(Routes.quickApply(job.id)) : _applyOnSite(ctx, ref, job);
 
     return CareerTheme(
       child: Scaffold(
@@ -213,6 +271,7 @@ class JobDetailScreen extends ConsumerWidget {
                     icon: Icons.school_outlined,
                     background: Colors.white,
                   ),
+                if (job.quickApply) const PartnerPill(),
               ],
             ),
             const SizedBox(height: 16),
@@ -335,25 +394,40 @@ class JobDetailScreen extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    CareerButton(
-                      label: missing.isEmpty
-                          ? 'Lamar di situs resmi'
-                          : 'Tingkatkan kecocokan',
-                      icon: missing.isEmpty
-                          ? Icons.open_in_new_rounded
-                          : Icons.trending_up_rounded,
-                      onPressed: missing.isEmpty
-                          ? () => _apply(ctx, ref, job)
-                          : toGap,
-                    ),
+                    if (applied != null)
+                      CareerButton(
+                        label: 'Lihat status lamaran',
+                        icon: Icons.checklist_rounded,
+                        onPressed: () => context.go(Routes.tracker),
+                      )
+                    else if (missing.isEmpty)
+                      CareerButton(
+                        label: job.quickApply
+                            ? 'Lamar cepat'
+                            : 'Lamar di situs perusahaan',
+                        icon: job.quickApply
+                            ? Icons.bolt_rounded
+                            : Icons.open_in_new_rounded,
+                        onPressed: () => apply(ctx),
+                      )
+                    else
+                      CareerButton(
+                        label: 'Tingkatkan kecocokan',
+                        icon: Icons.trending_up_rounded,
+                        onPressed: toGap,
+                      ),
                     const SizedBox(height: 4),
                     LayoutBuilder(
                       builder: (context, constraints) {
                         final actions = [
-                          if (missing.isNotEmpty)
+                          if (missing.isNotEmpty && applied == null)
                             TextButton(
-                              onPressed: () => _apply(ctx, ref, job),
-                              child: const Text('Lamar sekarang'),
+                              onPressed: () => apply(ctx),
+                              child: Text(
+                                job.quickApply
+                                    ? 'Lamar cepat'
+                                    : 'Lamar sekarang',
+                              ),
                             ),
                           TextButton.icon(
                             onPressed: () => _prepare(ctx, ref, job),
@@ -758,4 +832,24 @@ class _PreparationOption extends StatelessWidget {
 Uri? _httpUrl(String? raw) {
   final u = Uri.tryParse(raw?.trim() ?? '');
   return u != null && (u.scheme == 'https' || u.scheme == 'http') && u.host.isNotEmpty ? u : null;
+}
+
+/// Opens [url] in a browser tab inside KarirIn (Custom Tabs) and completes once the user closes it and is back in the
+/// app. Returns false when the page could not be opened.
+Future<bool> _openAndWait(Uri url) async {
+  final back = Completer<void>();
+  final listener = AppLifecycleListener(
+    onResume: () {
+      if (!back.isCompleted) back.complete();
+    },
+  );
+  try {
+    if (!await launchUrl(url, mode: LaunchMode.inAppBrowserView)) return false;
+    await back.future;
+    return true;
+  } catch (_) {
+    return false;
+  } finally {
+    listener.dispose();
+  }
 }

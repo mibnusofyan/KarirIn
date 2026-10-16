@@ -48,6 +48,7 @@ class Job {
     required this.expYears,
     required this.desc,
     this.applyUrl,
+    this.quickApply = false,
   });
 
   final String id;
@@ -69,6 +70,10 @@ class Job {
   /// Official application channel; null until the curated job has one.
   final String? applyUrl;
 
+  /// "Lamar cepat": a KarirIn partner (demo) employer that receives the application inside KarirIn and sets its
+  /// status through `backend/src/recruiter.ts`. Other jobs are applied for on the company's own site ([applyUrl]).
+  final bool quickApply;
+
   bool get anyMajor => eduFields.contains('Semua');
 
   /// Firestore `jobs/{id}` fields (the id is the document id).
@@ -86,6 +91,7 @@ class Job {
     'expYears': expYears,
     'desc': desc,
     'applyUrl': applyUrl,
+    if (quickApply) 'quickApply': true,
   };
 
   factory Job.fromMap(String id, Map<String, Object?> m) => Job(
@@ -103,6 +109,7 @@ class Job {
     expYears: (m['expYears'] as num?)?.toInt() ?? 0,
     desc: (m['desc'] as String?) ?? '',
     applyUrl: m['applyUrl'] as String?,
+    quickApply: m['quickApply'] == true,
   );
 }
 
@@ -295,6 +302,9 @@ enum AppStage {
   bool get isActive => this != diterima && this != ditolak;
 }
 
+/// A status of an application and when it was set.
+typedef StageChange = ({AppStage status, DateTime at});
+
 class JobApplication {
   const JobApplication({
     required this.id,
@@ -306,6 +316,10 @@ class JobApplication {
     this.jobId,
     this.appliedAt,
     this.reminderAt,
+    this.quick = false,
+    this.note,
+    this.history = const [],
+    this.cvSize,
   });
 
   final String id;
@@ -326,6 +340,18 @@ class JobApplication {
   /// When the follow-up notification fires; null when no reminder is scheduled.
   final DateTime? reminderAt;
 
+  /// Sent with Lamar cepat: the company sets the status, the user cannot change it.
+  final bool quick;
+
+  /// The company's message with the latest status (a test or interview schedule); Lamar cepat only.
+  final String? note;
+
+  /// Every status set so far, oldest first.
+  final List<StageChange> history;
+
+  /// Size in bytes of the CV copy sent with Lamar cepat.
+  final int? cvSize;
+
   JobApplication copyWith({AppStage? status, String? Function()? remind, DateTime? Function()? reminderAt}) => JobApplication(
     id: id,
     title: title,
@@ -336,6 +362,10 @@ class JobApplication {
     jobId: jobId,
     appliedAt: appliedAt,
     reminderAt: reminderAt != null ? reminderAt() : this.reminderAt,
+    quick: quick,
+    note: note,
+    history: history,
+    cvSize: cvSize,
   );
 
   /// Firestore `users/{uid}/applications/{id}` (dates are converted to Timestamps by the repository).
@@ -347,10 +377,15 @@ class JobApplication {
     'appliedAt': appliedAt,
     'reminderAt': reminderAt,
     'reminderLabel': remind,
+    if (quick) 'quick': true,
   };
 
   factory JobApplication.fromMap(String id, Map<String, Object?> m, {required DateTime? Function(Object?) toDate}) {
     final applied = toDate(m['appliedAt']);
+    final history = <StageChange>[
+      for (final h in (m['statusHistory'] as List?) ?? const [])
+        if (h is Map && toDate(h['at']) != null) (status: _byName(AppStage.values, h['status'], AppStage.dikirim), at: toDate(h['at'])!),
+    ]..sort((a, b) => a.at.compareTo(b.at));
     return JobApplication(
       id: id,
       jobId: m['jobId'] as String?,
@@ -361,6 +396,10 @@ class JobApplication {
       appliedAt: applied,
       reminderAt: toDate(m['reminderAt']),
       remind: m['reminderLabel'] as String?,
+      quick: m['quick'] == true,
+      note: m['note'] as String?,
+      history: history,
+      cvSize: ((m['cv'] as Map?)?['size'] as num?)?.toInt(),
     );
   }
 }
@@ -369,6 +408,11 @@ const _shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'S
 
 /// "15 Okt", the short date used across the tracker.
 String formatShortDateId(DateTime d) => '${d.day} ${_shortMonths[d.month - 1]}';
+
+/// "320 KB" or "1,2 MB".
+String formatFileSize(int bytes) => bytes < 1024 * 1024
+    ? '${(bytes / 1024).ceil()} KB'
+    : '${(bytes / (1024 * 1024)).toStringAsFixed(1).replaceAll('.', ',')} MB';
 
 enum QuestionKind { single, multi, text, area }
 

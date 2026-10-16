@@ -6,7 +6,8 @@ import 'package:flutter/foundation.dart';
 
 import 'reminders.dart';
 
-/// Push messages for "Lowongan baru yang cocok", sent by the team's notify-new-jobs script.
+/// Push messages for "Lowongan baru yang cocok" (notify-new-jobs script) and Lamar cepat status changes
+/// (recruiter script).
 abstract interface class PushService {
   /// Stores this device's FCM token under `users/{uid}.fcmTokens` and starts handling messages.
   /// [askPermission] shows Android's notification permission prompt when it has not been answered yet.
@@ -57,7 +58,11 @@ class FcmPushService implements PushService {
 
   void _opened(RemoteMessage m) {
     final jobId = m.data['jobId'];
-    if (jobId is String && jobId.isNotEmpty) notificationTaps.add('job:$jobId');
+    if (jobId is String && jobId.isNotEmpty) {
+      notificationTaps.add('job:$jobId');
+    } else if (m.data['applicationId'] != null) {
+      notificationTaps.add('tracker');
+    }
   }
 
   @override

@@ -8,6 +8,7 @@ import '../data/backend.dart';
 import '../data/mock_data.dart' as mock;
 import '../data/mock_data.dart' show initialApplications, raniProfile, resourceFor;
 import '../data/models.dart';
+import '../data/repositories/application_repository.dart' show QuickApplyPacket;
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/providers.dart';
 import '../firebase/bootstrap.dart' show remoteConfigDefaults;
@@ -98,6 +99,10 @@ class AppState {
   /// The job with [id]; falls back to the first job for an id no longer in the catalogue.
   Job job(String id) => jobs.firstWhere((j) => j.id == id, orElse: () => jobs.first);
 
+  /// The user's application for [job], if they already applied or logged one.
+  JobApplication? applicationFor(Job job) =>
+      applications.where((a) => a.jobId == job.id || (a.title == job.title && a.company == job.company)).firstOrNull;
+
   /// Learning material for [skill]: the curated catalogue first, then the bundled list.
   LearningResource resourceForSkill(String skill) => skills.where((s) => s.name == skill).firstOrNull?.resource ?? resourceFor(skill);
 
@@ -149,6 +154,18 @@ String followUpReminder(AppStage status, {DateTime? at}) {
 
 /// Offline writes never complete, so actions that must reach the server give up after this long.
 const _writeTimeout = Duration(seconds: 15);
+
+/// Sending a CV of up to 5 MB over a slow connection takes longer than other writes.
+const _quickApplyTimeout = Duration(seconds: 60);
+
+/// Why a Lamar cepat application could not be sent; [message] is shown to the user.
+class QuickApplyFailure implements Exception {
+  const QuickApplyFailure(this.message);
+  final String message;
+
+  @override
+  String toString() => message;
+}
 
 class AppNotifier extends Notifier<AppState> {
   /// The signed-in user on Firebase builds; null on mock builds and when signed out.
@@ -478,7 +495,61 @@ class AppNotifier extends Notifier<AppState> {
     );
   }
 
+  /// Lamar cepat: sends the application with [cv] (a PDF) and [letter] to the partner company, which then sets its
+  /// status. Returns false when the connection is too slow to confirm in time; Firestore keeps the write queued and
+  /// sends it once the connection allows. Throws [QuickApplyFailure] when nothing was sent.
+  Future<bool> sendQuickApplication(Job job, {required Uint8List cv, required String letter, required String consent}) async {
+    if (state.applicationFor(job) != null) throw const QuickApplyFailure('Kamu sudah melamar lowongan ini.');
+    final now = DateTime.now();
+    final a = JobApplication(
+      id: 'a${now.millisecondsSinceEpoch}',
+      jobId: job.id,
+      title: job.title,
+      company: job.company,
+      status: AppStage.dikirim,
+      date: formatShortDateId(now),
+      appliedAt: now,
+      quick: true,
+      history: [(status: AppStage.dikirim, at: now)],
+      cvSize: cv.length,
+    );
+    final packet = QuickApplyPacket(profile: state.profile, letter: letter.trim(), cv: cv, consent: consent);
+    if (!_firebase) {
+      state = state.copyWith(applications: [a, ...state.applications]);
+      await ref.read(applicationRepositoryProvider).sendQuick(mockUid, a, packet);
+      return true;
+    }
+    final uid = _uid;
+    if (uid == null) throw const QuickApplyFailure('Masuk ke akunmu dulu untuk melamar.');
+    if (state.offline) throw const QuickApplyFailure('Tidak ada koneksi internet. Sambungkan perangkat, lalu kirim lagi.');
+    state = state.copyWith(applications: [a, ...state.applications]);
+    try {
+      await ref.read(applicationRepositoryProvider).sendQuick(uid, a, packet).timeout(_quickApplyTimeout);
+      return true;
+    } on TimeoutException {
+      return false;
+    } catch (e, s) {
+      _report(e, s);
+      state = state.copyWith(applications: [for (final x in state.applications) if (x.id != a.id) x]);
+      throw const QuickApplyFailure('Lamaran gagal dikirim. Coba lagi beberapa saat lagi.');
+    }
+  }
+
+  /// Tarik lamaran: removes the application, and for Lamar cepat the CV copy the company received.
+  void withdrawApplication(String id) {
+    state = state.copyWith(applications: [for (final a in state.applications) if (a.id != id) a]);
+    unawaited(_reminders.cancel(id).catchError(_report));
+    if (_firebase) {
+      _write((uid) => ref.read(applicationRepositoryProvider).delete(uid, id));
+    } else {
+      unawaited(ref.read(applicationRepositoryProvider).delete(mockUid, id));
+    }
+  }
+
+  /// Status set by the user for an application logged from the company's site; Lamar cepat statuses come from the
+  /// company and are left alone.
   void updateApplication(String id, AppStage status, bool remind) {
+    if (state.applications.any((a) => a.id == id && a.quick)) return;
     if (_firebase) {
       final at = followUpAt(DateTime.now());
       final old = state.applications.where((a) => a.id == id).firstOrNull;

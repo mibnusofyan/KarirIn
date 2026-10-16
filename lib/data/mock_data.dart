@@ -17,6 +17,7 @@ const jobs = <Job>[
     expYears: 0,
     desc:
         'Mencatat transaksi harian, melakukan rekonsiliasi kas, dan menyusun laporan keuangan bulanan untuk kantor cabang Purwokerto. Terbuka untuk lulusan baru.',
+    quickApply: true,
   ),
   Job(
     id: 'j2',
@@ -92,6 +93,7 @@ const jobs = <Job>[
     eduFields: ['Semua'],
     expYears: 0,
     desc: 'Mencatat barang masuk dan keluar, menyusun laporan stok harian, dan membantu stock opname bulanan.',
+    quickApply: true,
   ),
 ];
 

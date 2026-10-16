@@ -7,7 +7,7 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing';
-import { Bytes, deleteDoc, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { Bytes, deleteDoc, doc, getDoc, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
 import { afterAll, beforeAll, beforeEach, describe, test } from 'vitest';
 
 let env: RulesTestEnvironment;
@@ -70,6 +70,61 @@ describe('foto profil', () => {
   });
 });
 
+describe('lamar cepat', () => {
+  const part = (size: number) => ({ data: Bytes.fromUint8Array(new Uint8Array(size)) });
+  const quick = (over: Record<string, unknown> = {}) => ({
+    title: 'Admin Gudang',
+    company: 'CV Berkah Logistik',
+    status: 'dikirim',
+    quick: true,
+    letter: 'Dengan hormat, ...',
+    cv: { size: 1200 * 1024, mimeType: 'application/pdf', parts: 2 },
+    consent: { text: 'Saya setuju profil, CV, dan surat lamaran ini dikirim ke CV Berkah Logistik.' },
+    ...over,
+  });
+  const send = async (db: ReturnType<typeof alice>, data = quick(), parts = [part(900 * 1024), part(300 * 1024)]) => {
+    const batch = writeBatch(db);
+    batch.set(doc(db, 'users/alice/applications/q1'), data);
+    parts.forEach((p, i) => batch.set(doc(db, `users/alice/applications/q1/cv/${i}`), p));
+    await batch.commit();
+  };
+
+  test('pemilik dapat mengirim lamaran dengan CV terpotong, lalu membaca dan menariknya', async () => {
+    await assertSucceeds(send(alice()));
+    await assertSucceeds(getDoc(doc(alice(), 'users/alice/applications/q1/cv/1')));
+    await assertSucceeds(deleteDoc(doc(alice(), 'users/alice/applications/q1/cv/0')));
+    await assertSucceeds(deleteDoc(doc(alice(), 'users/alice/applications/q1')));
+  });
+  test('status awal harus dikirim dan pengguna tidak dapat mengubahnya', async () => {
+    await assertFails(send(alice(), quick({ status: 'diterima' })));
+    await assertSucceeds(send(alice()));
+    await assertFails(updateDoc(doc(alice(), 'users/alice/applications/q1'), { status: 'diterima' }));
+    await assertFails(updateDoc(doc(alice(), 'users/alice/applications/q1'), { quick: false, status: 'diterima' }));
+  });
+  test('wajib ada persetujuan dan ukuran CV yang valid', async () => {
+    await assertFails(send(alice(), quick({ consent: { text: '' } })));
+    await assertFails(send(alice(), quick({ cv: { size: 6 * 1024 * 1024, parts: 7 } })));
+  });
+  test('potongan CV maksimal 900 KB, berupa bytes, dan hanya di bawah lamar cepat', async () => {
+    await assertFails(send(alice(), quick(), [part(901 * 1024)]));
+    await assertFails(send(alice(), quick(), [{ data: 'bukan-bytes' } as never]));
+    await assertSucceeds(setDoc(doc(alice(), 'users/alice/applications/a1'), { title: 'Kasir', company: 'Toko', status: 'dikirim' }));
+    await assertFails(setDoc(doc(alice(), 'users/alice/applications/a1/cv/0'), part(1024)));
+  });
+  test('potongan CV tidak dapat diganti setelah terkirim', async () => {
+    await assertSucceeds(send(alice()));
+    await assertFails(setDoc(doc(alice(), 'users/alice/applications/q1/cv/0'), part(10)));
+  });
+  test('lamaran dan CV pengguna lain tidak dapat dibaca', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users/bob/applications/q9'), quick());
+      await setDoc(doc(ctx.firestore(), 'users/bob/applications/q9/cv/0'), part(10));
+    });
+    await assertFails(getDoc(doc(alice(), 'users/bob/applications/q9')));
+    await assertFails(getDoc(doc(alice(), 'users/bob/applications/q9/cv/0')));
+  });
+});
+
 describe('katalog', () => {
   test('pengguna login dapat membaca lowongan dan skill', async () => {
     await assertSucceeds(getDoc(doc(alice(), 'jobs/j1')));
@@ -110,6 +165,12 @@ describe('data milik pengguna', () => {
     await assertSucceeds(setDoc(doc(alice(), 'users/alice/applications/a1'), { ...app, status: 'dikirim' }));
     await assertFails(setDoc(doc(alice(), 'users/alice/applications/a2'), { ...app, status: 'menang' }));
     await assertFails(setDoc(doc(alice(), 'users/bob/applications/a1'), { ...app, status: 'dikirim' }));
+  });
+  test('lamaran situs perusahaan tidak dapat diubah menjadi lamar cepat', async () => {
+    const ref = doc(alice(), 'users/alice/applications/a1');
+    await assertSucceeds(setDoc(ref, { title: 'Kasir', company: 'Toko', status: 'dikirim' }));
+    await assertSucceeds(updateDoc(ref, { status: 'tes' }));
+    await assertFails(updateDoc(ref, { quick: true }));
   });
   test('sesi wawancara tidak dapat diubah setelah disimpan', async () => {
     const ref = doc(alice(), 'users/alice/interviews/s1');

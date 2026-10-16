@@ -44,12 +44,42 @@ service cloud.firestore {
     match /users/{uid} {
       allow read, create, update, delete: if isOwner(uid);
 
+      // Applications logged after applying on the company's site: the user sets the status. Lamar cepat
+      // applications (quick == true) are sent once with status dikirim; after that only the partner company's
+      // recruiter script (Admin SDK) changes them.
       match /applications/{appId} {
+        function validApp(d) {
+          return validStage(d.status) && d.title is string && d.title.size() <= 120;
+        }
+        function isQuick(d) { return d.get('quick', false) == true; }
+        function validQuick(d) {
+          return d.status == 'dikirim'
+            && d.letter is string && d.letter.size() <= 8000
+            && d.cv.size is int && d.cv.size > 0 && d.cv.size <= 5 * 1024 * 1024
+            && d.cv.parts is int && d.cv.parts >= 1 && d.cv.parts <= 6
+            && d.consent.text is string && d.consent.text.size() > 0;
+        }
+
         allow read, delete: if isOwner(uid);
-        allow create, update: if isOwner(uid)
-          && validStage(request.resource.data.status)
-          && request.resource.data.title is string
-          && request.resource.data.title.size() <= 120;
+        allow create: if isOwner(uid)
+          && validApp(request.resource.data)
+          && (!isQuick(request.resource.data) || validQuick(request.resource.data));
+        allow update: if isOwner(uid)
+          && validApp(request.resource.data)
+          && !isQuick(resource.data)
+          && !isQuick(request.resource.data);
+
+        // The CV copy sent with Lamar cepat, in parts of at most 900 KB (a document holds at most 1 MiB).
+        match /cv/{part} {
+          allow read, delete: if isOwner(uid);
+          allow create: if isOwner(uid)
+            && part in ['0', '1', '2', '3', '4', '5']
+            && isQuick(getAfter(/databases/$(database)/documents/users/$(uid)/applications/$(appId)).data)
+            && request.resource.data.keys().hasOnly(['data'])
+            && request.resource.data.data is bytes
+            && request.resource.data.data.size() <= 900 * 1024;
+          allow update: if false;
+        }
       }
 
       // A finished practice session is written once and never edited.

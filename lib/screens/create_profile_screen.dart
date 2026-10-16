@@ -260,7 +260,7 @@ class _ConsentSheetState extends State<_ConsentSheet> {
           point(Icons.delete_outline_rounded, 'Bisa kamu hapus kapan saja dari Pengaturan.'),
         ] else ...[
           point(Icons.auto_awesome_outlined, 'CV dibaca oleh layanan AI Google Gemini hanya untuk menyusun profilmu.'),
-          point(Icons.phone_android_rounded, 'Berkas CV tidak disimpan di server KarirIn; salinannya hanya ada di perangkatmu.'),
+          point(Icons.phone_android_rounded, 'Berkas CV disimpan di perangkatmu. Salinannya hanya dikirim ke perusahaan saat kamu memakai Lamar cepat dan menyetujuinya.'),
           point(Icons.delete_outline_rounded, 'Bisa kamu hapus kapan saja dari Pengaturan.'),
           point(
             Icons.info_outline_rounded,
