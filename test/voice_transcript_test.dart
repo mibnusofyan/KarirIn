@@ -46,7 +46,7 @@ void main() {
       ..add('', finished: false);
     expect(t.text, 'Saya bekerja');
 
-    t.endSegment();
+    t.newListen();
     expect(t.text, 'Saya bekerja');
   });
 
@@ -82,6 +82,46 @@ void main() {
     expect(t.text, 'I made a new schedule for the whole team are sales went up by 20% I made a new schedule');
   });
 
+  test('a settled result that overlaps the end of its partial keeps the words before the overlap', () {
+    expect(
+      (VoiceTranscript()
+            ..add('are sales went up', finished: false)
+            ..add('went up by 20 percent', finished: true))
+          .text,
+      'are sales went up by 20 percent',
+    );
+    expect(
+      (VoiceTranscript()
+            ..add('saya bekerja di toko saya membuat', finished: false)
+            ..add('saya membuat jadwal', finished: true))
+          .text,
+      'saya bekerja di toko saya membuat jadwal',
+    );
+    // A revision that only shares its first word with the partial's last word is not joined.
+    expect(
+      (VoiceTranscript()
+            ..add('saya bekerja di toko saya', finished: false)
+            ..add('saya bekerja di toko roti', finished: true))
+          .text,
+      'saya bekerja di toko roti',
+    );
+  });
+
+  test('after an empty partial, words that overlap the cleared text continue it', () {
+    final t = VoiceTranscript()
+      ..add('saya bekerja di toko', finished: false)
+      ..add('', finished: false)
+      ..add('di toko roti', finished: false);
+    expect(t.text, 'saya bekerja di toko roti');
+
+    // A new sentence that starts like the cleared one does not replace it.
+    final u = VoiceTranscript()
+      ..add('saya menyusun prioritas', finished: false)
+      ..add('', finished: false)
+      ..add('saya membuat jadwal', finished: false);
+    expect(u.text, 'saya menyusun prioritas saya membuat jadwal');
+  });
+
   test('a final result that repeats the segment just kept is not added twice', () {
     final t = VoiceTranscript()
       ..add('Saya memimpin tim', finished: false)
@@ -90,15 +130,30 @@ void main() {
     expect(t.text, 'Saya memimpin tim');
   });
 
-  test('endSegment keeps the live text when a listen ends without a final result', () {
+  test('a repeat is only ignored within the listen that settled it', () {
+    final t = VoiceTranscript()
+      ..add('iya', finished: false)
+      ..add('iya', finished: true)
+      ..add('iya', finished: true);
+    expect(t.text, 'iya');
+
+    // The next listen can settle the same short answer without showing a partial first.
+    t
+      ..newListen()
+      ..add('', finished: false)
+      ..add('iya', finished: true);
+    expect(t.text, 'iya iya');
+  });
+
+  test('newListen keeps the live text when a listen ends without a final result', () {
     final t = VoiceTranscript()
       ..add('Saya memimpin tim', finished: false)
-      ..endSegment()
+      ..newListen()
       ..add('Kami berhasil', finished: false);
     expect(t.text, 'Saya memimpin tim Kami berhasil');
 
-    t.endSegment();
-    t.endSegment();
+    t.newListen();
+    t.newListen();
     expect(t.text, 'Saya memimpin tim Kami berhasil');
   });
 
@@ -114,7 +169,7 @@ void main() {
       ..add('', finished: false)
       ..add(' jadi saya', finished: false)
       ..add(' $action', finished: true)
-      ..endSegment()
+      ..newListen()
       ..add('hasilnya kedua Laporan', finished: false)
       ..add(result, finished: true)
       ..add(result, finished: true);

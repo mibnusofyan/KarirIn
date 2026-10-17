@@ -59,6 +59,10 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
   DateTime _recordStart = DateTime(0), _listenStart = DateTime(0), _restartAt = DateTime(0);
   DateTime? _listenEnded;
   bool _listenHeard = false, _restarting = false;
+
+  /// The current listen has sent a partial result. Speech always shows partials before it settles, so a finished
+  /// result before that is a late one from an earlier listen or recording.
+  bool _listenPartial = false;
   String? _listenError;
   int _failedListens = 0;
   Timer? _restartTimer;
@@ -143,6 +147,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
     _listenStart = DateTime.now();
     _listenEnded = null;
     _listenHeard = false;
+    _listenPartial = false;
     _listenError = null;
     try {
       await _speech.listen(
@@ -162,8 +167,16 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
 
   void _onSpeechResult(SpeechRecognitionResult r) {
     if (!mounted) return;
+    final finished = r.resultTypeValue != ResultType.partial;
+    if (finished && !_listenPartial) {
+      // A late result: keep it out of this transcript. The plugin now takes this listen as finished and drops its
+      // results, so listen again.
+      _recogniserStopped(settled: true);
+      return;
+    }
+    _listenPartial = true;
     if (r.recognizedWords.trim().isNotEmpty) _listenHeard = true;
-    _transcript.add(r.recognizedWords, finished: r.resultTypeValue != ResultType.partial);
+    _transcript.add(r.recognizedWords, finished: finished);
     if (_answer.text == _shown) _answer.text = _shown = _transcript.text;
     if (r.finalResult) _recogniserStopped(settled: true);
   }
@@ -205,7 +218,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
     }
     _restarting = true;
     try {
-      _transcript.endSegment();
+      _transcript.newListen();
       await _speech.cancel();
       if (_listening && mounted) await _listen();
     } finally {
