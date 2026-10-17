@@ -4,12 +4,15 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:speech_to_text/speech_recognition_error.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 import '../data/backend.dart';
 import '../data/models.dart';
 import '../data/repositories/providers.dart';
 import '../logic/interview.dart';
+import '../logic/voice_transcript.dart';
 import '../router.dart';
 import '../state/app_state.dart';
 import '../theme/career_theme.dart';
@@ -45,6 +48,27 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
   final _speech = SpeechToText();
   bool _speechReady = false;
 
+  /// What the recogniser has heard in this recording, across its segments and restarts.
+  final _transcript = VoiceTranscript();
+
+  /// The transcript last written to [_answer]. A result that lands after stop must not overwrite the user's edits.
+  String _shown = '';
+
+  /// One recording is a series of listens: the recogniser ends a listen by itself after a pause or a timeout, and it
+  /// is started again until the user taps stop.
+  DateTime _recordStart = DateTime(0), _listenStart = DateTime(0), _restartAt = DateTime(0);
+  DateTime? _listenEnded;
+  bool _listenHeard = false, _restarting = false;
+
+  /// The current listen has sent a partial result. Speech always shows partials before it settles, so a finished
+  /// result before that is a late one from an earlier listen or recording.
+  bool _listenPartial = false;
+  String? _listenError;
+  int _failedListens = 0;
+  Timer? _restartTimer;
+
+  static const _maxRecording = Duration(minutes: 2);
+
   @override
   void initState() {
     super.initState();
@@ -65,8 +89,11 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
 
   @override
   void dispose() {
+    _restartTimer?.cancel();
     _waveTimer?.cancel();
     _speech.cancel();
+    if (_speech.statusListener == _onSpeechStatus) _speech.statusListener = null;
+    if (_speech.errorListener == _onSpeechError) _speech.errorListener = null;
     _answer.dispose();
     super.dispose();
   }
@@ -92,37 +119,119 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
   /// Voice mode with the device's speech recogniser (Bahasa Indonesia). The transcript stays editable.
   Future<void> _toggleMic() async {
     if (backend == Backend.mock) return _toggleSimulatedMic();
-    if (_listening) {
-      await _speech.stop();
-      _stopWave();
-      return;
-    }
+    if (_listening) return _stopRecording();
     if (!_speechReady) {
-      _speechReady = await _speech.initialize(
-        onStatus: (s) {
-          if (s == SpeechToText.doneStatus || s == SpeechToText.notListeningStatus) _stopWave();
-        },
-        onError: (_) => _stopWave(),
-      );
+      _speechReady = await _speech.initialize();
       if (!_speechReady) {
         if (mounted) showToast(context, 'Pengenalan suara tidak tersedia atau izin mikrofon ditolak. Ketik jawabanmu.');
         ref.read(appProvider.notifier).setVoiceMode(false);
         return;
       }
+      if (!mounted) return;
     }
+    // SpeechToText is a singleton that keeps the listeners of its first initialize, so point them at this screen.
+    _speech
+      ..statusListener = _onSpeechStatus
+      ..errorListener = _onSpeechError;
+    _transcript.clear();
     _answer.clear();
+    _shown = '';
+    _failedListens = 0;
+    _recordStart = DateTime.now();
     setState(() => _listening = true);
     _startWave();
-    await _speech.listen(
-      onResult: (r) => _answer.text = r.recognizedWords,
-      listenOptions: SpeechListenOptions(
-        localeId: 'id_ID',
-        listenFor: const Duration(minutes: 2),
-        pauseFor: const Duration(seconds: 6),
-        partialResults: true,
-        listenMode: ListenMode.dictation,
-      ),
-    );
+    await _listen();
+  }
+
+  Future<void> _listen() async {
+    _listenStart = DateTime.now();
+    _listenEnded = null;
+    _listenHeard = false;
+    _listenPartial = false;
+    _listenError = null;
+    try {
+      await _speech.listen(
+        onResult: _onSpeechResult,
+        listenOptions: SpeechListenOptions(
+          localeId: 'id_ID',
+          listenFor: _maxRecording - _listenStart.difference(_recordStart),
+          pauseFor: const Duration(seconds: 6),
+          partialResults: true,
+          listenMode: ListenMode.dictation,
+        ),
+      );
+    } on ListenFailedException {
+      if (mounted) await _stopRecording();
+    }
+  }
+
+  void _onSpeechResult(SpeechRecognitionResult r) {
+    if (!mounted) return;
+    final finished = r.resultTypeValue != ResultType.partial;
+    if (finished && !_listenPartial) {
+      // A late result: keep it out of this transcript. The plugin now takes this listen as finished and drops its
+      // results, so listen again.
+      _recogniserStopped(settled: true);
+      return;
+    }
+    _listenPartial = true;
+    if (r.recognizedWords.trim().isNotEmpty) _listenHeard = true;
+    _transcript.add(r.recognizedWords, finished: finished);
+    if (_answer.text == _shown) _answer.text = _shown = _transcript.text;
+    if (r.finalResult) _recogniserStopped(settled: true);
+  }
+
+  void _onSpeechStatus(String status) {
+    if (status == SpeechToText.notListeningStatus) _recogniserStopped(settled: false);
+    if (status == SpeechToText.doneStatus) _recogniserStopped(settled: true);
+  }
+
+  void _onSpeechError(SpeechRecognitionError e) {
+    _listenError = e.errorMsg;
+    _recogniserStopped(settled: true);
+  }
+
+  /// The recogniser ended the listen by itself (a pause, a timeout or an error). While the user is still recording it
+  /// listens again, so a pause neither ends nor wipes the answer. Not [settled]: the final result may still come, so
+  /// wait for it a little longer.
+  void _recogniserStopped({required bool settled}) {
+    if (!_listening || !mounted || _restarting) return;
+    _listenEnded ??= DateTime.now();
+    final delay = Duration(milliseconds: settled ? 150 : 1000);
+    final at = DateTime.now().add(delay);
+    if (_restartTimer != null && !at.isBefore(_restartAt)) return;
+    _restartTimer?.cancel();
+    _restartAt = at;
+    _restartTimer = Timer(delay, _restart);
+  }
+
+  Future<void> _restart() async {
+    _restartTimer = null;
+    if (!_listening || !mounted) return;
+    // A listen that heard nothing and ended fast or on a real error (not silence) has failed. Three in a row end the
+    // recording, so does the time limit.
+    final silence = _listenError == null || _listenError == 'error_speech_timeout' || _listenError == 'error_no_match';
+    final quick = (_listenEnded ?? DateTime.now()).difference(_listenStart) < const Duration(milliseconds: 1500);
+    _failedListens = _listenHeard ? 0 : _failedListens + (silence && !quick ? 0 : 1);
+    if (_failedListens >= 3 || DateTime.now().difference(_recordStart) > _maxRecording - const Duration(seconds: 1)) {
+      return _stopRecording();
+    }
+    _restarting = true;
+    try {
+      _transcript.newListen();
+      await _speech.cancel();
+      if (_listening && mounted) await _listen();
+    } finally {
+      _restarting = false;
+    }
+  }
+
+  /// The user tapped stop, the time ran out or the recogniser kept failing. The transcript is kept.
+  Future<void> _stopRecording() async {
+    _restartTimer?.cancel();
+    _restartTimer = null;
+    _stopWave();
+    await _speech.stop();
   }
 
   /// Mock builds: the transcript is filled with the demo answer on stop.
@@ -197,7 +306,8 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
       );
       if (leave != true || !mounted) return;
     }
-    _waveTimer?.cancel();
+    _restartTimer?.cancel();
+    _stopWave();
     await _speech.cancel();
     if (mounted) context.back(Routes.coach);
   }
