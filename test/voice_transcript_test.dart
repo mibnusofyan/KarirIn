@@ -102,6 +102,25 @@ void main() {
     expect(t.text, 'Saya memimpin tim Kami berhasil');
   });
 
+  test('the three-part answer recorded on the phone comes out whole', () {
+    // Abbreviated id_ID results from the Xiaomi 2406APNFAG: a 3 s pause after the first part and an 8 s pause after the
+    // second, which ended the listen, so the screen listened again.
+    const situation = 'saat magang di bagian Keuangan saya harus menyelesaikan rekap kas dan rekonsiliasi bank di minggu yang sama';
+    const action = 'jadi saya menyusun prioritas berdasarkan tenggat dan mengerjakan rekonsiliasi lebih dulu';
+    const result = 'hasilnya kedua Laporan selesai sehari lebih cepat tanpa revisi dari atasan';
+    final t = VoiceTranscript()
+      ..add('saat magang di bagian keuangan', finished: false)
+      ..add(situation, finished: true)
+      ..add('', finished: false)
+      ..add(' jadi saya', finished: false)
+      ..add(' $action', finished: true)
+      ..endSegment()
+      ..add('hasilnya kedua Laporan', finished: false)
+      ..add(result, finished: true)
+      ..add(result, finished: true);
+    expect(t.text, '$situation $action $result');
+  });
+
   test('whitespace is tidied and clear starts over', () {
     final t = VoiceTranscript()..add('  Saya   memimpin\ttim ', finished: true);
     expect(t.text, 'Saya memimpin tim');
