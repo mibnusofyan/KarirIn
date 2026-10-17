@@ -38,6 +38,50 @@ void main() {
     expect(t.text, 'Saya memimpin tim lima orang Kami berhasil');
   });
 
+  test('an empty partial in the middle of speech does not wipe the live text', () {
+    // Seen on a Xiaomi 2406APNFAG: "Saya bekerja", then "", then the listen ended without a final result.
+    final t = VoiceTranscript()
+      ..add('Saya', finished: false)
+      ..add('Saya bekerja', finished: false)
+      ..add('', finished: false);
+    expect(t.text, 'Saya bekerja');
+
+    t.endSegment();
+    expect(t.text, 'Saya bekerja');
+  });
+
+  test('after an empty partial, new words start a segment and continued words do not', () {
+    final t = VoiceTranscript()
+      ..add('Saya bekerja', finished: false)
+      ..add('', finished: false)
+      ..add('di toko roti', finished: false);
+    expect(t.text, 'Saya bekerja di toko roti');
+
+    t
+      ..add('di toko roti selama dua tahun', finished: true)
+      ..add('Saya', finished: false)
+      ..add('', finished: false)
+      ..add('saya membuat jadwal', finished: false);
+    expect(t.text, 'Saya bekerja di toko roti selama dua tahun saya membuat jadwal');
+  });
+
+  test('a settled segment that drops the first words of its partial keeps the partial', () {
+    // Seen on a Xiaomi 2406APNFAG: partial "are sales went up by 20%", then intermediate "20%".
+    final t = VoiceTranscript()
+      ..add('I made a new schedule for the whole team', finished: true)
+      ..add('are sales went up by', finished: false)
+      ..add('are sales went up by 20%', finished: false)
+      ..add('20%', finished: true)
+      ..add('20%', finished: true);
+    expect(t.text, 'I made a new schedule for the whole team are sales went up by 20%');
+
+    // A settled revision of the partial still replaces it.
+    t
+      ..add('I made a new skedule', finished: false)
+      ..add('I made a new schedule', finished: true);
+    expect(t.text, 'I made a new schedule for the whole team are sales went up by 20% I made a new schedule');
+  });
+
   test('a final result that repeats the segment just kept is not added twice', () {
     final t = VoiceTranscript()
       ..add('Saya memimpin tim', finished: false)
